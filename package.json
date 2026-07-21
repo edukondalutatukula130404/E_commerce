@@ -1,0 +1,11 @@
+{
+  "name": "aura-ecommerce-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root workspace runner for AURA Mobile & Web E-Commerce Platform",
+  "scripts": {
+    "backend": "cd backend && npm start",
+    "frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm run build"
+  }
+}

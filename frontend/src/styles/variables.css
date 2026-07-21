@@ -1,0 +1,65 @@
+/* Brand Design Tokens & System Variables */
+:root {
+  /* Crimson Red Brand Palette */
+  --hue-primary: 350;
+  --hue-secondary: 220;
+  --hue-accent: 345;
+  --hue-success: 145;
+
+  /* HSL Color System */
+  --color-primary: hsl(var(--hue-primary), 85%, 45%);
+  --color-primary-hover: hsl(var(--hue-primary), 85%, 38%);
+  --color-primary-light: hsl(var(--hue-primary), 85%, 95%);
+  
+  --grad-primary: linear-gradient(135deg, hsl(350, 88%, 46%), hsl(345, 92%, 36%));
+  --grad-surface: linear-gradient(180deg, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.4));
+  
+  /* Dimensions - Increased Header Height */
+  --header-height: 78px;
+  --mobile-nav-height: 64px;
+  --container-max: 1280px;
+
+  /* Typography Scale */
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Elevation Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 6px 20px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-primary: 0 8px 24px rgba(186, 12, 47, 0.35);
+
+  /* Border Radii */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+}
+
+/* Light Theme Tokens */
+[data-theme='light'] {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --bg-glass-heavy: rgba(255, 255, 255, 0.92);
+  
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  --border-active: rgba(186, 12, 47, 0.4);
+}
+
+/* Dark Theme Tokens */
+[data-theme='dark'] {
+  --bg-primary: #090d16;
+  --bg-secondary: #121826;
+  --bg-card: #172033;
+  --bg-glass: rgba(15, 23, 42, 0.75);
+  --bg-glass-heavy: rgba(15, 23, 42, 0.92);
+  
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-light: #1e293b;
+  --border-active: rgba(255, 71, 87, 0.4);
+}

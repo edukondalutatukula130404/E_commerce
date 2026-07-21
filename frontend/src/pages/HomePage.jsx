@@ -1,0 +1,466 @@
+import React, { useState } from 'react';
+import { useApp } from '../context/AppContext';
+import { 
+  ArrowRight, 
+  Star, 
+  Heart, 
+  Sparkles, 
+  Cpu, 
+  Shirt, 
+  Home as HomeIcon, 
+  Briefcase, 
+  Zap, 
+  ShieldCheck, 
+  Truck, 
+  MessageSquare, 
+  CheckCircle2, 
+  ChevronDown, 
+  ChevronUp 
+} from 'lucide-react';
+
+export const HomePage = () => {
+  const { products, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, toggleWishlist, wishlist } = useApp();
+
+  const [openFaqId, setOpenFaqId] = useState(null);
+
+  const featured = products.filter(p => p.isFeatured).slice(0, 4);
+
+  const categories = [
+    { name: 'All', icon: Sparkles, color: '#BA0C2F' },
+    { name: 'Tech', icon: Cpu, color: '#00CEC9' },
+    { name: 'Apparel', icon: Shirt, color: '#6C5CE7' },
+    { name: 'Home', icon: HomeIcon, color: '#FDCB6E' },
+    { name: 'Accessories', icon: Briefcase, color: '#E84393' }
+  ];
+
+  const testimonials = [
+    {
+      id: 1,
+      name: "Marcus Vance",
+      role: "Verified Buyer",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80",
+      quote: "The SoundPulse Wireless Pro has unmatched ANC quality. Sub-second pairing with my devices and battery lasts all week!",
+      productName: "SoundPulse Wireless Pro"
+    },
+    {
+      id: 2,
+      name: "Sophia Chen",
+      role: "Verified Buyer",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=150&q=80",
+      quote: "SWITCHES ordering process was seamless. Express dispatch delivered my Horizon Smartwatch in under 48 hours!",
+      productName: "Horizon Smartwatch Ultra"
+    },
+    {
+      id: 3,
+      name: "David Miller",
+      role: "Tech Enthusiast",
+      rating: 5,
+      avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
+      quote: "CyberGlow keyboard typing feedback is ultra-crisp. Easily the highest build quality keyboard in my setup.",
+      productName: "CyberGlow Keyboard"
+    }
+  ];
+
+  const faqs = [
+    {
+      id: 1,
+      question: "How fast is SWITCHES Express Dispatch?",
+      answer: "All orders placed before 2 PM EST are dispatched same-day with real-time GPS tracking enabled."
+    },
+    {
+      id: 2,
+      question: "What warranty comes with SWITCHES hardware?",
+      answer: "Every electronic device and wearable includes our 2-Year SWITCHES Hardware Replacement Coverage."
+    },
+    {
+      id: 3,
+      question: "How do I apply VIP discount promo codes?",
+      answer: "You can apply promo codes like SWITCHES10 or SWITCHES20 directly during 2-step checkout."
+    }
+  ];
+
+  return (
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2.2rem', paddingTop: '0.85rem', width: '100%', overflowX: 'hidden' }}>
+      
+      {/* 1. Hero Banner Showcase with 3D E-Commerce Image */}
+      <section className="card" style={{
+        background: 'linear-gradient(135deg, rgba(186, 12, 47, 0.12), rgba(153, 0, 0, 0.05))',
+        border: '1px solid var(--border-active)',
+        padding: 'clamp(1.25rem, 4vw, 2.5rem) clamp(1rem, 4vw, 2.5rem)',
+        borderRadius: 'var(--radius-lg)',
+        position: 'relative',
+        overflow: 'hidden',
+        width: '100%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '2rem'
+      }}>
+        <div style={{ flex: 1, maxWidth: '600px', position: 'relative', zIndex: 2 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.75rem' }} className="badge badge-primary">
+            <img src="/logo.png" alt="SWITCHES" style={{ height: '1rem', width: 'auto' }} />
+            <span>SWITCHES OFFICIAL — SINCE 2026</span>
+          </div>
+          
+          <h1 style={{
+            fontSize: 'clamp(1.6rem, 5vw, 3.2rem)',
+            fontWeight: 900,
+            lineHeight: 1.12,
+            marginBottom: '0.85rem',
+            letterSpacing: '-0.5px'
+          }}>
+            Engineered for <span style={{ background: 'var(--grad-primary)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Speed & Precision</span>.
+          </h1>
+          
+          <p style={{ fontSize: 'clamp(0.85rem, 2.5vw, 1rem)', color: 'var(--text-muted)', marginBottom: '1.5rem', lineHeight: 1.5 }}>
+            Experience the new standard in retail. Instant sub-second browsing, high-converting checkout, and 60 FPS fluid animations.
+          </p>
+
+          <div style={{ display: 'flex', gap: '0.55rem', width: '100%', alignItems: 'center' }}>
+            <button 
+              onClick={() => setCurrentPage('catalog')} 
+              className="btn btn-primary"
+              style={{ flex: 1, padding: '0.65rem 0.65rem', fontSize: '0.8rem', whiteSpace: 'nowrap', minHeight: '38px' }}
+            >
+              Explore Collection <ArrowRight size={14} />
+            </button>
+            <button 
+              onClick={() => {
+                setSelectedCategory('Tech');
+                setCurrentPage('catalog');
+              }} 
+              className="btn btn-secondary"
+              style={{ flex: 1, padding: '0.65rem 0.65rem', fontSize: '0.8rem', whiteSpace: 'nowrap', minHeight: '38px' }}
+            >
+              Shop Electronics
+            </button>
+          </div>
+        </div>
+
+        <div className="hero-product-image-container" style={{ flex: '0 0 360px', maxWidth: '360px', position: 'relative', zIndex: 2 }}>
+          <div style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setCurrentPage('catalog')}>
+            <img
+              src="/ecommerce-hero.png"
+              alt="SWITCHES 3D E-Commerce Shopping Showcase"
+              style={{
+                width: '100%',
+                height: '250px',
+                objectFit: 'cover',
+                borderRadius: 'var(--radius-md)',
+                boxShadow: 'var(--shadow-lg)',
+                border: '2px solid var(--border-active)',
+                filter: 'drop-shadow(0 12px 24px rgba(186, 12, 47, 0.35))'
+              }}
+            />
+            <div style={{
+              position: 'absolute',
+              bottom: '10px',
+              left: '10px',
+              right: '10px',
+              background: 'var(--bg-glass-heavy)',
+              backdropFilter: 'blur(12px)',
+              padding: '0.45rem 0.75rem',
+              borderRadius: 'var(--radius-sm)',
+              display: 'flex',
+              justify: 'space-between',
+              alignItems: 'center'
+            }}>
+              <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>SWITCHES Retail Platform</span>
+              <span className="badge badge-primary" style={{ fontSize: '0.65rem' }}>VIP SHOPPING</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 2. Category Quick Selector */}
+      <section style={{ width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
+          <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800 }}>Explore Categories</h2>
+          <button onClick={() => setCurrentPage('catalog')} className="btn btn-secondary" style={{ fontSize: '0.78rem', padding: '0.3rem 0.65rem', minHeight: '34px' }}>
+            View All
+          </button>
+        </div>
+
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '0.65rem',
+          width: '100%'
+        }}>
+          {categories.map((cat) => {
+            const Icon = cat.icon;
+            const isSelected = selectedCategory === cat.name;
+            return (
+              <button
+                key={cat.name}
+                onClick={() => {
+                  setSelectedCategory(cat.name);
+                  setCurrentPage('catalog');
+                }}
+                className="card"
+                style={{
+                  flex: '1 1 90px',
+                  minWidth: '85px',
+                  padding: '0.65rem 0.85rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem',
+                  cursor: 'pointer',
+                  border: isSelected ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
+                  background: isSelected ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-card)',
+                  color: isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                  fontWeight: 700,
+                  fontSize: '0.85rem',
+                  minHeight: '42px',
+                  borderRadius: 'var(--radius-md)'
+                }}
+              >
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: cat.color
+                }}>
+                  <Icon size={18} />
+                </div>
+                <span>{cat.name}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 3. Featured SWITCHES Products Grid */}
+      <section style={{ width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.45rem)', fontWeight: 800 }}>Featured SWITCHES Products</h2>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Top-rated products engineered for high performance.</p>
+          </div>
+          <button onClick={() => setCurrentPage('catalog')} className="btn btn-primary" style={{ fontSize: '0.78rem', padding: '0.35rem 0.8rem' }}>
+            Browse Catalog
+          </button>
+        </div>
+
+        <div className="product-grid">
+          {featured.map((product) => {
+            const isWishlisted = wishlist.includes(product.id);
+            return (
+              <div 
+                key={product.id} 
+                className="card" 
+                onClick={() => navigateToProduct(product.id)}
+                style={{ display: 'flex', flexDirection: 'column', width: '100%', cursor: 'pointer' }}
+              >
+                
+                {/* Image Container */}
+                <div className="product-image-container">
+                  <img
+                    src={product.images[0]}
+                    alt={product.name}
+                    loading="lazy"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80";
+                    }}
+                  />
+                  {product.isNew && (
+                    <span className="badge badge-primary" style={{ position: 'absolute', top: '8px', left: '8px', zIndex: 2 }}>
+                      NEW
+                    </span>
+                  )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      toggleWishlist(product.id);
+                    }}
+                    className="btn btn-icon"
+                    style={{
+                      position: 'absolute',
+                      top: '8px',
+                      right: '8px',
+                      zIndex: 2,
+                      background: 'var(--bg-glass-heavy)',
+                      width: '32px',
+                      height: '32px',
+                      minWidth: '32px',
+                      minHeight: '32px'
+                    }}
+                  >
+                    <Heart size={14} color={isWishlisted ? '#ff4757' : 'var(--text-main)'} fill={isWishlisted ? '#ff4757' : 'none'} />
+                  </button>
+                </div>
+
+                {/* Card Body */}
+                <div style={{ padding: '0.75rem', flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.5rem' }}>
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                      <span className="badge badge-primary" style={{ fontSize: '0.6rem' }}>{product.category}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.15rem', fontSize: '0.72rem', fontWeight: 700 }}>
+                        <Star size={11} color="#f59e0b" fill="#f59e0b" />
+                        <span>{product.rating}</span>
+                      </div>
+                    </div>
+                    <h3 
+                      style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.2rem', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
+                    >
+                      {product.name}
+                    </h3>
+                    <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {product.tagline}
+                    </p>
+                  </div>
+
+                  {/* Price & Action */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px solid var(--border-light)' }}>
+                    <div>
+                      <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
+                    </div>
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigateToProduct(product.id);
+                      }} 
+                      className="btn btn-secondary" 
+                      style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', minHeight: '32px' }}
+                    >
+                      Details
+                    </button>
+                  </div>
+
+                </div>
+
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 4. Brand Promise & Key Values */}
+      <section style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+        gap: '1rem',
+        width: '100%'
+      }}>
+        {[
+          { icon: Truck, title: "Express Dispatch", desc: "Free worldwide shipping on orders over $150." },
+          { icon: ShieldCheck, title: "2-Year Coverage", desc: "Comprehensive hardware replacement guarantee." },
+          { icon: Zap, title: "Sub-Second Speed", desc: "Built for instant 60 FPS responsive browsing." },
+          { icon: MessageSquare, title: "24/7 VIP Support", desc: "Priority customer support on all orders." }
+        ].map((v, idx) => {
+          const Icon = v.icon;
+          return (
+            <div key={idx} className="card" style={{ padding: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+              <div style={{
+                padding: '0.55rem',
+                borderRadius: 'var(--radius-md)',
+                background: 'rgba(186, 12, 47, 0.12)',
+                color: 'hsl(var(--hue-primary), 85%, 50%)',
+                flexShrink: 0
+              }}>
+                <Icon size={20} />
+              </div>
+              <div>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.2rem' }}>{v.title}</h4>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{v.desc}</p>
+              </div>
+            </div>
+          );
+        })}
+      </section>
+
+      {/* 5. Customer Verified Reviews */}
+      <section style={{ width: '100%' }}>
+        <div style={{ marginBottom: '1rem' }}>
+          <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800 }}>Verified Customer Reviews</h2>
+          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>See what real buyers are saying about SWITCHES products.</p>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gap: '1rem',
+          width: '100%'
+        }}>
+          {testimonials.map((t) => (
+            <div key={t.id} className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.85rem' }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#f59e0b', marginBottom: '0.5rem' }}>
+                  {[...Array(t.rating)].map((_, i) => (
+                    <Star key={i} size={14} fill="#f59e0b" />
+                  ))}
+                </div>
+                <p style={{ fontSize: '0.82rem', lineHeight: 1.5, italic: 'true' }}>
+                  "{t.quote}"
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
+                <img src={t.avatar} alt={t.name} style={{ width: '38px', height: '38px', borderRadius: 'var(--radius-full)', objectFit: 'cover' }} />
+                <div>
+                  <h4 style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                    {t.name} <CheckCircle2 size={13} color="hsl(var(--hue-success), 80%, 45%)" />
+                  </h4>
+                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t.productName}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 6. Interactive Quick FAQ */}
+      <section className="card" style={{ padding: '1.25rem', width: '100%' }}>
+        <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800, marginBottom: '0.85rem' }}>
+          Frequently Asked Questions
+        </h2>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
+          {faqs.map((faq) => {
+            const isOpen = openFaqId === faq.id;
+            return (
+              <div key={faq.id} style={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', overflow: 'hidden' }}>
+                <button
+                  onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 0.85rem',
+                    background: 'var(--bg-secondary)',
+                    border: 'none',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    cursor: 'pointer',
+                    fontWeight: 700,
+                    fontSize: '0.82rem',
+                    color: 'var(--text-main)',
+                    textAlign: 'left'
+                  }}
+                >
+                  <span>{faq.question}</span>
+                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+                {isOpen && (
+                  <div style={{ padding: '0.75rem 0.85rem', background: 'var(--bg-card)', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                    {faq.answer}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .hero-product-image-container { display: none !important; }
+        }
+      `}</style>
+
+    </div>
+  );
+};
