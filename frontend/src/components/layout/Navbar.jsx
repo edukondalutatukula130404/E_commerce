@@ -35,67 +35,67 @@ export const Navbar = () => {
     <header className="glass-header" style={{ width: '100%', maxWidth: '100vw', margin: 0, padding: 0 }}>
       <div className="header-inner-container">
         
-        {/* Top Header Row (Logo, Brand Name, Actions) */}
-        <div className="header-main-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flex: 1, gap: '0.5rem' }}>
+        {/* Top Header Row (Logo, Center Brand Name, Right Actions) */}
+        <div className="header-main-row" style={{ display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', width: '100%', gap: '0.5rem' }}>
           
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            {/* 1. LEFT SIDE: Logo Image */}
-            <a 
-              href="/"
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentPage('home');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }} 
-              className="left-logo-img-link"
-              title="SWITCHES — Go to Homepage"
-            >
-              <img
-                src="/logo.png"
-                alt="SWITCHES Logo"
-                style={{
-                  height: '4.2rem',
-                  width: 'auto',
-                  maxHeight: '66px',
-                  objectFit: 'contain',
-                  filter: 'drop-shadow(0 4px 12px rgba(186, 12, 47, 0.45))'
-                }}
-              />
-            </a>
-
-            {/* 2. MIDDLE / CENTER: Brand Name Text */}
-            <a 
-              href="/"
-              onClick={(e) => {
-                e.preventDefault();
-                setCurrentPage('home');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+          {/* 1. LEFT SIDE: Larger Logo Image */}
+          <a 
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrentPage('home');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} 
+            className="left-logo-img-link"
+            title="SWITCHES — Go to Homepage"
+            style={{ justifySelf: 'start' }}
+          >
+            <img
+              src="/logo.png"
+              alt="SWITCHES Logo"
+              style={{
+                height: '4.5rem',
+                width: 'auto',
+                maxHeight: '70px',
+                objectFit: 'contain',
+                filter: 'drop-shadow(0 4px 12px rgba(186, 12, 47, 0.45))'
               }}
-              className="middle-brand-name-link"
-              title="SWITCHES — Homepage"
-            >
-              <span style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '0.4px', color: 'var(--text-main)', lineHeight: 1 }}>
-                SWITCHES<span style={{ color: 'hsl(var(--hue-primary), 85%, 50%)' }}>.</span>
-              </span>
-              <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '1px', color: 'var(--text-muted)' }} className="logo-tagline">
-                SINCE 2026
-              </span>
-            </a>
-          </div>
+            />
+          </a>
 
-          {/* 3. RIGHT SIDE: Actions */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }} className="header-right-actions">
+          {/* 2. MIDDLE / CENTER: Centered Brand Name Text */}
+          <a 
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrentPage('home');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="middle-brand-name-link"
+            title="SWITCHES — Homepage"
+            style={{ justifySelf: 'center', textAlign: 'center' }}
+          >
+            <span style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '0.4px', color: 'var(--text-main)', lineHeight: 1 }}>
+              SWITCHES<span style={{ color: 'hsl(var(--hue-primary), 85%, 50%)' }}>.</span>
+            </span>
+            <span style={{ fontSize: '0.58rem', fontWeight: 700, letterSpacing: '1px', color: 'var(--text-muted)' }} className="logo-tagline">
+              SINCE 2026
+            </span>
+          </a>
+
+          {/* 3. RIGHT SIDE: Actions (Compact Cart & User) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', justifySelf: 'end' }} className="header-right-actions">
             
             {/* Cart Button */}
             <button 
               onClick={() => setCurrentPage('cart')} 
               className="btn btn-primary desktop-cart-btn"
-              style={{ padding: '0.45rem 0.75rem', position: 'relative', minHeight: '38px' }}
+              style={{ padding: '0.3rem 0.55rem', position: 'relative', minHeight: '32px' }}
             >
-              <ShoppingBag size={17} />
-              <span style={{ fontSize: '0.8rem' }} className="cart-text">Cart</span>
+              <ShoppingBag size={15} />
+              <span style={{ fontSize: '0.75rem' }} className="cart-text">Cart</span>
               {totalCartCount > 0 && (
-                <span className="badge badge-primary animate-bounce" style={{ background: '#fff', color: '#ba0c2f', fontSize: '0.65rem', fontWeight: 800 }}>
+                <span className="badge badge-primary animate-bounce" style={{ background: '#fff', color: '#ba0c2f', fontSize: '0.62rem', fontWeight: 800 }}>
                   {totalCartCount}
                 </span>
               )}
@@ -105,10 +105,10 @@ export const Navbar = () => {
             <button
               onClick={() => setCurrentPage(user ? (user.role === 'admin' ? 'admin' : 'user-dashboard') : 'auth')}
               className="btn btn-secondary desktop-user-btn"
-              style={{ padding: '0.4rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.35rem', minHeight: '38px' }}
+              style={{ padding: '0.3rem 0.55rem', display: 'flex', alignItems: 'center', gap: '0.25rem', minHeight: '32px' }}
             >
-              {user?.role === 'admin' ? <Shield size={15} color="#ba0c2f" /> : <User size={15} />}
-              <span style={{ fontSize: '0.8rem', fontWeight: 600 }}>
+              {user?.role === 'admin' ? <Shield size={14} color="#ba0c2f" /> : <User size={14} />}
+              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>
                 {user ? (user.role === 'admin' ? 'Admin' : user.name.split(' ')[0]) : 'Login'}
               </span>
             </button>
@@ -181,29 +181,33 @@ export const Navbar = () => {
           .glass-header {
             width: 100vw !important;
             max-width: 100vw !important;
-            padding: 0.35rem 0 0.15rem !important;
+            padding: 0.4rem 0 0.15rem !important;
             margin: 0 !important;
           }
           .header-inner-container {
             display: flex !important;
             flex-direction: column !important;
             align-items: stretch !important;
-            padding: 0 0.75rem !important;
+            padding: 0 0.65rem !important;
             width: 100% !important;
             gap: 0.25rem !important;
           }
           .header-main-row {
-            display: flex !important;
-            justify-content: space-between !important;
+            display: grid !important;
+            grid-template-columns: auto 1fr auto !important;
             align-items: center !important;
             width: 100% !important;
           }
           .left-logo-img-link img {
-            height: 32px !important;
-            max-height: 32px !important;
+            height: 46px !important;
+            max-height: 46px !important;
+          }
+          .middle-brand-name-link {
+            justify-self: center !important;
+            text-align: center !important;
           }
           .middle-brand-name-link span {
-            font-size: 1.1rem !important;
+            font-size: 1.2rem !important;
           }
           .desktop-nav-links {
             display: flex !important;
@@ -229,19 +233,20 @@ export const Navbar = () => {
           .header-right-actions {
             display: flex !important;
             align-items: center !important;
-            gap: 0.3rem !important;
+            gap: 0.25rem !important;
+            justify-self: end !important;
           }
           .desktop-user-btn {
             display: flex !important;
-            padding: 0.25rem 0.5rem !important;
-            font-size: 0.72rem !important;
-            min-height: 32px !important;
+            padding: 0.2rem 0.45rem !important;
+            font-size: 0.7rem !important;
+            min-height: 28px !important;
           }
           .desktop-cart-btn {
             display: flex !important;
-            padding: 0.25rem 0.55rem !important;
-            font-size: 0.72rem !important;
-            min-height: 32px !important;
+            padding: 0.2rem 0.45rem !important;
+            font-size: 0.7rem !important;
+            min-height: 28px !important;
           }
           .logo-tagline { display: none !important; }
         }
