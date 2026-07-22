@@ -17,7 +17,7 @@ export const Footer = () => {
       marginTop: '3.5rem',
       color: 'var(--text-muted)'
     }}>
-      <div className="app-container footer-grid-container" style={{
+      <div className="app-container footer-grid-container hide-mobile" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '2rem'
