@@ -45,7 +45,7 @@ export const WishlistPage = () => {
             <div key={product.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
               <div className="product-image-container">
                 <img
-                  src={product.images[0]}
+                  src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"}
                   alt={product.name}
                   onError={(e) => {
                     e.target.onerror = null;

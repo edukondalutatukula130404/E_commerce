@@ -153,8 +153,8 @@ export const CartCheckoutPage = () => {
                   {cartItemsDetailed.map((item, idx) => (
                     <div key={idx} className="card" style={{ padding: '0.85rem', display: 'flex', gap: '0.85rem', alignItems: 'center', flexWrap: 'wrap' }}>
                       <img
-                        src={item.product.images[0]}
-                        alt={item.product.name}
+                        src={item.product?.images?.[0] || item.product?.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"}
+                        alt={item.product?.name || "Product"}
                         style={{ width: '64px', height: '64px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
                       />
                       <div style={{ flex: 1, minWidth: '140px' }}>

@@ -120,7 +120,7 @@ export const ProductDetailPage = () => {
           {/* Main Large Image Container */}
           <div className="card" style={{ position: 'relative', width: '100%', overflow: 'hidden' }}>
             <img
-              src={product.images[activeImageIndex] || product.images[0]}
+              src={product.images?.[activeImageIndex] || product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"}
               alt={product.name}
               className="product-detail-main-img"
               onError={(e) => {
@@ -138,7 +138,7 @@ export const ProductDetailPage = () => {
           </div>
 
           {/* Thumbnails list */}
-          {product.images.length > 1 && (
+          {product.images?.length > 1 && (
             <div style={{ display: 'flex', gap: '0.55rem', overflowX: 'auto' }}>
               {product.images.map((img, idx) => (
                 <button
