@@ -102,6 +102,12 @@ export const Footer = () => {
       }}>
         © 2026 SWITCHES Inc. All rights reserved. Premium Retail Platform.
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .hide-mobile { display: none !important; }
+        }
+      `}</style>
     </footer>
   );
 };
