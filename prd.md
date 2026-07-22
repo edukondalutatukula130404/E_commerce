@@ -10,7 +10,7 @@
 - **Performance First**: Achieve sub-second page loads (<1.0s LCP) and high responsiveness (<50ms INP).
 - **Mobile-Native UX**: Provide native app-like interactions (swipe sheets, bottom navigation bar, touch-friendly 48px targets).
 - **High-Converting Checkout**: Streamlined 2-step checkout wizard with instant validation and dynamic order summaries.
-- **Rich Aesthetic Identity**: Futuristic glassmorphism aesthetics, dark/light dynamic theme switching, smooth HSL color accents.
+- **Rich Aesthetic Identity**: Futuristic glassmorphism aesthetics with premium dark mode, smooth HSL color accents.
 
 ---
 
@@ -34,7 +34,7 @@
 
 | Phase | Module | Core Functionality | Mobile Specifics |
 | :--- | :--- | :--- | :--- |
-| **Phase 1** | Foundation & Theme | Global Layout, Navigation Header, Hero Banner, Dynamic Dark/Light Theme | Sticky Top Header & Collapsible Mobile Menu |
+| **Phase 1** | Foundation & Design | Global Layout, Navigation Header, Hero Banner, Dark Glassmorphism Styling | Sticky Top Header & Collapsible Mobile Menu |
 | **Phase 2** | Catalog & Filtering | Product Grid, Categories, Instant Search with Debounce, Multi-Attribute Filters | Filter Slide-over Drawer, Touch Scroll Categories |
 | **Phase 3** | Product Details | Product Gallery with Zoom, Variant Selectors (Size/Color), Customer Reviews | Swipeable Image Carousel, Fixed Bottom Add-to-Cart Bar |
 | **Phase 4** | Cart & Checkout | Cart Slide-over, Order Summary, Coupon Engine, Multi-step Checkout Wizard | Mobile Bottom Sheet Cart, Swipe-to-Delete Cart Items |

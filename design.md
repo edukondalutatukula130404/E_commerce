@@ -15,17 +15,17 @@ The design system uses HSL values to enable ultra-smooth color transitions, dark
   --hue-success: 150; /* Emerald Emerald */
   --hue-danger: 350;  /* Crimson Red */
 
-  /* Light Theme Palette */
-  --bg-primary: hsl(220, 20%, 98%);
-  --bg-secondary: hsl(220, 15%, 94%);
-  --bg-card: hsl(0, 0%, 100%);
-  --bg-glass: rgba(255, 255, 255, 0.75);
+  /* Default Design System Palette (Dark) */
+  --bg-primary: hsl(225, 25%, 8%);
+  --bg-secondary: hsl(225, 20%, 12%);
+  --bg-card: hsl(225, 20%, 14%);
+  --bg-glass: rgba(18, 22, 36, 0.75);
 
-  --text-main: hsl(220, 30%, 12%);
-  --text-muted: hsl(220, 10%, 45%);
+  --text-main: hsl(220, 20%, 96%);
+  --text-muted: hsl(220, 10%, 65%);
   --text-inverse: hsl(0, 0%, 100%);
 
-  --border-light: hsl(220, 15%, 88%);
+  --border-light: hsl(225, 18%, 20%);
   --border-focus: hsl(var(--hue-primary), 90%, 60%);
 
   /* Accent Gradients */
@@ -34,7 +34,7 @@ The design system uses HSL values to enable ultra-smooth color transitions, dark
   --grad-gold: linear-gradient(135deg, hsl(40, 95%, 55%), hsl(25, 90%, 50%));
 
   /* Elevation & Shadows */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.05);
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.12);
   --shadow-glow: 0 0 20px rgba(108, 92, 231, 0.35);
@@ -45,19 +45,6 @@ The design system uses HSL values to enable ultra-smooth color transitions, dark
   --radius-lg: 20px;
   --radius-full: 9999px;
 }
-
-/* Dark Mode Overrides */
-[data-theme="dark"] {
-  --bg-primary: hsl(225, 25%, 8%);
-  --bg-secondary: hsl(225, 20%, 12%);
-  --bg-card: hsl(225, 20%, 14%);
-  --bg-glass: rgba(18, 22, 36, 0.75);
-
-  --text-main: hsl(220, 20%, 96%);
-  --text-muted: hsl(220, 10%, 65%);
-  
-  --border-light: hsl(225, 18%, 20%);
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.4);
   --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.5);
   --shadow-lg: 0 16px 40px rgba(0, 0, 0, 0.6);
 }

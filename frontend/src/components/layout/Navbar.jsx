@@ -1,11 +1,9 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShoppingBag, Heart, Sun, Moon, Search, User, Shield } from 'lucide-react';
+import { ShoppingBag, Heart, Search, User, Shield } from 'lucide-react';
 
 export const Navbar = () => {
   const { 
-    theme, 
-    toggleTheme, 
     currentPage, 
     setCurrentPage, 
     cart, 
@@ -140,16 +138,6 @@ export const Navbar = () => {
         {/* 3. RIGHT SIDE: Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }} className="header-right-actions">
           
-          {/* Theme Toggle (Desktop Only) */}
-          <button 
-            onClick={toggleTheme} 
-            className="btn btn-icon desktop-theme-toggle"
-            title="Toggle Light/Dark Theme"
-            style={{ width: '38px', height: '38px', minWidth: '38px', minHeight: '38px' }}
-          >
-            {theme === 'dark' ? <Sun size={17} color="#f59e0b" /> : <Moon size={17} color="#ba0c2f" />}
-          </button>
-
           {/* Wishlist Button */}
           <button 
             onClick={() => setCurrentPage('wishlist')} 
@@ -259,7 +247,6 @@ export const Navbar = () => {
           }
           .desktop-nav-links { display: none !important; }
           .desktop-user-btn { display: none !important; }
-          .desktop-theme-toggle { display: none !important; }
           .desktop-cart-btn { display: none !important; }
           .logo-tagline { display: none !important; }
         }

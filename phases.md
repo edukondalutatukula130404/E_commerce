@@ -8,7 +8,7 @@ This document establishes the step-by-step development roadmap for **AURA**, a h
 
 | Phase | Core Objective | Key Deliverables & Focus Areas | Target SLA / NFR |
 | :--- | :--- | :--- | :--- |
-| **Phase 1** | Foundation & Design System | Vite/React setup, HSL CSS design tokens, Glassmorphism, Theme Switcher, Layout Shell | 60 FPS transitions, zero horizontal overflow |
+| **Phase 1** | Foundation & Design System | Vite/React setup, HSL CSS design tokens, Glassmorphism, Layout Shell | 60 FPS transitions, zero horizontal overflow |
 | **Phase 2** | Catalog, Search & Filtering | Mock data engine, Responsive Product Grid, Debounced Search, Mobile Filter Drawer | Sub-10ms filter query, `content-visibility: auto` |
 | **Phase 3** | Product Showcase & Details | Multi-image gallery, Variant selectors (Size/Color), Customer reviews, Mobile sticky bar | Touch-friendly 48px targets |
 | **Phase 4** | Cart Engine & Checkout Wizard | `CartContext` reducer, Slide-over Cart, Coupon engine, 2-Step Checkout Wizard | Frictionless cart conversion, local persistence |
@@ -22,16 +22,16 @@ This document establishes the step-by-step development roadmap for **AURA**, a h
 ### Phase 1: Foundation, Architecture & Design System Setup
 - [x] **Step 1.1: Project Architecture & Environment Initialization**
   - Configure Vite + React 18 application structure following `architechure.md`.
-  - Wire up environment variables (`.env`): `VITE_APP_NAME`, `VITE_DEFAULT_THEME`, `VITE_CURRENCY_SYMBOL`, `VITE_ENABLE_SW`.
+  - Wire up environment variables (`.env`): `VITE_APP_NAME`, `VITE_CURRENCY_SYMBOL`, `VITE_ENABLE_SW`.
 - [x] **Step 1.2: Design Tokens & CSS System (`variables.css`, `components.css`, `animations.css`)**
   - Implement HSL color token system with brand hues (Indigo `250`, Cyan `190`, Emerald `150`, Crimson `350`).
-  - Configure dynamic dark mode class switcher (`[data-theme="dark"]`) with glassmorphism overlays (`--bg-glass`).
+  - Configure default dark theme design tokens (`[data-theme="dark"]`) with glassmorphism overlays (`--bg-glass`).
   - Setup hardware-accelerated animation utility classes (`transform3d`, `will-change: transform, opacity`).
 - [x] **Step 1.3: Adaptive Layout Shell & Navigation Components**
-  - Build responsive top navigation header with search trigger, theme toggle button, and cart badge counter.
+  - Build responsive top navigation header with search trigger and cart badge counter.
   - Implement mobile sticky bottom navigation bar tailored for compact touch viewports (`320px` to `640px`).
-- [x] **Step 1.4: Dynamic Theme Provider (`ThemeContext.jsx`)**
-  - Create context provider for dark/light mode switching with automated `localStorage` state persistence.
+- [x] **Step 1.4: App Provider & State Sync (`AppContext.jsx`)**
+  - Setup global state provider for page navigation, products, cart, wishlist, and user account management.
 
 ---
 

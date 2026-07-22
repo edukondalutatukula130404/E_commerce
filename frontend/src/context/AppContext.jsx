@@ -181,9 +181,6 @@ export const initialProducts = [
 ];
 
 export const AppProvider = ({ children }) => {
-  // Theme State
-  const [theme, setTheme] = useState(() => localStorage.getItem('switches_theme') || 'dark');
-  
   // Navigation State
   const [currentPage, setCurrentPage] = useState('home');
   const [selectedProductId, setSelectedProductId] = useState('p1');
@@ -280,11 +277,11 @@ export const AppProvider = ({ children }) => {
   // Toast State
   const [toast, setToast] = useState(null);
 
-  // Theme effect
+  // Enforce default dark theme
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('switches_theme', theme);
-  }, [theme]);
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.removeItem('switches_theme');
+  }, []);
 
   // Storage persistence effects
   useEffect(() => {
@@ -316,10 +313,6 @@ export const AppProvider = ({ children }) => {
   const showToast = (text) => {
     setToast({ text, id: Date.now() });
     setTimeout(() => setToast(null), 3000);
-  };
-
-  const toggleTheme = () => {
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   };
 
   const navigateToProduct = (id) => {
@@ -429,8 +422,6 @@ export const AppProvider = ({ children }) => {
   return (
     <AppContext.Provider
       value={{
-        theme,
-        toggleTheme,
         currentPage,
         setCurrentPage,
         selectedProductId,
