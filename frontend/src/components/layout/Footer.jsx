@@ -39,8 +39,8 @@ export const Footer = () => {
           </p>
         </div>
 
-        {/* Quick Links */}
-        <div>
+        {/* Quick Links (Desktop Only) */}
+        <div className="hide-mobile">
           <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             Product Categories
           </h4>
@@ -52,8 +52,8 @@ export const Footer = () => {
           </ul>
         </div>
 
-        {/* Support */}
-        <div>
+        {/* Support (Desktop Only) */}
+        <div className="hide-mobile">
           <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             Customer Care
           </h4>
@@ -65,8 +65,8 @@ export const Footer = () => {
           </ul>
         </div>
 
-        {/* Newsletter */}
-        <div>
+        {/* Newsletter (Desktop Only) */}
+        <div className="hide-mobile">
           <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             SWITCHES VIP Club
           </h4>
