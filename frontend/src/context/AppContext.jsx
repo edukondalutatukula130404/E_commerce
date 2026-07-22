@@ -729,13 +729,22 @@ export const AppProvider = ({ children }) => {
   };
 
   const updateCategory = (id, updatedData) => {
+    const oldCategory = categoriesList.find(c => c.id === id);
+    const oldName = oldCategory?.name;
+    const newName = updatedData.name || oldName;
+
     setCategoriesList(prev => {
       const next = prev.map(c => c.id === id ? { ...c, ...updatedData, slug: (updatedData.name || c.name).toLowerCase().replace(/\s+/g, '-') } : c);
       localStorage.setItem('switches_categories', JSON.stringify(next));
       return next;
     });
+
+    if (oldName && newName && oldName !== newName) {
+      setProducts(prev => prev.map(p => p.category === oldName ? { ...p, category: newName } : p));
+    }
+
     api.updateCategory(id, updatedData);
-    showToast('Category updated!');
+    showToast('Category specs updated!');
   };
 
   const deleteCategory = (id) => {
