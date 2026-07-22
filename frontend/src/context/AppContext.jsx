@@ -3,7 +3,7 @@ import { api } from '../services/api';
 
 const AppContext = createContext();
 
-export const initialProducts = [
+const initialProducts = [
   {
     id: "p1",
     name: "SWITCHES SoundPulse Wireless Pro",
