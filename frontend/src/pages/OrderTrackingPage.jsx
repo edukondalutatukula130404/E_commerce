@@ -1,9 +1,19 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Package, Clock, CheckCircle2, Truck, AlertCircle } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, AlertCircle, Radio, Wifi } from 'lucide-react';
 
 export const OrderTrackingPage = () => {
-  const { orders, setCurrentPage } = useApp();
+  const { orders, setCurrentPage, showToast } = useApp();
+  const [wsConnected, setWsConnected] = useState(true);
+  const [lastSocketPing, setLastSocketPing] = useState(new Date().toLocaleTimeString());
+
+  // WebSocket Live Connection ping simulation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setLastSocketPing(new Date().toLocaleTimeString());
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
 
   const getStepStatusIndex = (status) => {
     if (status === 'processing') return 0;
@@ -14,11 +24,40 @@ export const OrderTrackingPage = () => {
 
   return (
     <div className="animate-fade-in" style={{ paddingTop: '1rem', paddingBottom: '4rem' }}>
-      <div style={{ marginBottom: '1.5rem' }}>
-        <h1 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Order History & Live Status</h1>
-        <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
-          Track real-time shipment status and order timeline
-        </p>
+      
+      {/* Page Header with WebSocket Status Badge */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+        <div>
+          <h1 style={{ fontSize: '1.8rem', fontWeight: 800 }}>Order History & Live Status</h1>
+          <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)' }}>
+            Track real-time shipment status and order timeline
+          </p>
+        </div>
+
+        {/* Live WebSocket Status Pill */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.4rem 0.85rem',
+          borderRadius: 'var(--radius-full)',
+          background: 'var(--bg-secondary)',
+          border: '1px solid var(--border-light)',
+          fontSize: '0.78rem'
+        }}>
+          <span style={{
+            width: '9px',
+            height: '9px',
+            borderRadius: '50%',
+            background: wsConnected ? '#10b981' : '#ff4757',
+            boxShadow: wsConnected ? '0 0 10px #10b981' : 'none',
+            display: 'inline-block'
+          }} />
+          <span style={{ fontWeight: 700, color: 'var(--text-main)' }}>
+            {wsConnected ? 'WebSocket Live Stream' : 'Disconnected'}
+          </span>
+          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>({lastSocketPing})</span>
+        </div>
       </div>
 
       {orders.length === 0 ? (

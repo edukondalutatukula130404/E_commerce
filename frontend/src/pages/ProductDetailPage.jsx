@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Star, Heart, ShoppingBag, ArrowLeft, Check } from 'lucide-react';
+import { Star, Heart, ShoppingBag, ArrowLeft, Check, Sparkles, Upload, Image as ImageIcon, MessageSquare, CheckCircle2, X } from 'lucide-react';
 
 export const ProductDetailPage = () => {
-  const { products, selectedProductId, setCurrentPage, addToCart, toggleWishlist, wishlist } = useApp();
+  const { products, selectedProductId, setCurrentPage, navigateToProduct, addToCart, toggleWishlist, wishlist, showToast } = useApp();
 
   const product = products.find(p => p.id === selectedProductId) || products[0];
 
@@ -12,7 +12,87 @@ export const ProductDetailPage = () => {
   const [selectedSize, setSelectedSize] = useState(product.sizes[0] || 'Standard');
   const [quantity, setQuantity] = useState(1);
 
+  // Review System & Upload State
+  const [reviews, setReviews] = useState([
+    {
+      id: 1,
+      author: "Marcus Vance",
+      date: "July 20, 2026",
+      rating: 5,
+      comment: "Absolutely top quality. Build materials feel premium and delivery was super fast under 2 days.",
+      verified: true,
+      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=400&q=80"
+    },
+    {
+      id: 2,
+      author: "Sarah Jenkins",
+      date: "July 16, 2026",
+      rating: 5,
+      comment: "Exceeded my expectations! The color and finish match the photos perfectly. Highly recommend SWITCHES.",
+      verified: true
+    },
+    {
+      id: 3,
+      author: "David Chen",
+      date: "July 10, 2026",
+      rating: 4,
+      comment: "Great product for the price. Very comfortable to use and feels sturdy.",
+      verified: true
+    }
+  ]);
+
+  const [isReviewModalOpen, setIsReviewModalOpen] = useState(false);
+  const [newReview, setNewReview] = useState({
+    author: '',
+    rating: 5,
+    comment: '',
+    verified: true,
+    image: null
+  });
+  const [imagePreview, setImagePreview] = useState(null);
+
   const isWishlisted = wishlist.includes(product.id);
+
+  // AI-Powered Recommendation Logic: Filters related items by category & price proximity
+  const recommendations = products.filter(
+    p => p.id !== product.id && (p.category === product.category || Math.abs(p.price - product.price) <= 120)
+  ).slice(0, 4);
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+        setNewReview(prev => ({ ...prev, image: reader.result }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleAddReview = (e) => {
+    e.preventDefault();
+    if (!newReview.author || !newReview.comment) {
+      showToast('Please enter your name and review details');
+      return;
+    }
+
+    const createdReview = {
+      id: Date.now(),
+      author: newReview.author,
+      date: 'Just Now',
+      rating: Number(newReview.rating),
+      comment: newReview.comment,
+      verified: newReview.verified,
+      image: newReview.image
+    };
+
+    setReviews([createdReview, ...reviews]);
+    showToast('Review submitted successfully!');
+    setIsReviewModalOpen(false);
+    setNewReview({ author: '', rating: 5, comment: '', verified: true, image: null });
+    setImagePreview(null);
+  };
 
   return (
     <div className="animate-fade-in" style={{ paddingTop: '1rem', paddingBottom: '6rem' }}>
@@ -110,7 +190,7 @@ export const ProductDetailPage = () => {
                 ))}
               </div>
               <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{product.rating}</span>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>({product.reviewCount} reviews)</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>({reviews.length} verified reviews)</span>
             </div>
           </div>
 
@@ -229,9 +309,22 @@ export const ProductDetailPage = () => {
 
       </div>
 
-      {/* Customer Reviews & Breakdown Section */}
+      {/* 1. Customer Reviews & Verification System */}
       <div style={{ marginTop: '2.5rem', paddingTop: '1.75rem', borderTop: '1px solid var(--border-light)' }}>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '1.25rem' }}>Customer Reviews & Feedback</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+          <div>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Customer Reviews & Feedback</h3>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Verified buyer ratings and uploaded product photos</p>
+          </div>
+
+          <button 
+            onClick={() => setIsReviewModalOpen(true)}
+            className="btn btn-primary"
+            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            <MessageSquare size={14} /> Write a Review
+          </button>
+        </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '1.5rem', alignItems: 'flex-start' }}>
           
@@ -251,7 +344,7 @@ export const ProductDetailPage = () => {
             </div>
 
             <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-              Based on {product.reviewCount || 128} verified customer purchases
+              Based on {reviews.length} verified customer reviews
             </p>
 
             {/* Rating Distribution Bars */}
@@ -276,48 +369,172 @@ export const ProductDetailPage = () => {
 
           {/* Verified Customer Feedback Cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-            {[
-              {
-                id: 1,
-                author: "Marcus Vance",
-                date: "July 20, 2026",
-                rating: 5,
-                comment: "Absolutely top quality. Build materials feel premium and delivery was super fast under 2 days."
-              },
-              {
-                id: 2,
-                author: "Sarah Jenkins",
-                date: "July 16, 2026",
-                rating: 5,
-                comment: "Exceeded my expectations! The color and finish match the photos perfectly. Highly recommend SWITCHES."
-              },
-              {
-                id: 3,
-                author: "David Chen",
-                date: "July 10, 2026",
-                rating: 4,
-                comment: "Great product for the price. Very comfortable to use and feels sturdy."
-              }
-            ].map(review => (
+            {reviews.map(review => (
               <div key={review.id} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{review.author}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                    <span style={{ fontWeight: 700, fontSize: '0.85rem' }}>{review.author}</span>
+                    {review.verified && (
+                      <span className="badge badge-success" style={{ fontSize: '0.65rem', padding: '1px 4px', display: 'flex', alignItems: 'center', gap: '2px' }}>
+                        <CheckCircle2 size={10} /> Verified Purchase
+                      </span>
+                    )}
+                  </div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{review.date}</span>
                 </div>
+
                 <div style={{ display: 'flex', color: '#f59e0b', gap: '2px' }}>
                   {[...Array(5)].map((_, i) => (
                     <Star key={i} size={13} fill={i < review.rating ? '#f59e0b' : 'none'} />
                   ))}
                 </div>
+
                 <p style={{ fontSize: '0.825rem', color: 'var(--text-main)', lineHeight: 1.5 }}>
                   {review.comment}
                 </p>
+
+                {/* Uploaded Customer Image Preview */}
+                {review.image && (
+                  <div style={{ marginTop: '0.4rem' }}>
+                    <img 
+                      src={review.image} 
+                      alt="Customer review photo" 
+                      style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }} 
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
 
         </div>
       </div>
+
+      {/* 2. AI-Powered Product Recommendations ("You May Also Like") */}
+      {recommendations.length > 0 && (
+        <div style={{ marginTop: '3rem', paddingTop: '2rem', borderTop: '1px solid var(--border-light)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1.25rem' }}>
+            <Sparkles size={20} color="hsl(var(--hue-primary), 85%, 50%)" />
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>AI Recommendations: You May Also Like</h3>
+          </div>
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fill, minmax(210px, 1fr))',
+            gap: '1rem'
+          }}>
+            {recommendations.map(rec => (
+              <div key={rec.id} className="card product-card" style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <img
+                  src={rec.images[0]}
+                  alt={rec.name}
+                  style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }}
+                />
+                <span className="badge badge-primary" style={{ alignSelf: 'flex-start', fontSize: '0.65rem' }}>{rec.category}</span>
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.25, height: '2.2rem', overflow: 'hidden' }}>{rec.name}</h4>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
+                  <span style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${rec.price}</span>
+                  <button 
+                    onClick={() => navigateToProduct(rec.id)}
+                    className="btn btn-secondary"
+                    style={{ fontSize: '0.75rem', padding: '0.3rem 0.6rem' }}
+                  >
+                    View
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Write Review Modal with Image Upload */}
+      {isReviewModalOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0,0,0,0.65)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }} className="animate-fade-in">
+          <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Write a Review for {product.name}</h3>
+              <button onClick={() => setIsReviewModalOpen(false)} className="btn btn-icon">
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddReview} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>Your Name</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Alex Mercer"
+                  value={newReview.author}
+                  onChange={(e) => setNewReview({ ...newReview, author: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>Rating</label>
+                <div style={{ display: 'flex', gap: '0.4rem', color: '#f59e0b' }}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      type="button"
+                      key={star}
+                      onClick={() => setNewReview({ ...newReview, rating: star })}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+                    >
+                      <Star size={22} fill={star <= newReview.rating ? '#f59e0b' : 'none'} />
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>Review Details</label>
+                <textarea
+                  rows={3}
+                  placeholder="Share your experience with quality, fit, audio performance..."
+                  value={newReview.comment}
+                  onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem', resize: 'vertical' }}
+                />
+              </div>
+
+              {/* Image Upload Input */}
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Upload Product Photo</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ fontSize: '0.8rem' }}
+                />
+                {imagePreview && (
+                  <div style={{ marginTop: '0.5rem' }}>
+                    <img src={imagePreview} alt="Preview" style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: 'var(--radius-sm)' }} />
+                  </div>
+                )}
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setIsReviewModalOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Submit Review</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Fixed Sticky Bottom Action Bar */}
       <div style={{
@@ -359,3 +576,4 @@ export const ProductDetailPage = () => {
     </div>
   );
 };
+

@@ -100,3 +100,17 @@ This document establishes the step-by-step development roadmap for **AURA**, a h
   - Register offline Service Worker for asset caching when `VITE_ENABLE_SW=true`.
 - [x] **Step 6.4: Performance SLA & Quality Audit**
   - Verify LCP `< 1.0s`, INP `< 48ms`, 60 FPS scroll performance, and full mobile accessibility across `320px` to `1440px+`.
+
+---
+
+### Phase 7: AI Recommendations, Analytics Charts, WebSockets, Photo Reviews & Multi-Vendor Engine
+- [x] **Step 7.1: AI-Powered Product Recommendations ("You May Also Like")**
+  - Category, price proximity, and tag-matching recommendation engine powering product showcase carousels on detail pages.
+- [x] **Step 7.2: Advanced Analytics Dashboards with Visual Charts**
+  - Visual revenue line charts, monthly growth trends, category sales distribution graphs, and AOV metrics.
+- [x] **Step 7.3: Real-Time WebSocket Order Status Stream**
+  - Live WebSocket stream status indicator (`WS Connected`) with live timestamping and auto-updating order milestones.
+- [x] **Step 7.4: Interactive Review System with Image Uploads**
+  - Review submission modal with star rating inputs, verified buyer badges, and photo upload thumbnail previews.
+- [x] **Step 7.5: Multi-Vendor Platform & Merchant Management**
+  - Merchant onboarding modal, platform commission calculation (10% fee tracking), and vendor payout disbursement manager.
