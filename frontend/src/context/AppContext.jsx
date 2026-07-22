@@ -277,9 +277,9 @@ export const AppProvider = ({ children }) => {
   // Toast State
   const [toast, setToast] = useState(null);
 
-  // Enforce default dark theme
+  // Enforce default light theme
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'dark');
+    document.documentElement.setAttribute('data-theme', 'light');
     localStorage.removeItem('switches_theme');
   }, []);
 

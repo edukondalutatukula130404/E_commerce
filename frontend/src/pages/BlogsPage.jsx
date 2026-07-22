@@ -25,7 +25,7 @@ By relying exclusively on CSS \`transform3d\` and \`opacity\` properties, we ens
 Search responsiveness is critical for mobile shoppers on the go. Our custom debouncer allows instant query filtering under 10ms delay.
 
 ### 3. Glassmorphism Aesthetics
-Utilizing HSL CSS custom properties and \`backdrop-filter: blur(14px)\`, AURA delivers futuristic glass surfaces with a sleek dark aesthetic.`
+Utilizing HSL CSS custom properties and \`backdrop-filter: blur(14px)\`, AURA delivers futuristic glass surfaces with a clean light aesthetic.`
     },
     {
       id: "b2",

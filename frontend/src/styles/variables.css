@@ -32,15 +32,15 @@
   /* Border Radii */
   --radius-sm: 8px;
   --radius-md: 14px;
-  /* Default Theme Tokens (Dark) */
-  --bg-primary: #090d16;
-  --bg-secondary: #121826;
-  --bg-card: #172033;
-  --bg-glass: rgba(15, 23, 42, 0.75);
-  --bg-glass-heavy: rgba(15, 23, 42, 0.92);
+  /* Default Theme Tokens (Light) */
+  --bg-primary: #f8fafc;
+  --bg-secondary: #f1f5f9;
+  --bg-card: #ffffff;
+  --bg-glass: rgba(255, 255, 255, 0.75);
+  --bg-glass-heavy: rgba(255, 255, 255, 0.92);
   
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --border-light: #1e293b;
-  --border-active: rgba(255, 71, 87, 0.4);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-light: #e2e8f0;
+  --border-active: rgba(186, 12, 47, 0.4);
 }
