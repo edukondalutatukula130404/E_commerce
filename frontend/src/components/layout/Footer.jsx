@@ -10,21 +10,21 @@ export const Footer = () => {
   }
 
   return (
-    <footer className="hide-mobile" style={{
+    <footer style={{
       background: 'var(--bg-secondary)',
       borderTop: '1px solid var(--border-light)',
-      padding: '3rem 0 2rem',
-      marginTop: '4rem',
+      padding: '2.5rem 0 2rem',
+      marginTop: '3.5rem',
       color: 'var(--text-muted)'
     }}>
       <div className="app-container" style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '2rem'
       }}>
         
         {/* Brand Info with Official Logo */}
-        <div className="hide-mobile">
+        <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
             <img src="/logo.png" alt="SWITCHES Logo" style={{ height: '2.5rem', width: 'auto' }} />
             <div>
@@ -34,17 +34,17 @@ export const Footer = () => {
               <span style={{ fontSize: '0.6rem', fontWeight: 700, letterSpacing: '1px' }}>SINCE 2026</span>
             </div>
           </div>
-          <p style={{ fontSize: '0.875rem', lineHeight: 1.6 }}>
+          <p style={{ fontSize: '0.85rem', lineHeight: 1.6 }}>
             Next-generation retail platform engineered for speed, 60 FPS fluidity, and high-converting retail experiences.
           </p>
         </div>
 
-        {/* Quick Links (Desktop Only) */}
-        <div className="hide-mobile">
+        {/* Quick Links */}
+        <div>
           <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             Product Categories
           </h4>
-          <ul style={{ listStyle: 'none', fontSize: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <ul style={{ listStyle: 'none', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
             <li>Audio & Pro Wearables</li>
             <li>Tech & Ergonomics</li>
             <li>Apparel & Activewear</li>
@@ -52,12 +52,12 @@ export const Footer = () => {
           </ul>
         </div>
 
-        {/* Support (Desktop Only) */}
-        <div className="hide-mobile">
+        {/* Support */}
+        <div>
           <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             Customer Care
           </h4>
-          <ul style={{ listStyle: 'none', fontSize: '0.875rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          <ul style={{ listStyle: 'none', fontSize: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
             <li>Real-Time Order Tracking</li>
             <li>Shipping & Express Delivery</li>
             <li>Terms & Conditions</li>
@@ -65,8 +65,8 @@ export const Footer = () => {
           </ul>
         </div>
 
-        {/* Newsletter (Desktop Only) */}
-        <div className="hide-mobile">
+        {/* Newsletter */}
+        <div>
           <h4 style={{ color: 'var(--text-main)', fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.75rem' }}>
             SWITCHES VIP Club
           </h4>
@@ -93,21 +93,15 @@ export const Footer = () => {
 
       </div>
 
-      <div className="app-container hide-mobile" style={{
-        marginTop: '2.5rem',
-        paddingTop: '1.5rem',
+      <div className="app-container" style={{
+        marginTop: '2rem',
+        paddingTop: '1.25rem',
         borderTop: '1px solid var(--border-light)',
         textAlign: 'center',
         fontSize: '0.8rem'
       }}>
         © 2026 SWITCHES Inc. All rights reserved. Premium Retail Platform.
       </div>
-
-      <style>{`
-        @media (max-width: 768px) {
-          footer, .hide-mobile { display: none !important; }
-        }
-      `}</style>
     </footer>
   );
 };
