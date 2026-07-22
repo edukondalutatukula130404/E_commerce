@@ -10,7 +10,7 @@ export const Footer = () => {
   }
 
   return (
-    <footer style={{
+    <footer className="hide-mobile" style={{
       background: 'var(--bg-secondary)',
       borderTop: '1px solid var(--border-light)',
       padding: '3rem 0 2rem',
@@ -24,7 +24,7 @@ export const Footer = () => {
       }}>
         
         {/* Brand Info with Official Logo */}
-        <div>
+        <div className="hide-mobile">
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', marginBottom: '0.75rem' }}>
             <img src="/logo.png" alt="SWITCHES Logo" style={{ height: '2.5rem', width: 'auto' }} />
             <div>
@@ -93,7 +93,7 @@ export const Footer = () => {
 
       </div>
 
-      <div className="app-container" style={{
+      <div className="app-container hide-mobile" style={{
         marginTop: '2.5rem',
         paddingTop: '1.5rem',
         borderTop: '1px solid var(--border-light)',
@@ -105,7 +105,7 @@ export const Footer = () => {
 
       <style>{`
         @media (max-width: 768px) {
-          .hide-mobile { display: none !important; }
+          footer, .hide-mobile { display: none !important; }
         }
       `}</style>
     </footer>
