@@ -471,7 +471,7 @@ export const HomePage = () => {
           gap: '1rem',
           width: '100%'
         }}>
-          {products.filter(p => p.isNew || p.id === 'p1' || p.id === 'p2' || p.id === 'p5').slice(0, 4).map((product) => (
+          {products.slice(0, 5).map((product) => (
             <div 
               key={`new-${product.id}`}
               className="card product-card-hover"
