@@ -413,8 +413,8 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* 6. Interactive Quick FAQ */}
-      <section className="card" style={{ padding: '1.25rem', width: '100%' }}>
+      {/* 6. Interactive Quick FAQ (Desktop Only) */}
+      <section className="card hide-mobile" style={{ padding: '1.25rem', width: '100%' }}>
         <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800, marginBottom: '0.85rem' }}>
           Frequently Asked Questions
         </h2>
@@ -458,6 +458,7 @@ export const HomePage = () => {
       <style>{`
         @media (max-width: 768px) {
           .hero-product-image-container { display: none !important; }
+          .hide-mobile { display: none !important; }
         }
       `}</style>
 
