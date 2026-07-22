@@ -32,8 +32,11 @@ export const AdminDashboardPage = () => {
 
   // Modals & Forms State
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [newCat, setNewCat] = useState({ name: '', icon: 'Cpu', color: '#ba0c2f' });
+  const [newCat, setNewCat] = useState({ name: '', slug: '', icon: 'Cpu', color: '#ba0c2f', description: '' });
   const [editingCat, setEditingCat] = useState(null);
+
+  const availableColors = ['#ba0c2f', '#00CEC9', '#6C5CE7', '#FDCB6E', '#E84393', '#10B981', '#0984e3', '#fd79a8'];
+  const availableIcons = ['Cpu', 'Shirt', 'HomeIcon', 'Briefcase', 'Tag', 'Sparkles', 'Smartphone', 'Headphones'];
 
   const [newProduct, setNewProduct] = useState({
     name: '', tagline: '', price: '', originalPrice: '', stock: 25, category: 'Tech', description: '',
@@ -58,18 +61,30 @@ export const AdminDashboardPage = () => {
   const handleAddCategorySubmit = (e) => {
     e.preventDefault();
     if (!newCat.name) {
-      showToast('Please enter category name');
+      showToast('Please enter Category Name');
       return;
     }
-    addCategory(newCat);
+    addCategory({
+      name: newCat.name,
+      slug: (newCat.slug || newCat.name).toLowerCase().replace(/\s+/g, '-'),
+      icon: newCat.icon || 'Cpu',
+      color: newCat.color || '#ba0c2f',
+      description: newCat.description || ''
+    });
     setIsCategoryModalOpen(false);
-    setNewCat({ name: '', icon: 'Cpu', color: '#ba0c2f' });
+    setNewCat({ name: '', slug: '', icon: 'Cpu', color: '#ba0c2f', description: '' });
   };
 
   const handleSaveCategoryEdit = (e) => {
     e.preventDefault();
-    if (!editingCat) return;
-    updateCategory(editingCat.id, editingCat);
+    if (!editingCat || !editingCat.name) return;
+    updateCategory(editingCat.id, {
+      name: editingCat.name,
+      slug: (editingCat.slug || editingCat.name).toLowerCase().replace(/\s+/g, '-'),
+      icon: editingCat.icon || 'Cpu',
+      color: editingCat.color || '#ba0c2f',
+      description: editingCat.description || ''
+    });
     setEditingCat(null);
   };
 
@@ -671,19 +686,141 @@ export const AdminDashboardPage = () => {
       {/* Category Create Modal */}
       {isCategoryModalOpen && (
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
-          <div className="card" style={{ maxWidth: '400px', width: '100%', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <div className="card" style={{ maxWidth: '440px', width: '100%', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Add Category</h3>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Add Store Category (CREATE)</h3>
               <button onClick={() => setIsCategoryModalOpen(false)} className="btn btn-icon"><X size={16} /></button>
             </div>
+            
             <form onSubmit={handleAddCategorySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category Name</label>
-                <input type="text" placeholder="e.g. Gaming Gear" value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category Name *</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Gaming Gear, Smartphones" 
+                  value={newCat.name} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setNewCat({ ...newCat, name: val, slug: val.toLowerCase().replace(/\s+/g, '-') });
+                  }} 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} 
+                />
               </div>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
+
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>URL Slug</label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. gaming-gear" 
+                  value={newCat.slug} 
+                  onChange={(e) => setNewCat({ ...newCat, slug: e.target.value })} 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} 
+                />
+              </div>
+
+              {/* Color Swatch Picker */}
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>Accent Brand Color</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {availableColors.map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setNewCat({ ...newCat, color: c })}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: 'var(--radius-full)',
+                        background: c,
+                        border: newCat.color === c ? '2px solid #ffffff' : '1px solid transparent',
+                        boxShadow: newCat.color === c ? '0 0 0 2px var(--border-active)' : 'none',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={newCat.color}
+                    onChange={(e) => setNewCat({ ...newCat, color: e.target.value })}
+                    style={{ width: '28px', height: '28px', border: 'none', background: 'none', cursor: 'pointer' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Create Category</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Category Edit Modal */}
+      {editingCat && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="card" style={{ maxWidth: '440px', width: '100%', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Edit Category Specs (UPDATE)</h3>
+              <button onClick={() => setEditingCat(null)} className="btn btn-icon"><X size={16} /></button>
+            </div>
+            
+            <form onSubmit={handleSaveCategoryEdit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category Name</label>
+                <input 
+                  type="text" 
+                  value={editingCat.name} 
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditingCat({ ...editingCat, name: val, slug: val.toLowerCase().replace(/\s+/g, '-') });
+                  }} 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} 
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>URL Slug</label>
+                <input 
+                  type="text" 
+                  value={editingCat.slug || ''} 
+                  onChange={(e) => setEditingCat({ ...editingCat, slug: e.target.value })} 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} 
+                />
+              </div>
+
+              {/* Color Swatch Picker */}
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>Accent Brand Color</label>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {availableColors.map(c => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setEditingCat({ ...editingCat, color: c })}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: 'var(--radius-full)',
+                        background: c,
+                        border: editingCat.color === c ? '2px solid #ffffff' : '1px solid transparent',
+                        boxShadow: editingCat.color === c ? '0 0 0 2px var(--border-active)' : 'none',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  ))}
+                  <input
+                    type="color"
+                    value={editingCat.color || '#ba0c2f'}
+                    onChange={(e) => setEditingCat({ ...editingCat, color: e.target.value })}
+                    style={{ width: '28px', height: '28px', border: 'none', background: 'none', cursor: 'pointer' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setEditingCat(null)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Changes</button>
               </div>
             </form>
           </div>
