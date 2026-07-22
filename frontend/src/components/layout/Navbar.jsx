@@ -83,19 +83,19 @@ export const Navbar = () => {
             </span>
           </a>
 
-          {/* 3. RIGHT SIDE: Actions (Compact Cart & User) */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', justifySelf: 'end' }} className="header-right-actions">
+          {/* 3. RIGHT SIDE: Actions (Compact Mini Cart & User) */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', justifySelf: 'end' }} className="header-right-actions">
             
             {/* Cart Button */}
             <button 
               onClick={() => setCurrentPage('cart')} 
               className="btn btn-primary desktop-cart-btn"
-              style={{ padding: '0.3rem 0.55rem', position: 'relative', minHeight: '32px' }}
+              style={{ padding: '0.22rem 0.45rem', position: 'relative', minHeight: '26px', fontSize: '0.7rem', display: 'flex', alignItems: 'center', gap: '0.2rem' }}
             >
-              <ShoppingBag size={15} />
-              <span style={{ fontSize: '0.75rem' }} className="cart-text">Cart</span>
+              <ShoppingBag size={13} />
+              <span style={{ fontSize: '0.7rem', fontWeight: 700 }} className="cart-text">Cart</span>
               {totalCartCount > 0 && (
-                <span className="badge badge-primary animate-bounce" style={{ background: '#fff', color: '#ba0c2f', fontSize: '0.62rem', fontWeight: 800 }}>
+                <span className="badge badge-primary animate-bounce" style={{ background: '#fff', color: '#ba0c2f', fontSize: '0.58rem', fontWeight: 800, padding: '0.05rem 0.25rem', borderRadius: '8px' }}>
                   {totalCartCount}
                 </span>
               )}
@@ -105,10 +105,10 @@ export const Navbar = () => {
             <button
               onClick={() => setCurrentPage(user ? (user.role === 'admin' ? 'admin' : 'user-dashboard') : 'auth')}
               className="btn btn-secondary desktop-user-btn"
-              style={{ padding: '0.3rem 0.55rem', display: 'flex', alignItems: 'center', gap: '0.25rem', minHeight: '32px' }}
+              style={{ padding: '0.22rem 0.45rem', display: 'flex', alignItems: 'center', gap: '0.2rem', minHeight: '26px', fontSize: '0.7rem' }}
             >
-              {user?.role === 'admin' ? <Shield size={14} color="#ba0c2f" /> : <User size={14} />}
-              <span style={{ fontSize: '0.75rem', fontWeight: 600 }}>
+              {user?.role === 'admin' ? <Shield size={13} color="#ba0c2f" /> : <User size={13} />}
+              <span style={{ fontSize: '0.7rem', fontWeight: 600 }}>
                 {user ? (user.role === 'admin' ? 'Admin' : user.name.split(' ')[0]) : 'Login'}
               </span>
             </button>
@@ -238,15 +238,15 @@ export const Navbar = () => {
           }
           .desktop-user-btn {
             display: flex !important;
-            padding: 0.2rem 0.45rem !important;
-            font-size: 0.7rem !important;
-            min-height: 28px !important;
+            padding: 0.18rem 0.4rem !important;
+            font-size: 0.68rem !important;
+            min-height: 24px !important;
           }
           .desktop-cart-btn {
             display: flex !important;
-            padding: 0.2rem 0.45rem !important;
-            font-size: 0.7rem !important;
-            min-height: 28px !important;
+            padding: 0.18rem 0.4rem !important;
+            font-size: 0.68rem !important;
+            min-height: 24px !important;
           }
           .logo-tagline { display: none !important; }
         }
