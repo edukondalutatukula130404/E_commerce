@@ -210,25 +210,7 @@ export const Navbar = () => {
             font-size: 1.2rem !important;
           }
           .desktop-nav-links {
-            display: flex !important;
-            width: 100% !important;
-            overflow-x: auto !important;
-            -webkit-overflow-scrolling: touch !important;
-            scrollbar-width: none !important;
-            border-top: 1px solid var(--border-light) !important;
-            padding: 0.3rem 0 0.1rem !important;
-            margin: 0 !important;
-            gap: 0.2rem !important;
-          }
-          .desktop-nav-links::-webkit-scrollbar {
             display: none !important;
-          }
-          .desktop-nav-links button {
-            white-space: nowrap !important;
-            padding: 0.25rem 0.6rem !important;
-            font-size: 0.78rem !important;
-            flex-shrink: 0 !important;
-            min-height: 30px !important;
           }
           .header-right-actions {
             display: flex !important;
