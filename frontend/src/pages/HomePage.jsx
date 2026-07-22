@@ -374,92 +374,125 @@ export const HomePage = () => {
         })}
       </section>
 
-      {/* 5. Customer Verified Reviews (Desktop Only) */}
-      <section className="hide-mobile" style={{ width: '100%' }}>
-        <div style={{ marginBottom: '1rem' }}>
-          <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800 }}>Verified Customer Reviews</h2>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>See what real buyers are saying about SWITCHES products.</p>
+      {/* 5. 🔥 Best Selling Products Section */}
+      <section style={{ width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              🔥 Best Selling Products
+            </h2>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              Top-rated hardware & tech accessories chosen by tech enthusiasts worldwide
+            </p>
+          </div>
+          <button 
+            onClick={() => setCurrentPage('catalog')}
+            className="btn btn-secondary"
+            style={{ padding: '0.35rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            Explore All
+          </button>
         </div>
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
           gap: '1rem',
           width: '100%'
         }}>
-          {testimonials.map((t) => (
-            <div key={t.id} className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.85rem' }}>
+          {products.slice(0, 4).map((product) => (
+            <div 
+              key={product.id}
+              className="card product-card-hover"
+              style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
+              onClick={() => navigateToProduct(product.id)}
+            >
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.25rem', color: '#f59e0b', marginBottom: '0.5rem' }}>
-                  {[...Array(t.rating)].map((_, i) => (
-                    <Star key={i} size={14} fill="#f59e0b" />
-                  ))}
+                <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '0.65rem' }}>
+                  <img 
+                    src={product.image} 
+                    alt={product.name} 
+                    style={{ width: '100%', height: '140px', objectFit: 'cover' }} 
+                  />
+                  <span className="badge" style={{ position: 'absolute', top: '8px', left: '8px', background: '#ba0c2f', color: '#fff', fontSize: '0.65rem', fontWeight: 800 }}>
+                    🔥 BEST SELLER
+                  </span>
                 </div>
-                <p style={{ fontSize: '0.82rem', lineHeight: 1.5, italic: 'true' }}>
-                  "{t.quote}"
+                <h3 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {product.name}
+                </h3>
+                <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {product.tagline}
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
-                <img src={t.avatar} alt={t.name} style={{ width: '38px', height: '38px', borderRadius: 'var(--radius-full)', objectFit: 'cover' }} />
-                <div>
-                  <h4 style={{ fontSize: '0.85rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                    {t.name} <CheckCircle2 size={13} color="hsl(var(--hue-success), 80%, 45%)" />
-                  </h4>
-                  <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{t.productName}</p>
-                </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product, product.colors?.[0]?.name || 'Standard', product.sizes?.[0] || 'Default');
+                    showToast(`Added ${product.name} to Cart!`);
+                  }}
+                  className="btn btn-primary"
+                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                >
+                  Add to Cart
+                </button>
               </div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 6. Interactive Quick FAQ (Desktop Only) */}
-      <section className="card hide-mobile" style={{ padding: '1.25rem', width: '100%' }}>
-        <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800, marginBottom: '0.85rem' }}>
-          Frequently Asked Questions
-        </h2>
+      {/* 6. ⚡ Precision Engineering & Brand Story Content */}
+      <section className="card" style={{ padding: '1.5rem', width: '100%', background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%)' }}>
+        <div style={{ maxWidth: '680px', marginBottom: '1.25rem' }}>
+          <span className="badge badge-primary" style={{ marginBottom: '0.5rem', fontSize: '0.68rem' }}>
+            ENGINEERING & CRAFTSMANSHIP
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.2rem, 3.5vw, 1.6rem)', fontWeight: 800, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+            Engineered for Speed, Fluidity & Tactile Precision
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.6 }}>
+            Every product in the SWITCHES ecosystem is crafted to deliver optimal ergonomics, premium material feel, and zero-compromise hardware durability.
+          </p>
+        </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.55rem' }}>
-          {faqs.map((faq) => {
-            const isOpen = openFaqId === faq.id;
-            return (
-              <div key={faq.id} style={{ borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', overflow: 'hidden' }}>
-                <button
-                  onClick={() => setOpenFaqId(isOpen ? null : faq.id)}
-                  style={{
-                    width: '100%',
-                    padding: '0.75rem 0.85rem',
-                    background: 'var(--bg-secondary)',
-                    border: 'none',
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    cursor: 'pointer',
-                    fontWeight: 700,
-                    fontSize: '0.82rem',
-                    color: 'var(--text-main)',
-                    textAlign: 'left'
-                  }}
-                >
-                  <span>{faq.question}</span>
-                  {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-                </button>
-                {isOpen && (
-                  <div style={{ padding: '0.75rem 0.85rem', background: 'var(--bg-card)', fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                    {faq.answer}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+          gap: '1rem'
+        }}>
+          <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+            <div style={{ fontSize: '1.2rem', marginBottom: '0.4rem' }}>⚡</div>
+            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem' }}>Sub-Second Speed</h4>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              60 FPS fluid rendering with micro-animations optimized for instant tactile responsiveness.
+            </p>
+          </div>
+
+          <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+            <div style={{ fontSize: '1.2rem', marginBottom: '0.4rem' }}>🛡️</div>
+            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem' }}>2-Year Hardware Coverage</h4>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              Comprehensive replacement warranty guaranteeing long-term peak performance for all gear.
+            </p>
+          </div>
+
+          <div style={{ padding: '1rem', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+            <div style={{ fontSize: '1.2rem', marginBottom: '0.4rem' }}>🚀</div>
+            <h4 style={{ fontSize: '0.9rem', fontWeight: 700, marginBottom: '0.3rem' }}>Express Worldwide Shipping</h4>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+              Real-time order tracking with express dispatch on all orders worldwide over $150.
+            </p>
+          </div>
         </div>
       </section>
 
       <style>{`
         @media (max-width: 768px) {
           .hero-product-image-container { display: none !important; }
-          .hide-mobile { display: none !important; }
         }
       `}</style>
 
