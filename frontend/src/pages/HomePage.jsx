@@ -445,6 +445,77 @@ export const HomePage = () => {
         </div>
       </section>
 
+      {/* 5.5 ✨ New Arrivals Section */}
+      <section style={{ width: '100%' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <div>
+            <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              ✨ New Arrivals
+            </h2>
+            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              Explore the latest 2026 hardware drops and fresh tech releases
+            </p>
+          </div>
+          <button 
+            onClick={() => setCurrentPage('catalog')}
+            className="btn btn-secondary"
+            style={{ padding: '0.35rem 0.85rem', fontSize: '0.8rem' }}
+          >
+            View All Drops
+          </button>
+        </div>
+
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+          gap: '1rem',
+          width: '100%'
+        }}>
+          {products.filter(p => p.isNew || p.id === 'p1' || p.id === 'p2' || p.id === 'p5').slice(0, 4).map((product) => (
+            <div 
+              key={`new-${product.id}`}
+              className="card product-card-hover"
+              style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
+              onClick={() => navigateToProduct(product.id)}
+            >
+              <div>
+                <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '0.65rem' }}>
+                  <img 
+                    src={product.images?.[0] || product.image} 
+                    alt={product.name} 
+                    style={{ width: '100%', height: '140px', objectFit: 'cover' }} 
+                  />
+                  <span className="badge badge-accent" style={{ position: 'absolute', top: '8px', left: '8px', fontSize: '0.65rem', fontWeight: 800 }}>
+                    ✨ NEW RELEASE
+                  </span>
+                </div>
+                <h3 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {product.name}
+                </h3>
+                <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                  {product.tagline}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    addToCart(product, product.colors?.[0]?.name || 'Standard', product.sizes?.[0] || 'Default');
+                    showToast(`Added ${product.name} to Cart!`);
+                  }}
+                  className="btn btn-primary"
+                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                >
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* 6. ⚡ Precision Engineering & Brand Story Content */}
       <section className="card" style={{ padding: '1.5rem', width: '100%', background: 'linear-gradient(135deg, var(--bg-card) 0%, var(--bg-secondary) 100%)' }}>
         <div style={{ maxWidth: '680px', marginBottom: '1.25rem' }}>

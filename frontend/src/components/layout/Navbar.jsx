@@ -175,32 +175,49 @@ export const Navbar = () => {
           .glass-header {
             width: 100vw !important;
             max-width: 100vw !important;
-            padding: 0 !important;
+            padding: 0.35rem 0 !important;
             margin: 0 !important;
           }
           .header-inner-container {
-            display: grid !important;
-            grid-template-columns: auto 1fr auto !important;
+            display: flex !important;
+            flex-wrap: wrap !important;
             align-items: center !important;
+            justify-content: space-between !important;
             padding: 0 0.85rem !important;
             width: 100% !important;
+            gap: 0.4rem !important;
           }
-          .left-logo-img-link {
-            grid-column: 1;
-            justify-self: start;
+          .left-logo-img-link img {
+            height: 2.8rem !important;
           }
-          .middle-brand-name-link {
-            grid-column: 2;
-            justify-self: center;
-            text-align: center;
+          .desktop-nav-links {
+            display: flex !important;
+            width: 100% !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch !important;
+            padding-bottom: 0.2rem !important;
+            border-top: 1px solid var(--border-light) !important;
+            padding-top: 0.35rem !important;
+            gap: 0.2rem !important;
           }
-          .header-right-actions {
-            grid-column: 3;
-            justify-self: end;
+          .desktop-nav-links button {
+            white-space: nowrap !important;
+            padding: 0.25rem 0.55rem !important;
+            font-size: 0.78rem !important;
+            flex-shrink: 0 !important;
           }
-          .desktop-nav-links { display: none !important; }
-          .desktop-user-btn { display: none !important; }
-          .desktop-cart-btn { display: none !important; }
+          .desktop-user-btn {
+            display: flex !important;
+            padding: 0.3rem 0.55rem !important;
+            font-size: 0.75rem !important;
+            min-height: 32px !important;
+          }
+          .desktop-cart-btn {
+            display: flex !important;
+            padding: 0.3rem 0.55rem !important;
+            font-size: 0.75rem !important;
+            min-height: 32px !important;
+          }
           .logo-tagline { display: none !important; }
         }
       `}</style>
