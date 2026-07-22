@@ -400,7 +400,7 @@ export const HomePage = () => {
           gap: '1rem',
           width: '100%'
         }}>
-          {products.slice(0, 4).map((product) => (
+          {products.slice(0, 5).map((product) => (
             <div 
               key={product.id}
               className="card product-card-hover"
