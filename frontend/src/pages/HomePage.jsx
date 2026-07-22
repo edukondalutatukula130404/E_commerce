@@ -410,7 +410,7 @@ export const HomePage = () => {
               <div>
                 <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '0.65rem' }}>
                   <img 
-                    src={product.image} 
+                    src={product.images?.[0] || product.image} 
                     alt={product.name} 
                     style={{ width: '100%', height: '140px', objectFit: 'cover' }} 
                   />
