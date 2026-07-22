@@ -212,24 +212,9 @@ export const Navbar = () => {
           .desktop-nav-links {
             display: none !important;
           }
-          .header-right-actions {
-            display: flex !important;
-            align-items: center !important;
-            gap: 0.25rem !important;
-            justify-self: end !important;
-          }
-          .desktop-user-btn {
-            display: flex !important;
-            padding: 0.18rem 0.4rem !important;
-            font-size: 0.68rem !important;
-            min-height: 24px !important;
-          }
-          .desktop-cart-btn {
-            display: flex !important;
-            padding: 0.18rem 0.4rem !important;
-            font-size: 0.68rem !important;
-            min-height: 24px !important;
-          }
+          .header-right-actions { display: none !important; }
+          .desktop-user-btn { display: none !important; }
+          .desktop-cart-btn { display: none !important; }
           .logo-tagline { display: none !important; }
         }
       `}</style>
