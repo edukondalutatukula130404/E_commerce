@@ -21,6 +21,7 @@ import { UserDashboardPage } from './pages/UserDashboardPage';
 import { FaqPage } from './pages/FaqPage';
 import { TermsPage } from './pages/TermsPage';
 import { BlogsPage } from './pages/BlogsPage';
+import { AboutUsPage } from './pages/AboutUsPage';
 
 // Styles Import
 import './styles/variables.css';
@@ -78,6 +79,7 @@ const MainContent = () => {
         {currentPage === 'user-dashboard' && <UserDashboardPage />}
         
         {/* Content pages */}
+        {currentPage === 'about' && <AboutUsPage />}
         {currentPage === 'faq' && <FaqPage />}
         {currentPage === 'terms' && <TermsPage />}
         {currentPage === 'blogs' && <BlogsPage />}

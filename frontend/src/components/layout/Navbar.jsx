@@ -25,6 +25,7 @@ export const Navbar = () => {
   const navLinks = [
     { id: 'home', label: 'Home' },
     { id: 'catalog', label: 'Catalog' },
+    { id: 'about', label: 'About Us' },
     { id: 'blogs', label: 'Blogs' },
     { id: 'faq', label: 'FAQ' },
     { id: 'terms', label: 'Terms' }
@@ -101,39 +102,6 @@ export const Navbar = () => {
             );
           })}
         </nav>
-
-        {/* Global Search Bar (Desktop) */}
-        <form 
-          onSubmit={handleSearchSubmit} 
-          style={{ 
-            flex: 1, 
-            maxWidth: '260px', 
-            position: 'relative',
-            display: 'none'
-          }}
-          className="desktop-search"
-        >
-          <input
-            type="text"
-            placeholder="Search catalog..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '0.45rem 0.75rem 0.45rem 2rem',
-              borderRadius: 'var(--radius-full)',
-              border: '1px solid var(--border-light)',
-              background: 'var(--bg-secondary)',
-              color: 'var(--text-main)',
-              fontSize: '0.8rem',
-              outline: 'none'
-            }}
-          />
-          <Search 
-            size={14} 
-            style={{ position: 'absolute', left: '0.65rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} 
-          />
-        </form>
 
         {/* 3. RIGHT SIDE: Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }} className="header-right-actions">
