@@ -387,6 +387,14 @@ export const HomePage = () => {
         boxShadow: '0 8px 24px rgba(186, 12, 47, 0.25)',
         overflow: 'hidden'
       }}>
+        <div style={{ width: '170px', height: '130px', flexShrink: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 6px 16px rgba(0,0,0,0.2)' }}>
+          <img 
+            src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80" 
+            alt="Best Seller Headphones" 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+        </div>
+
         <div style={{ flex: 1, minWidth: '260px' }}>
           <span style={{
             background: 'rgba(255, 255, 255, 0.2)',
@@ -421,14 +429,6 @@ export const HomePage = () => {
           >
             Shop Best Sellers
           </button>
-        </div>
-
-        <div style={{ width: '170px', height: '130px', flexShrink: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '2px solid rgba(255,255,255,0.3)', boxShadow: '0 6px 16px rgba(0,0,0,0.2)' }}>
-          <img 
-            src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80" 
-            alt="Best Seller Headphones" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-          />
         </div>
       </div>
 
@@ -519,6 +519,14 @@ export const HomePage = () => {
         boxShadow: '0 8px 24px rgba(15, 23, 42, 0.3)',
         overflow: 'hidden'
       }}>
+        <div style={{ width: '170px', height: '130px', flexShrink: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '2px solid rgba(255,255,255,0.15)', boxShadow: '0 6px 16px rgba(0,0,0,0.3)' }}>
+          <img 
+            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" 
+            alt="New Smartwatch Drop" 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+          />
+        </div>
+
         <div style={{ flex: 1, minWidth: '260px' }}>
           <span style={{
             background: 'rgba(186, 12, 47, 0.35)',
@@ -552,14 +560,6 @@ export const HomePage = () => {
           >
             Discover New Drops
           </button>
-        </div>
-
-        <div style={{ width: '170px', height: '130px', flexShrink: 0, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '2px solid rgba(255,255,255,0.15)', boxShadow: '0 6px 16px rgba(0,0,0,0.3)' }}>
-          <img 
-            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80" 
-            alt="New Smartwatch Drop" 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-          />
         </div>
       </div>
 
