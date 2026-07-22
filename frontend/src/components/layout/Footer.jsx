@@ -10,14 +10,14 @@ export const Footer = () => {
   }
 
   return (
-    <footer style={{
+    <footer className="footer-root-container" style={{
       background: 'var(--bg-secondary)',
       borderTop: '1px solid var(--border-light)',
       padding: '2.5rem 0 2rem',
       marginTop: '3.5rem',
       color: 'var(--text-muted)'
     }}>
-      <div className="app-container" style={{
+      <div className="app-container footer-grid-container" style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
         gap: '2rem'
@@ -93,7 +93,7 @@ export const Footer = () => {
 
       </div>
 
-      <div className="app-container" style={{
+      <div className="app-container copyright-bar" style={{
         marginTop: '2rem',
         paddingTop: '1.25rem',
         borderTop: '1px solid var(--border-light)',
@@ -102,6 +102,23 @@ export const Footer = () => {
       }}>
         © 2026 SWITCHES Inc. All rights reserved. Premium Retail Platform.
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .footer-grid-container { display: none !important; }
+          .footer-root-container {
+            margin-top: 1.5rem !important;
+            padding: 1.25rem 0 1.5rem !important;
+          }
+          .copyright-bar {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+            border-top: none !important;
+            font-size: 0.72rem !important;
+            color: var(--text-muted) !important;
+          }
+        }
+      `}</style>
     </footer>
   );
 };
