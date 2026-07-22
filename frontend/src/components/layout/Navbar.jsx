@@ -1,6 +1,6 @@
 import React from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShoppingBag, Heart, Search, User, Shield } from 'lucide-react';
+import { ShoppingBag, Search, User, Shield } from 'lucide-react';
 
 export const Navbar = () => {
   const { 
@@ -138,21 +138,6 @@ export const Navbar = () => {
         {/* 3. RIGHT SIDE: Actions */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }} className="header-right-actions">
           
-          {/* Wishlist Button */}
-          <button 
-            onClick={() => setCurrentPage('wishlist')} 
-            className="btn btn-icon"
-            style={{ position: 'relative', width: '38px', height: '38px', minWidth: '38px', minHeight: '38px' }}
-            title="Wishlist"
-          >
-            <Heart size={17} color={wishlist.length > 0 ? '#ff4757' : 'currentColor'} fill={wishlist.length > 0 ? '#ff4757' : 'none'} />
-            {wishlist.length > 0 && (
-              <span className="badge badge-accent animate-bounce" style={{ position: 'absolute', top: '-4px', right: '-4px', fontSize: '0.6rem', padding: '1px 4px' }}>
-                {wishlist.length}
-              </span>
-            )}
-          </button>
-
           {/* Cart Button (Desktop Only) */}
           <button 
             onClick={() => setCurrentPage('cart')} 

@@ -339,35 +339,36 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* 4. Brand Promise & Key Values */}
+      {/* 4. Brand Promise & Key Values - Compact Icon Badges */}
       <section style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '1rem',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+        gap: '0.65rem',
         width: '100%'
       }}>
         {[
-          { icon: Truck, title: "Express Dispatch", desc: "Free worldwide shipping on orders over $150." },
-          { icon: ShieldCheck, title: "2-Year Coverage", desc: "Comprehensive hardware replacement guarantee." },
-          { icon: Zap, title: "Sub-Second Speed", desc: "Built for instant 60 FPS responsive browsing." },
-          { icon: MessageSquare, title: "24/7 VIP Support", desc: "Priority customer support on all orders." }
+          { icon: Truck, title: "Express Dispatch" },
+          { icon: ShieldCheck, title: "2-Year Coverage" },
+          { icon: Zap, title: "Sub-Second Speed" },
+          { icon: MessageSquare, title: "24/7 VIP Support" }
         ].map((v, idx) => {
           const Icon = v.icon;
           return (
-            <div key={idx} className="card" style={{ padding: '1rem', display: 'flex', gap: '0.75rem', alignItems: 'flex-start' }}>
+            <div key={idx} className="card" style={{ padding: '0.55rem 0.75rem', display: 'flex', alignItems: 'center', gap: '0.55rem', justifyContent: 'center' }} title={v.title}>
               <div style={{
-                padding: '0.55rem',
-                borderRadius: 'var(--radius-md)',
+                width: '32px',
+                height: '32px',
+                borderRadius: 'var(--radius-full)',
                 background: 'rgba(186, 12, 47, 0.12)',
                 color: 'hsl(var(--hue-primary), 85%, 50%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
                 flexShrink: 0
               }}>
-                <Icon size={20} />
+                <Icon size={16} />
               </div>
-              <div>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.2rem' }}>{v.title}</h4>
-                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{v.desc}</p>
-              </div>
+              <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-main)', whiteSpace: 'nowrap' }}>{v.title}</span>
             </div>
           );
         })}
