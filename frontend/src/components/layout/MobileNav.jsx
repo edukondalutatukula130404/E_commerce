@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Grid, Heart, Home, Search, User, Shield, ShoppingBag, X } from 'lucide-react';
+import { Grid, Heart, Home, Search, User, Shield, ShoppingBag, X, ChevronRight, Layers, Tag } from 'lucide-react';
 
 export const MobileNav = () => {
-  const { currentPage, setCurrentPage, wishlist, cart, user, searchQuery, setSearchQuery } = useApp();
+  const {
+    currentPage,
+    setCurrentPage,
+    wishlist,
+    cart,
+    user,
+    searchQuery,
+    setSearchQuery,
+    categoriesList,
+    selectedCategory,
+    setSelectedCategory,
+    setIsFilterDrawerOpen,
+    openCatalogFilter,
+    products
+  } = useApp();
+
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
 
   // Scroll direction detection state
   const [isHidden, setIsHidden] = useState(false);
@@ -27,8 +43,8 @@ export const MobileNav = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, [lastScrollY]);
 
-  // Show Mobile Bottom Bar strictly ONLY on the Home page
-  if (currentPage !== 'home') {
+  // Hide bottom bar ONLY on Admin View
+  if (currentPage === 'admin') {
     return null;
   }
 
@@ -36,7 +52,12 @@ export const MobileNav = () => {
     { 
       id: 'catalog', 
       label: 'Categories', 
-      icon: Grid 
+      icon: Grid,
+      onClick: () => {
+        if (typeof setSelectedCategory === 'function') setSelectedCategory('All');
+        if (typeof setIsFilterDrawerOpen === 'function') setIsFilterDrawerOpen(false);
+        setCurrentPage('catalog');
+      }
     },
     { 
       id: 'wishlist', 
@@ -66,6 +87,13 @@ export const MobileNav = () => {
     e.preventDefault();
     setIsSearchOpen(false);
     setCurrentPage('catalog');
+  };
+
+  const handleCategorySelect = (catName) => {
+    setSelectedCategory(catName);
+    setIsCategoryDrawerOpen(false);
+    setCurrentPage('catalog');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -140,7 +168,7 @@ export const MobileNav = () => {
       }} className="mobile-only-bar">
         {navItems.map((item) => {
           const Icon = item.icon;
-          const isActive = currentPage === item.id;
+          const isActive = currentPage === item.id || (item.id === 'categories-drawer' && isCategoryDrawerOpen);
           return (
             <button
               key={item.label}
@@ -197,6 +225,129 @@ export const MobileNav = () => {
           }
         `}</style>
       </nav>
+
+      {/* Dynamic Slide-Up Categories Modal */}
+      {isCategoryDrawerOpen && (
+        <div 
+          onClick={() => setIsCategoryDrawerOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 2600,
+            background: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'flex-end',
+            justifyContent: 'center'
+          }}
+          className="animate-fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="card"
+            style={{
+              width: '100%',
+              maxWidth: '500px',
+              borderBottomLeftRadius: 0,
+              borderBottomRightRadius: 0,
+              borderTopLeftRadius: 'var(--radius-lg)',
+              borderTopRightRadius: 'var(--radius-lg)',
+              padding: '1.25rem',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              boxShadow: '0 -10px 30px rgba(0,0,0,0.3)',
+              background: 'var(--bg-card)'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Layers size={20} color="hsl(var(--hue-primary), 85%, 50%)" />
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Explore Categories</h3>
+              </div>
+              <button onClick={() => setIsCategoryDrawerOpen(false)} className="btn btn-icon">
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Category Items List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {/* All Products Option */}
+              <button
+                onClick={() => handleCategorySelect('All')}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '0.85rem 1rem',
+                  borderRadius: 'var(--radius-md)',
+                  border: selectedCategory === 'All' ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
+                  background: selectedCategory === 'All' ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-secondary)',
+                  color: selectedCategory === 'All' ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <Tag size={18} color="hsl(var(--hue-primary), 85%, 50%)" />
+                  <span>All Products</span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                  <span style={{ fontSize: '0.75rem', background: 'var(--bg-card)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', color: 'var(--text-muted)' }}>
+                    {products.length} items
+                  </span>
+                  <ChevronRight size={16} />
+                </div>
+              </button>
+
+              {/* Dynamic Categories Map */}
+              {categoriesList.map((cat) => {
+                const count = products.filter(p => p.category === cat.name).length;
+                const isSelected = selectedCategory === cat.name;
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => handleCategorySelect(cat.name)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.85rem 1rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: isSelected ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
+                      background: isSelected ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-secondary)',
+                      color: isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                      fontWeight: 700,
+                      fontSize: '0.9rem',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease'
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <div style={{ width: '12px', height: '12px', borderRadius: '50%', background: cat.color || 'hsl(var(--hue-primary), 85%, 50%)' }} />
+                      <span>{cat.name}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ fontSize: '0.75rem', background: 'var(--bg-card)', padding: '0.2rem 0.55rem', borderRadius: 'var(--radius-full)', color: 'var(--text-muted)' }}>
+                        {count} items
+                      </span>
+                      <ChevronRight size={16} />
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Instant Search Modal */}
       {isSearchOpen && (

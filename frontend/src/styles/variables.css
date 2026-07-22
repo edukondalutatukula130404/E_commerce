@@ -17,7 +17,7 @@
   /* Dimensions - Increased Header Height */
   --header-height: 78px;
   --mobile-nav-height: 64px;
-  --container-max: 1280px;
+  --container-max: 1440px;
 
   /* Typography Scale */
   --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;

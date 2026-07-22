@@ -89,10 +89,11 @@ export const AdminDashboardPage = () => {
       slug: (newCat.slug || newCat.name).toLowerCase().replace(/\s+/g, '-'),
       icon: newCat.icon || 'Cpu',
       color: newCat.color || '#ba0c2f',
-      description: newCat.description || ''
+      description: newCat.description || '',
+      subCategories: newCat.subCategories
     });
     setIsCategoryModalOpen(false);
-    setNewCat({ name: '', slug: '', icon: 'Cpu', color: '#ba0c2f', description: '' });
+    setNewCat({ name: '', slug: '', icon: 'Cpu', color: '#ba0c2f', description: '', subCategories: '' });
   };
 
   const handleSaveCategoryEdit = (e) => {
@@ -103,7 +104,8 @@ export const AdminDashboardPage = () => {
       slug: (editingCat.slug || editingCat.name).toLowerCase().replace(/\s+/g, '-'),
       icon: editingCat.icon || 'Cpu',
       color: editingCat.color || '#ba0c2f',
-      description: editingCat.description || ''
+      description: editingCat.description || '',
+      subCategories: editingCat.subCategories
     });
     setEditingCat(null);
   };
@@ -123,11 +125,14 @@ export const AdminDashboardPage = () => {
       stock: Number(newProduct.stock) || 25,
       category: newProduct.category,
       description: newProduct.description || 'Engineered by SWITCHES.',
-      images: newProduct.images
+      images: newProduct.images,
+      isBestSeller: Boolean(newProduct.isBestSeller),
+      isNew: newProduct.isNew !== undefined ? Boolean(newProduct.isNew) : true
     });
     setNewProduct({
       name: '', tagline: '', price: '', originalPrice: '', stock: 25, category: 'Tech', description: '',
-      images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80']
+      images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80'],
+      isBestSeller: false, isNew: true
     });
   };
 
@@ -141,7 +146,9 @@ export const AdminDashboardPage = () => {
       stock: Number(editingProduct.stock),
       category: editingProduct.category,
       description: editingProduct.description,
-      images: editingProduct.images
+      images: editingProduct.images,
+      isBestSeller: Boolean(editingProduct.isBestSeller),
+      isNew: Boolean(editingProduct.isNew)
     });
     setEditingProduct(null);
   };
@@ -414,6 +421,16 @@ export const AdminDashboardPage = () => {
                       </div>
                     </div>
 
+                    {cat.subCategories && cat.subCategories.length > 0 && (
+                      <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', margin: '0.2rem 0' }}>
+                        {cat.subCategories.map(sub => (
+                          <span key={sub} style={{ fontSize: '0.62rem', padding: '0.1rem 0.35rem', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-light)', color: 'var(--text-muted)' }}>
+                            {sub}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.65rem', borderTop: '1px solid var(--border-light)' }}>
                       <span className="badge badge-primary" style={{ fontSize: '0.65rem' }}>{prodCount} Products</span>
                       <div style={{ display: 'flex', gap: '0.35rem' }}>
@@ -453,20 +470,100 @@ export const AdminDashboardPage = () => {
                   <input type="number" placeholder="35" value={newProduct.stock} onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category</label>
-                  <select value={newProduct.category} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category *</label>
+                  <select 
+                    value={newProduct.category || ''} 
+                    onChange={(e) => {
+                      const selectedCatName = e.target.value;
+                      const catObj = (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === selectedCatName.trim().toLowerCase());
+                      let subList = catObj?.subCategories || [];
+                      if (!subList || subList.length === 0) {
+                        const lower = selectedCatName.toLowerCase();
+                        if (lower.includes('tech')) subList = ["Headphones & ANC", "Smartwatches", "Keyboards", "Smartphones", "Audio"];
+                        else if (lower.includes('apparel')) subList = ["Hoodies", "Activewear", "Jackets", "Caps & Hats"];
+                        else if (lower.includes('home') || lower.includes('appliance')) subList = ["Ambient Lighting", "Desk Accessories", "Smart Gadgets", "Kitchen Appliances", "Air Quality & Cooling"];
+                        else if (lower.includes('accessories')) subList = ["Backpacks", "Travel Gear", "Cases & Sleeves"];
+                        else if (lower.includes('switch') || lower.includes('key')) subList = ["Mechanical Switches", "Keycaps", "Custom Cables"];
+                        else if (lower.includes('beauty') || lower.includes('care')) subList = ["Skincare", "facewash", "Cosmetics", "Fragrance"];
+                        else subList = [`${selectedCatName} Essentials`, `${selectedCatName} Pro`];
+                      }
+                      const defaultSub = subList[0] || '';
+                      setNewProduct({ ...newProduct, category: selectedCatName, subCategory: defaultSub });
+                    }} 
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                  >
                     {categoriesList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
                   </select>
                 </div>
-                <div>
+
+                <div style={{ gridColumn: 'span 2' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Sub-Category (Select Existing OR Type New) *</label>
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <select 
+                      value={newProduct.subCategory || ''} 
+                      onChange={(e) => setNewProduct({ ...newProduct, subCategory: e.target.value })} 
+                      style={{ flex: 1, padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                    >
+                      {(() => {
+                        const catObj = (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === (newProduct.category || '').trim().toLowerCase());
+                        let subList = (catObj?.subCategories && catObj.subCategories.length > 0) ? catObj.subCategories : [];
+                        if (subList.length === 0) {
+                          const catName = newProduct.category || 'Tech';
+                          const lower = catName.toLowerCase();
+                          if (lower.includes('tech')) subList = ["Headphones & ANC", "Smartwatches", "Keyboards", "Smartphones", "Audio"];
+                          else if (lower.includes('apparel')) subList = ["Hoodies", "Activewear", "Jackets", "Caps & Hats"];
+                          else if (lower.includes('home') || lower.includes('appliance')) subList = ["Ambient Lighting", "Desk Accessories", "Smart Gadgets", "Kitchen Appliances", "Air Quality & Cooling"];
+                          else if (lower.includes('accessories')) subList = ["Backpacks", "Travel Gear", "Cases & Sleeves"];
+                          else if (lower.includes('switch') || lower.includes('key')) subList = ["Mechanical Switches", "Keycaps", "Custom Cables"];
+                          else if (lower.includes('beauty') || lower.includes('care')) subList = ["Skincare", "facewash", "Cosmetics", "Fragrance"];
+                          else subList = [`${catName} Essentials`, `${catName} Pro`];
+                        }
+                        return subList.map(sub => <option key={sub} value={sub}>{sub}</option>);
+                      })()}
+                    </select>
+                    <input 
+                      type="text" 
+                      placeholder="Or type custom sub-category..." 
+                      value={newProduct.subCategory || ''} 
+                      onChange={(e) => setNewProduct({ ...newProduct, subCategory: e.target.value })} 
+                      style={{ flex: 1.2, padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} 
+                    />
+                  </div>
+                </div>
+                <div style={{ gridColumn: 'span 2' }}>
                   <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Tagline</label>
                   <input type="text" placeholder="e.g. Studio-grade noise cancelling" value={newProduct.tagline} onChange={(e) => setNewProduct({ ...newProduct, tagline: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
                 </div>
+
+                <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Product Flags & Display Options</label>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', padding: '0.55rem 0.85rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', height: '38px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>
+                      <input
+                        type="checkbox"
+                        checked={Boolean(newProduct.isBestSeller)}
+                        onChange={(e) => setNewProduct({ ...newProduct, isBestSeller: e.target.checked })}
+                        style={{ width: '15px', height: '15px', accentColor: '#ba0c2f' }}
+                      />
+                      🔥 Best Selling Product
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>
+                      <input
+                        type="checkbox"
+                        checked={newProduct.isNew !== false}
+                        onChange={(e) => setNewProduct({ ...newProduct, isNew: e.target.checked })}
+                        style={{ width: '15px', height: '15px', accentColor: 'hsl(var(--hue-primary), 85%, 50%)' }}
+                      />
+                      ✨ New Arrival
+                    </label>
+                  </div>
+                </div>
+
                 <div style={{ gridColumn: '1 / -1' }}>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Product Image</label>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Product Image (File Upload or Image URL)</label>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
                     <label htmlFor="new-product-image" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.9rem', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-active)', background: 'var(--bg-secondary)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
-                      <Image size={15} /> Upload Image
+                      <Image size={15} /> Upload Local Image File
                     </label>
                     <input
                       id="new-product-image"
@@ -475,19 +572,30 @@ export const AdminDashboardPage = () => {
                       onChange={(e) => handleImageUpload(e, false)}
                       style={{ display: 'none' }}
                     />
+                    
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 700 }}>OR</span>
+
+                    <input
+                      type="text"
+                      placeholder="Paste Image URL (e.g. https://...)"
+                      value={newProduct.images?.[0] && !newProduct.images[0].startsWith('data:') ? newProduct.images[0] : ''}
+                      onChange={(e) => setNewProduct({ ...newProduct, images: [e.target.value] })}
+                      style={{ flex: 1, minWidth: '200px', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                    />
+
                     {newProduct.images?.[0] && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.25rem 0.5rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
                         <img
                           src={newProduct.images[0]}
                           alt="Preview"
-                          style={{ width: '52px', height: '52px', borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border-light)' }}
+                          style={{ width: '48px', height: '48px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }}
                         />
-                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Preview</span>
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 700 }}>Preview</span>
                       </div>
                     )}
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>JPG, PNG, WebP — max 5MB</span>
                   </div>
                 </div>
+
                 <div style={{ gridColumn: '1 / -1' }}>
                   <button type="submit" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}>
                     <Plus size={15} /> Publish Product to Catalog
@@ -765,6 +873,19 @@ export const AdminDashboardPage = () => {
                 />
               </div>
 
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>
+                  Sub-Categories (Comma Separated)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Skincare, Cosmetics, Fragrance" 
+                  value={newCat.subCategories || ''} 
+                  onChange={(e) => setNewCat({ ...newCat, subCategories: e.target.value })} 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} 
+                />
+              </div>
+
               {/* Color Swatch Picker */}
               <div>
                 <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>Accent Brand Color</label>
@@ -836,6 +957,22 @@ export const AdminDashboardPage = () => {
                 />
               </div>
 
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>
+                  Sub-Categories (Comma Separated)
+                </label>
+                <input 
+                  type="text" 
+                  placeholder="e.g. Headphones, Smartwatches, Keyboards"
+                  value={Array.isArray(editingCat.subCategories) ? editingCat.subCategories.join(', ') : (editingCat.subCategories || '')} 
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    setEditingCat({ ...editingCat, subCategories: raw });
+                  }} 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} 
+                />
+              </div>
+
               {/* Color Swatch Picker */}
               <div>
                 <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.3rem' }}>Accent Brand Color</label>
@@ -898,29 +1035,126 @@ export const AdminDashboardPage = () => {
                 </div>
               </div>
 
-              {/* Image Upload */}
               <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Product Image</label>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  <img
-                    src={editingProduct.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80'}
-                    alt="Current"
-                    style={{ width: '64px', height: '64px', borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border-light)' }}
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category</label>
+                <select 
+                  value={editingProduct.category || ''} 
+                  onChange={(e) => {
+                    const selectedCatName = e.target.value;
+                    const catObj = (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === selectedCatName.trim().toLowerCase());
+                    let subList = catObj?.subCategories || [];
+                    if (!subList || subList.length === 0) {
+                      const lower = selectedCatName.toLowerCase();
+                      if (lower.includes('tech')) subList = ["Headphones & ANC", "Smartwatches", "Keyboards", "Smartphones", "Audio"];
+                      else if (lower.includes('apparel')) subList = ["Hoodies", "Activewear", "Jackets", "Caps & Hats"];
+                      else if (lower.includes('home') || lower.includes('appliance')) subList = ["Ambient Lighting", "Desk Accessories", "Smart Gadgets", "Kitchen Appliances", "Air Quality & Cooling"];
+                      else if (lower.includes('accessories')) subList = ["Backpacks", "Travel Gear", "Cases & Sleeves"];
+                      else if (lower.includes('switch') || lower.includes('key')) subList = ["Mechanical Switches", "Keycaps", "Custom Cables"];
+                      else if (lower.includes('beauty') || lower.includes('care')) subList = ["Skincare", "facewash", "Cosmetics", "Fragrance"];
+                      else subList = [`${selectedCatName} Essentials`, `${selectedCatName} Pro`];
+                    }
+                    const defaultSub = subList[0] || '';
+                    setEditingProduct({ ...editingProduct, category: selectedCatName, subCategory: defaultSub });
+                  }} 
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                >
+                  {categoriesList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Sub-Category (Select Existing OR Type Custom)</label>
+                <div style={{ display: 'flex', gap: '0.4rem' }}>
+                  <select 
+                    value={editingProduct.subCategory || ''} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, subCategory: e.target.value })} 
+                    style={{ flex: 1, padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                  >
+                    {(() => {
+                      const catObj = (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === (editingProduct.category || '').trim().toLowerCase());
+                      let subList = (catObj?.subCategories && catObj.subCategories.length > 0) ? catObj.subCategories : [];
+                      if (subList.length === 0) {
+                        const catName = editingProduct.category || 'Tech';
+                        const lower = catName.toLowerCase();
+                        if (lower.includes('tech')) subList = ["Headphones & ANC", "Smartwatches", "Keyboards", "Smartphones", "Audio"];
+                        else if (lower.includes('apparel')) subList = ["Hoodies", "Activewear", "Jackets", "Caps & Hats"];
+                        else if (lower.includes('home') || lower.includes('appliance')) subList = ["Ambient Lighting", "Desk Accessories", "Smart Gadgets", "Kitchen Appliances", "Air Quality & Cooling"];
+                        else if (lower.includes('accessories')) subList = ["Backpacks", "Travel Gear", "Cases & Sleeves"];
+                        else if (lower.includes('switch') || lower.includes('key')) subList = ["Mechanical Switches", "Keycaps", "Custom Cables"];
+                        else if (lower.includes('beauty') || lower.includes('care')) subList = ["Skincare", "facewash", "Cosmetics", "Fragrance"];
+                        else subList = [`${catName} Essentials`, `${catName} Pro`];
+                      }
+                      return subList.map(sub => <option key={sub} value={sub}>{sub}</option>);
+                    })()}
+                  </select>
+                  <input 
+                    type="text" 
+                    placeholder="Or type custom..." 
+                    value={editingProduct.subCategory || ''} 
+                    onChange={(e) => setEditingProduct({ ...editingProduct, subCategory: e.target.value })} 
+                    style={{ flex: 1.2, padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} 
                   />
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                    <label htmlFor="edit-product-image" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-active)', background: 'var(--bg-secondary)', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
-                      <Image size={14} /> Change Image
-                    </label>
-                    <input
-                      id="edit-product-image"
-                      type="file"
-                      accept="image/*"
-                      onChange={(e) => handleImageUpload(e, true)}
-                      style={{ display: 'none' }}
+                </div>
+              </div>
+
+              {/* Image Upload & URL Input */}
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Product Image (Upload File or Paste URL)</label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <img
+                      src={editingProduct.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80'}
+                      alt="Current"
+                      style={{ width: '64px', height: '64px', borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border-light)' }}
                     />
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>JPG, PNG, WebP — max 5MB</span>
+                    
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', flex: 1 }}>
+                      <label htmlFor="edit-product-image" style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-active)', background: 'var(--bg-secondary)', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
+                        <Image size={14} /> Upload New Local Image File
+                      </label>
+                      <input
+                        id="edit-product-image"
+                        type="file"
+                        accept="image/*"
+                        onChange={(e) => handleImageUpload(e, true)}
+                        style={{ display: 'none' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Or Image Web URL:</label>
+                    <input
+                      type="text"
+                      placeholder="https://..."
+                      value={editingProduct.images?.[0] && !editingProduct.images[0].startsWith('data:') ? editingProduct.images[0] : ''}
+                      onChange={(e) => setEditingProduct({ ...editingProduct, images: [e.target.value] })}
+                      style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
+                    />
                   </div>
                 </div>
+              </div>
+
+              {/* Product Badges / Display Options */}
+              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', padding: '0.6rem 0.75rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editingProduct.isBestSeller)}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, isBestSeller: e.target.checked })}
+                    style={{ width: '15px', height: '15px', accentColor: '#ba0c2f' }}
+                  />
+                  🔥 Best Seller
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editingProduct.isNew)}
+                    onChange={(e) => setEditingProduct({ ...editingProduct, isNew: e.target.checked })}
+                    style={{ width: '15px', height: '15px', accentColor: 'hsl(var(--hue-primary), 85%, 50%)' }}
+                  />
+                  ✨ New Arrival
+                </label>
               </div>
 
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>

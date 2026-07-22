@@ -19,11 +19,23 @@ import {
 } from 'lucide-react';
 
 export const HomePage = () => {
-  const { products, categoriesList, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, toggleWishlist, wishlist } = useApp();
+  const { products, categoriesList, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, setSelectedSubCategory, selectedSubCategory, setIsFilterDrawerOpen, toggleWishlist, wishlist } = useApp();
 
   const [openFaqId, setOpenFaqId] = useState(null);
 
-  const featured = products.filter(p => p.isFeatured).slice(0, 4);
+  const featured = React.useMemo(() => {
+    return products.filter(p => {
+      const matchesCategory = selectedCategory === 'All' || (p.category || '').trim().toLowerCase() === selectedCategory.trim().toLowerCase();
+      const matchesSubCategory = !selectedSubCategory || selectedSubCategory === 'All' || 
+        (p.subCategory || '').trim().toLowerCase() === selectedSubCategory.trim().toLowerCase() ||
+        (p.name || '').toLowerCase().includes(selectedSubCategory.toLowerCase()) ||
+        (p.description || '').toLowerCase().includes(selectedSubCategory.toLowerCase());
+      return matchesCategory && matchesSubCategory;
+    });
+  }, [products, selectedCategory, selectedSubCategory]);
+
+  const bestSellers = products.filter(p => p.isBestSeller || p.isFeatured).length > 0 ? products.filter(p => p.isBestSeller || p.isFeatured) : products;
+  const newArrivals = products.filter(p => p.isNew).length > 0 ? products.filter(p => p.isNew) : [...products].reverse();
 
   // Dynamic Categories from Admin & AppContext
   const categories = React.useMemo(() => {
@@ -191,7 +203,17 @@ export const HomePage = () => {
       <section style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
           <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800 }}>Explore Categories</h2>
-          <button onClick={() => setCurrentPage('catalog')} className="btn btn-secondary" style={{ fontSize: '0.78rem', padding: '0.3rem 0.65rem', minHeight: '34px' }}>
+          <button 
+            onClick={() => {
+              setSelectedCategory('All');
+              if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
+              setIsFilterDrawerOpen(false);
+              setCurrentPage('catalog');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }} 
+            className="btn btn-secondary" 
+            style={{ fontSize: '0.78rem', padding: '0.3rem 0.65rem', minHeight: '34px' }}
+          >
             View All
           </button>
         </div>
@@ -210,7 +232,10 @@ export const HomePage = () => {
                 key={cat.name}
                 onClick={() => {
                   setSelectedCategory(cat.name);
+                  if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
+                  setIsFilterDrawerOpen(false);
                   setCurrentPage('catalog');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
                 className="card"
                 style={{
@@ -244,6 +269,88 @@ export const HomePage = () => {
             );
           })}
         </div>
+
+        {/* Dynamic Sub-Categories bar for selected category on Home page */}
+        {(() => {
+          let subList = [];
+          if (selectedCategory !== 'All') {
+            const catObj = (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === (selectedCategory || '').trim().toLowerCase());
+            subList = catObj?.subCategories || [];
+          } else {
+            // Gather all sub-categories across all categories
+            (categoriesList || []).forEach(cat => {
+              if (cat.subCategories && Array.isArray(cat.subCategories)) {
+                cat.subCategories.forEach(sub => {
+                  if (sub && !subList.includes(sub)) subList.push(sub);
+                });
+              }
+            });
+          }
+
+          if (subList.length === 0) return null;
+
+          return (
+            <div className="animate-fade-in" style={{ marginTop: '0.85rem', padding: '0.75rem 1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', flexWrap: 'wrap', gap: '0.4rem' }}>
+                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+                  Sub-Categories {selectedCategory !== 'All' ? `for ${selectedCategory}` : '(All Categories)'}:
+                </span>
+                <button
+                  onClick={() => {
+                    setIsFilterDrawerOpen(false);
+                    setCurrentPage('catalog');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  style={{ fontSize: '0.72rem', color: 'hsl(var(--hue-primary), 85%, 50%)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
+                >
+                  Open in Catalog &rarr;
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+                <button
+                  onClick={() => {
+                    if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
+                  }}
+                  className="btn"
+                  style={{
+                    padding: '0.3rem 0.75rem',
+                    fontSize: '0.78rem',
+                    fontWeight: selectedSubCategory === 'All' ? 800 : 600,
+                    background: selectedSubCategory === 'All' ? 'rgba(186, 12, 47, 0.15)' : 'var(--bg-card)',
+                    color: selectedSubCategory === 'All' ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                    border: selectedSubCategory === 'All' ? '1px solid var(--border-active)' : '1px solid var(--border-light)',
+                    borderRadius: 'var(--radius-sm)'
+                  }}
+                >
+                  All {selectedCategory !== 'All' ? selectedCategory : ''}
+                </button>
+                {subList.map(sub => {
+                  const isSubSelected = (selectedSubCategory || '').trim().toLowerCase() === sub.trim().toLowerCase();
+                  return (
+                    <button
+                      key={sub}
+                      onClick={() => {
+                        if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory(sub);
+                      }}
+                      className="btn"
+                      style={{
+                        padding: '0.3rem 0.75rem',
+                        fontSize: '0.78rem',
+                        fontWeight: isSubSelected ? 800 : 600,
+                        background: isSubSelected ? 'rgba(186, 12, 47, 0.15)' : 'var(--bg-card)',
+                        color: isSubSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                        border: isSubSelected ? '1px solid var(--border-active)' : '1px solid var(--border-light)',
+                        borderRadius: 'var(--radius-sm)'
+                      }}
+                    >
+                      {sub}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })()}
       </section>
 
       {/* 3. Featured SWITCHES Products Grid */}
@@ -471,7 +578,7 @@ export const HomePage = () => {
           gap: '1rem',
           width: '100%'
         }}>
-          {products.slice(0, 5).map((product) => (
+          {bestSellers.map((product) => (
             <div 
               key={product.id}
               className="card product-card-hover"
@@ -479,13 +586,12 @@ export const HomePage = () => {
               onClick={() => navigateToProduct(product.id)}
             >
               <div>
-                <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '0.65rem' }}>
+                <div className="product-image-container" style={{ height: '220px', borderRadius: 'var(--radius-md)', marginBottom: '0.65rem' }}>
                   <img 
-                    src={product.images?.[0] || product.image} 
+                    src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"} 
                     alt={product.name} 
-                    style={{ width: '100%', height: '140px', objectFit: 'cover' }} 
                   />
-                  <span className="badge" style={{ position: 'absolute', top: '8px', left: '8px', background: '#ba0c2f', color: '#fff', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <span className="badge" style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(186, 12, 47, 0.85)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, backdropFilter: 'blur(6px)', padding: '0.25rem 0.6rem', border: '1px solid rgba(255,255,255,0.2)' }}>
                     🔥 BEST SELLER
                   </span>
                 </div>
@@ -602,7 +708,7 @@ export const HomePage = () => {
           gap: '1rem',
           width: '100%'
         }}>
-          {products.slice(0, 5).map((product) => (
+          {newArrivals.map((product) => (
             <div 
               key={`new-${product.id}`}
               className="card product-card-hover"
@@ -610,13 +716,12 @@ export const HomePage = () => {
               onClick={() => navigateToProduct(product.id)}
             >
               <div>
-                <div style={{ position: 'relative', borderRadius: 'var(--radius-md)', overflow: 'hidden', marginBottom: '0.65rem' }}>
+                <div className="product-image-container" style={{ height: '220px', borderRadius: 'var(--radius-md)', marginBottom: '0.65rem' }}>
                   <img 
-                    src={product.images?.[0] || product.image} 
+                    src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"} 
                     alt={product.name} 
-                    style={{ width: '100%', height: '140px', objectFit: 'cover' }} 
                   />
-                  <span className="badge badge-accent" style={{ position: 'absolute', top: '8px', left: '8px', fontSize: '0.65rem', fontWeight: 800 }}>
+                  <span className="badge badge-accent" style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '0.65rem', fontWeight: 800, backdropFilter: 'blur(6px)', background: 'rgba(255, 71, 87, 0.85)', color: '#fff', padding: '0.25rem 0.6rem', border: '1px solid rgba(255,255,255,0.2)' }}>
                     ✨ NEW RELEASE
                   </span>
                 </div>

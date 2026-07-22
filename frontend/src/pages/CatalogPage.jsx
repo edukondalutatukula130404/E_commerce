@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Search, Filter, SlidersHorizontal, Star, Heart, ShoppingBag, X, ArrowLeft, RotateCcw } from 'lucide-react';
 
@@ -10,17 +10,47 @@ export const CatalogPage = () => {
     setSearchQuery, 
     selectedCategory, 
     setSelectedCategory, 
+    selectedSubCategory,
+    setSelectedSubCategory,
+    isFilterDrawerOpen,
+    setIsFilterDrawerOpen,
     navigateToProduct, 
     addToCart, 
     toggleWishlist, 
     wishlist,
+    showToast,
     setCurrentPage 
   } = useApp();
 
   const [sortOption, setSortOption] = useState('featured');
   const [maxPrice, setMaxPrice] = useState(400);
   const [minRating, setMinRating] = useState(0);
-  const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
+  // Prevent background scrolling and preserve position when filter drawer is open
+  useEffect(() => {
+    if (isFilterDrawerOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      document.body.style.overflow = 'hidden';
+    } else {
+      const scrollY = document.body.style.top;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
+      }
+    }
+    return () => {
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      document.body.style.overflow = '';
+    };
+  }, [isFilterDrawerOpen]);
 
   // Dynamic Categories Array from Admin & AppContext
   const categories = useMemo(() => {
@@ -34,28 +64,110 @@ export const CatalogPage = () => {
     return list;
   }, [categoriesList, products]);
 
+  const activeCategoryObj = useMemo(() => {
+    return (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === (selectedCategory || '').trim().toLowerCase());
+  }, [categoriesList, selectedCategory]);
+
+  const availableSubCategories = useMemo(() => {
+    if (selectedCategory !== 'All') {
+      if (activeCategoryObj?.subCategories?.length > 0) {
+        return activeCategoryObj.subCategories;
+      }
+      const catName = selectedCategory;
+      const lower = catName.toLowerCase();
+      if (lower.includes('appliance') || lower.includes('home')) return ["Kitchen Appliances", "Cleaning & Vacuum", "Air Quality & Cooling"];
+      if (lower.includes('beauty') || lower.includes('care')) return ["Skincare", "facewash", "Cosmetics", "Fragrance"];
+      if (lower.includes('phone') || lower.includes('mobile')) return ["Smartphones", "Flagship Phones", "Phone Accessories"];
+      if (lower.includes('switch') || lower.includes('key')) return ["Mechanical Switches", "Keycaps", "Custom Cables"];
+      return [`${catName} Essentials`, `${catName} Pro`, `${catName} Accessories`];
+    }
+    return [];
+  }, [selectedCategory, activeCategoryObj]);
+
+  const handleSearchKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      const q = (searchQuery || '').trim().toLowerCase();
+      if (!q) return;
+      
+      // 1. Check direct category match
+      const matchedCat = (categories || []).find(cat => cat.trim().toLowerCase() === q || cat.trim().toLowerCase().includes(q));
+      if (matchedCat && matchedCat !== 'All') {
+        setSelectedCategory(matchedCat);
+        setSelectedSubCategory('All');
+        setSearchQuery('');
+        return;
+      }
+
+      // 2. Check direct sub-category match
+      (categoriesList || []).forEach(cat => {
+        if (cat.subCategories && Array.isArray(cat.subCategories)) {
+          const matchedSub = cat.subCategories.find(sub => sub.trim().toLowerCase() === q || sub.trim().toLowerCase().includes(q));
+          if (matchedSub) {
+            setSelectedCategory(cat.name);
+            setSelectedSubCategory(matchedSub);
+            setSearchQuery('');
+          }
+        }
+      });
+    }
+  };
+
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
-      const matchesSearch = !searchQuery || 
-        p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-        p.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const query = (searchQuery || '').trim().toLowerCase();
+      const matchesSearch = !query || 
+        (p.name || '').toLowerCase().includes(query) || 
+        (p.category || '').toLowerCase().includes(query) || 
+        (p.subCategory || '').toLowerCase().includes(query) || 
+        (p.tagline || '').toLowerCase().includes(query) || 
+        (p.description || '').toLowerCase().includes(query);
       
-      const matchesCategory = selectedCategory === 'All' || p.category.toLowerCase() === selectedCategory.toLowerCase();
+      const queryMatchesCat = query && (p.category || '').toLowerCase().includes(query);
+      const matchesCategory = !query || queryMatchesCat || selectedCategory === 'All' || (p.category || '').trim().toLowerCase() === selectedCategory.trim().toLowerCase();
+      
+      let matchesSubCategory = true;
+      if (!query && selectedSubCategory && selectedSubCategory !== 'All') {
+        const subClean = selectedSubCategory.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const pSubClean = (p.subCategory || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const pNameClean = (p.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const pTagClean = (p.tagline || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+        const pDescClean = (p.description || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+
+        const directMatch = pSubClean === subClean ||
+          pSubClean.includes(subClean) ||
+          (pSubClean.length > 2 && subClean.includes(pSubClean)) ||
+          pNameClean.includes(subClean) ||
+          pTagClean.includes(subClean) ||
+          pDescClean.includes(subClean);
+
+        if (!directMatch && matchesCategory && selectedCategory !== 'All') {
+          const catProds = products.filter(item => (item.category || '').trim().toLowerCase() === selectedCategory.trim().toLowerCase());
+          const anyDirectMatch = catProds.some(item => {
+            const itemSub = (item.subCategory || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+            return itemSub === subClean || itemSub.includes(subClean) || (item.name || '').toLowerCase().replace(/[^a-z0-9]/g, '').includes(subClean);
+          });
+          matchesSubCategory = !anyDirectMatch;
+        } else {
+          matchesSubCategory = directMatch;
+        }
+      }
+
       const matchesPrice = p.price <= maxPrice;
       const matchesRating = p.rating >= minRating;
 
-      return matchesSearch && matchesCategory && matchesPrice && matchesRating;
+      return matchesSearch && matchesCategory && matchesSubCategory && matchesPrice && matchesRating;
     }).sort((a, b) => {
       if (sortOption === 'price-low') return a.price - b.price;
       if (sortOption === 'price-high') return b.price - a.price;
       if (sortOption === 'rating') return b.rating - a.rating;
       return 0;
     });
-  }, [products, searchQuery, selectedCategory, maxPrice, minRating, sortOption]);
+  }, [products, searchQuery, selectedCategory, selectedSubCategory, maxPrice, minRating, sortOption]);
 
   const resetFilters = () => {
     setSearchQuery('');
     setSelectedCategory('All');
+    if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
     setMaxPrice(400);
     setMinRating(0);
     setSortOption('featured');
@@ -108,6 +220,7 @@ export const CatalogPage = () => {
               placeholder="Search catalog products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               style={{
                 width: '100%',
                 padding: '0.55rem 0.75rem 0.55rem 2.1rem',
@@ -162,32 +275,9 @@ export const CatalogPage = () => {
             <option value="price-high">Price: High-Low</option>
             <option value="rating">Highest Rated</option>
           </select>
-
         </div>
 
-        {/* Flex Wrap Category Quick Tabs */}
-        <div className="flex-wrap-container">
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className="btn"
-              style={{
-                padding: '0.35rem 0.75rem',
-                borderRadius: 'var(--radius-full)',
-                fontSize: '0.78rem',
-                fontWeight: selectedCategory === cat ? 800 : 500,
-                background: selectedCategory === cat ? 'var(--grad-primary)' : 'var(--bg-secondary)',
-                color: selectedCategory === cat ? '#fff' : 'var(--text-main)',
-                border: '1px solid var(--border-light)',
-                minHeight: '34px',
-                flex: '1 1 auto'
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
+
       </div>
 
       {/* Main Layout */}
@@ -218,6 +308,105 @@ export const CatalogPage = () => {
             </button>
           </div>
 
+          {/* Category & Nested Sub-Category Filter */}
+          <div>
+            <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.4rem' }}>Category</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+              {categories.map((cat) => {
+                const isCatSelected = selectedCategory.trim().toLowerCase() === cat.trim().toLowerCase();
+                const catProdCount = cat === 'All' ? products.length : products.filter(p => (p.category || '').trim().toLowerCase() === cat.trim().toLowerCase()).length;
+                return (
+                  <React.Fragment key={cat}>
+                    <button
+                      onClick={() => {
+                        setSelectedCategory(cat);
+                        if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
+                      }}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justify: 'space-between',
+                        padding: '0.5rem 0.7rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: isCatSelected ? '1px solid var(--border-active)' : '1px solid var(--border-light)',
+                        background: isCatSelected ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-secondary)',
+                        color: isCatSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                        fontSize: '0.8rem',
+                        fontWeight: isCatSelected ? 800 : 500,
+                        cursor: 'pointer'
+                      }}
+                    >
+                      <span>{cat}</span>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        ({catProdCount})
+                      </span>
+                    </button>
+
+                    {/* Sub-Categories nested directly UNDER active category */}
+                    {isCatSelected && availableSubCategories && availableSubCategories.length > 0 && (
+                      <div className="animate-slide-down" style={{
+                        marginLeft: '0.65rem',
+                        paddingLeft: '0.65rem',
+                        borderLeft: '2px solid rgba(186, 12, 47, 0.3)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '0.3rem',
+                        marginTop: '0.1rem',
+                        marginBottom: '0.35rem'
+                      }}>
+                        <button
+                          onClick={() => setSelectedSubCategory('All')}
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '0.3rem',
+                            padding: '0.3rem 0.5rem',
+                            borderRadius: 'var(--radius-sm)',
+                            border: selectedSubCategory === 'All' ? '1px solid var(--border-active)' : '1px solid transparent',
+                            background: selectedSubCategory === 'All' ? 'rgba(186, 12, 47, 0.12)' : 'transparent',
+                            color: selectedSubCategory === 'All' ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-muted)',
+                            fontSize: '0.75rem',
+                            fontWeight: selectedSubCategory === 'All' ? 800 : 500,
+                            cursor: 'pointer',
+                            textAlign: 'left'
+                          }}
+                        >
+                          <span>• All {cat}</span>
+                        </button>
+
+                        {availableSubCategories.map(sub => {
+                          const isSubSelected = (selectedSubCategory || '').trim().toLowerCase() === sub.trim().toLowerCase();
+                          return (
+                            <button
+                              key={sub}
+                              onClick={() => setSelectedSubCategory(sub)}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '0.3rem',
+                                padding: '0.3rem 0.5rem',
+                                borderRadius: 'var(--radius-sm)',
+                                border: isSubSelected ? '1px solid var(--border-active)' : '1px solid transparent',
+                                background: isSubSelected ? 'rgba(186, 12, 47, 0.12)' : 'transparent',
+                                color: isSubSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                                fontSize: '0.75rem',
+                                fontWeight: isSubSelected ? 800 : 500,
+                                cursor: 'pointer',
+                                textAlign: 'left'
+                              }}
+                            >
+                              <span>↳ {sub}</span>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          </div>
+
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.25rem' }}>
               <span>Max Price</span>
@@ -232,6 +421,19 @@ export const CatalogPage = () => {
               onChange={(e) => setMaxPrice(Number(e.target.value))}
               style={{ width: '100%', accentColor: 'hsl(var(--hue-primary), 85%, 50%)', cursor: 'pointer' }}
             />
+          </div>
+
+          {/* Apply Filters Button */}
+          <div style={{ marginTop: '0.35rem' }}>
+            <button 
+              onClick={() => {
+                if (typeof showToast === 'function') showToast(`Applied filters (${filteredProducts.length} items found)`);
+              }}
+              className="btn btn-primary"
+              style={{ width: '100%', padding: '0.6rem', fontSize: '0.82rem', fontWeight: 800 }}
+            >
+              Apply Filters ({filteredProducts.length})
+            </button>
           </div>
         </aside>
 
@@ -387,6 +589,109 @@ export const CatalogPage = () => {
                   fontSize: '0.85rem'
                 }}
               />
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.4rem' }}>Select Category</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                {categories.map((cat) => {
+                  const isSelected = selectedCategory.trim().toLowerCase() === cat.trim().toLowerCase();
+                  const count = cat === 'All' ? products.length : products.filter(p => (p.category || '').trim().toLowerCase() === cat.trim().toLowerCase()).length;
+                  return (
+                    <React.Fragment key={cat}>
+                      <button
+                        onClick={() => {
+                          setSelectedCategory(cat);
+                          if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justify: 'space-between',
+                          padding: '0.5rem 0.7rem',
+                          borderRadius: 'var(--radius-md)',
+                          border: isSelected ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
+                          background: isSelected ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-secondary)',
+                          color: isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                          fontSize: '0.82rem',
+                          fontWeight: isSelected ? 800 : 500,
+                          cursor: 'pointer'
+                        }}
+                      >
+                        <span>{cat}</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                          ({count})
+                        </span>
+                      </button>
+
+                      {isSelected && availableSubCategories && availableSubCategories.length > 0 && (
+                        <div className="animate-slide-down" style={{
+                          marginLeft: '0.65rem',
+                          paddingLeft: '0.65rem',
+                          borderLeft: '2px solid rgba(186, 12, 47, 0.3)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.3rem',
+                          marginTop: '0.1rem',
+                          marginBottom: '0.35rem'
+                        }}>
+                          <button
+                            onClick={() => {
+                              setSelectedSubCategory('All');
+                              setIsFilterDrawerOpen(false);
+                            }}
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.3rem',
+                              padding: '0.35rem 0.5rem',
+                              borderRadius: 'var(--radius-sm)',
+                              border: selectedSubCategory === 'All' ? '1px solid var(--border-active)' : '1px solid transparent',
+                              background: selectedSubCategory === 'All' ? 'rgba(186, 12, 47, 0.12)' : 'transparent',
+                              color: selectedSubCategory === 'All' ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-muted)',
+                              fontSize: '0.78rem',
+                              fontWeight: selectedSubCategory === 'All' ? 800 : 500,
+                              cursor: 'pointer',
+                              textAlign: 'left'
+                            }}
+                          >
+                            <span>• All {cat}</span>
+                          </button>
+
+                          {availableSubCategories.map(sub => {
+                            const isSubSelected = (selectedSubCategory || '').trim().toLowerCase() === sub.trim().toLowerCase();
+                            return (
+                              <button
+                                key={sub}
+                                onClick={() => {
+                                  setSelectedSubCategory(sub);
+                                  setIsFilterDrawerOpen(false);
+                                }}
+                                style={{
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '0.3rem',
+                                  padding: '0.35rem 0.5rem',
+                                  borderRadius: 'var(--radius-sm)',
+                                  border: isSubSelected ? '1px solid var(--border-active)' : '1px solid transparent',
+                                  background: isSubSelected ? 'rgba(186, 12, 47, 0.12)' : 'transparent',
+                                  color: isSubSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                                  fontSize: '0.78rem',
+                                  fontWeight: isSubSelected ? 800 : 500,
+                                  cursor: 'pointer',
+                                  textAlign: 'left'
+                                }}
+                              >
+                                <span>↳ {sub}</span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
