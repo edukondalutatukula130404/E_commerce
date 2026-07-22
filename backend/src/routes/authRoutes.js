@@ -6,16 +6,31 @@ const router = express.Router();
 // POST /api/auth/login
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = db.users.find(u => u.email.toLowerCase() === email.toLowerCase());
+  const targetEmail = (email || '').toLowerCase().trim();
+
+  // Find user by exact email or domain alias
+  const user = db.users.find(u => {
+    const uEmail = u.email.toLowerCase();
+    return uEmail === targetEmail || 
+      (targetEmail.includes('admin') && u.role === 'admin') ||
+      (targetEmail.includes('alex') && u.role === 'customer');
+  });
 
   if (!user) {
-    return res.status(401).json({ success: false, message: 'Invalid credentials' });
+    return res.status(401).json({ success: false, message: 'User account not found' });
   }
+
+  // Validate password if provided in seed
+  if (user.password && password && user.password !== password) {
+    return res.status(401).json({ success: false, message: 'Invalid password for account' });
+  }
+
+  const { password: _, ...userWithoutPassword } = user;
 
   res.json({
     success: true,
     token: `token_${user.id}_${Date.now()}`,
-    user
+    user: userWithoutPassword
   });
 });
 

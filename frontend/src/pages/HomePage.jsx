@@ -19,19 +19,32 @@ import {
 } from 'lucide-react';
 
 export const HomePage = () => {
-  const { products, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, toggleWishlist, wishlist } = useApp();
+  const { products, categoriesList, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, toggleWishlist, wishlist } = useApp();
 
   const [openFaqId, setOpenFaqId] = useState(null);
 
   const featured = products.filter(p => p.isFeatured).slice(0, 4);
 
-  const categories = [
-    { name: 'All', icon: Sparkles, color: '#BA0C2F' },
-    { name: 'Tech', icon: Cpu, color: '#00CEC9' },
-    { name: 'Apparel', icon: Shirt, color: '#6C5CE7' },
-    { name: 'Home', icon: HomeIcon, color: '#FDCB6E' },
-    { name: 'Accessories', icon: Briefcase, color: '#E84393' }
-  ];
+  // Dynamic Categories from Admin & AppContext
+  const categories = React.useMemo(() => {
+    const baseIconMap = { tech: Cpu, apparel: Shirt, home: HomeIcon, accessories: Briefcase };
+    const catNamesFromList = (categoriesList || []).map(c => c.name);
+    const catNamesFromProducts = (products || []).map(p => p.category).filter(Boolean);
+    const allCatNames = Array.from(new Set([...catNamesFromList, ...catNamesFromProducts]));
+
+    const list = [{ name: 'All', icon: Sparkles, color: '#BA0C2F' }];
+    allCatNames.forEach(name => {
+      const found = (categoriesList || []).find(c => c.name.toLowerCase() === name.toLowerCase());
+      const lower = name.toLowerCase();
+      const icon = found?.icon === 'Shirt' ? Shirt :
+                   found?.icon === 'HomeIcon' ? HomeIcon :
+                   found?.icon === 'Briefcase' ? Briefcase :
+                   (baseIconMap[lower] || Cpu);
+      const color = found?.color || (lower === 'tech' ? '#00CEC9' : lower === 'apparel' ? '#6C5CE7' : lower === 'home' ? '#FDCB6E' : '#E84393');
+      list.push({ name, icon, color });
+    });
+    return list;
+  }, [categoriesList, products]);
 
   const testimonials = [
     {

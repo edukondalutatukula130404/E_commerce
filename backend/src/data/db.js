@@ -184,6 +184,7 @@ export const db = {
     {
       id: "u1",
       email: "alex@aura.io",
+      password: "user123",
       name: "Alex Mercer",
       role: "customer",
       avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
@@ -191,10 +192,17 @@ export const db = {
     {
       id: "u2",
       email: "admin@aura.io",
+      password: "admin123",
       name: "Elena Rostova (Admin)",
       role: "admin",
       avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80"
     }
+  ],
+
+  vendors: [
+    { id: 'v1', name: 'AURA Audio Labs', store: 'Aura Official Store', commission: 10, totalSales: 18400, pendingPayout: 16560, status: 'Active' },
+    { id: 'v2', name: 'SWITCHES Apparel Ltd', store: 'Switches Wearables', commission: 12, totalSales: 9200, pendingPayout: 8096, status: 'Active' },
+    { id: 'v3', name: 'SmartHome Ambient', store: 'Ambient Tech Store', commission: 8, totalSales: 7100, pendingPayout: 6532, status: 'Active' }
   ],
 
   cart: [
@@ -203,6 +211,44 @@ export const db = {
       selectedColor: "Electric Indigo",
       selectedSize: "Standard",
       quantity: 1
+    }
+  ],
+
+  categories: [
+    { id: "c1", name: "Tech", slug: "tech", icon: "Cpu", color: "#00CEC9" },
+    { id: "c2", name: "Apparel", slug: "apparel", icon: "Shirt", color: "#6C5CE7" },
+    { id: "c3", name: "Home", slug: "home", icon: "HomeIcon", color: "#FDCB6E" },
+    { id: "c4", name: "Accessories", slug: "accessories", icon: "Briefcase", color: "#E84393" },
+    { id: "c5", name: "Switches", slug: "switches", icon: "Cpu", color: "#ba0c2f" },
+    { id: "c6", name: "Electronics", slug: "electronics", icon: "Cpu", color: "#00b894" }
+  ],
+
+  payments: [
+    { id: "TXN-90182", orderId: "ORD-92810", customerName: "Alex Mercer", amount: 199.99, paymentMethod: "card", status: "Paid", date: "2026-07-20T14:30:00Z" },
+    { id: "TXN-90183", orderId: "ORD-92811", customerName: "Sophia Chen", amount: 299.99, paymentMethod: "upi", status: "Paid", date: "2026-07-21T09:15:00Z" },
+    { id: "TXN-90184", orderId: "ORD-92812", customerName: "Marcus Vance", amount: 89.99, paymentMethod: "cod", status: "Pending", date: "2026-07-22T11:00:00Z" }
+  ],
+
+  banners: [
+    {
+      id: "b1",
+      title: "Top-Rated Tech & Ergonomic Hardware Sale",
+      subtitle: "Upgrade your daily workflow with studio audio headphones, titanium smartwatches, and hot-swappable keyboards.",
+      ctaText: "Shop Best Sellers",
+      imageUrl: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80",
+      tag: "🔥 LIMITED TIME OFFER — SAVE UP TO 30%",
+      category: "Tech",
+      isActive: true
+    },
+    {
+      id: "b2",
+      title: "Next-Generation Smart Lighting & Audio Gear",
+      subtitle: "Be among the first to experience our latest sub-second ANC audio, titanium display watches, and ambient lightbars.",
+      ctaText: "Discover New Drops",
+      imageUrl: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80",
+      tag: "✨ NEW 2026 RELEASE DROPS",
+      category: "Home",
+      isActive: true
     }
   ],
 

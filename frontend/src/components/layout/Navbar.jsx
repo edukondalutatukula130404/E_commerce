@@ -139,6 +139,25 @@ export const Navbar = () => {
               </button>
             );
           })}
+
+          {user?.role === 'admin' && (
+            <button
+              onClick={() => setCurrentPage('admin')}
+              className="btn btn-primary"
+              style={{
+                padding: '0.35rem 0.75rem',
+                fontSize: '0.85rem',
+                fontWeight: 800,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                minHeight: '36px',
+                marginLeft: '0.5rem'
+              }}
+            >
+              <Shield size={14} /> Admin Command
+            </button>
+          )}
         </nav>
 
       </div>

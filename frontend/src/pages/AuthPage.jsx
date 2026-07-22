@@ -3,35 +3,36 @@ import { useApp } from '../context/AppContext';
 import { Shield, ArrowLeft } from 'lucide-react';
 
 export const AuthPage = () => {
-  const { user, setUser, setCurrentPage, showToast } = useApp();
+  const { user, setUser, loginWithCredentials, setCurrentPage, showToast } = useApp();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
 
+  const handleCredentialSubmit = async (e) => {
+    e.preventDefault();
+    if (!email) {
+      showToast('Please enter an email address');
+      return;
+    }
+    await loginWithCredentials(email, password);
+  };
+
+  const autofillSeed = (type) => {
+    if (type === 'admin') {
+      setEmail('admin@aura.io');
+      setPassword('admin123');
+    } else {
+      setEmail('alex@aura.io');
+      setPassword('user123');
+    }
+  };
+
   const handleDemoLogin = (role) => {
     if (role === 'admin') {
-      const adminUser = {
-        id: 'u2',
-        name: 'Elena Rostova (Admin)',
-        email: 'admin@switches.io',
-        role: 'admin',
-        avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80'
-      };
-      setUser(adminUser);
-      showToast('Logged in as SWITCHES Administrator');
-      setCurrentPage('admin');
+      loginWithCredentials('admin@aura.io', 'admin123');
     } else {
-      const customerUser = {
-        id: 'u1',
-        name: 'Alex Mercer',
-        email: 'alex@switches.io',
-        role: 'customer',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
-      };
-      setUser(customerUser);
-      showToast('Logged in as Alex Mercer');
-      setCurrentPage('user-dashboard');
+      loginWithCredentials('alex@aura.io', 'user123');
     }
   };
 
@@ -103,7 +104,30 @@ export const AuthPage = () => {
           </div>
         ) : (
           <>
-            <form onSubmit={(e) => { e.preventDefault(); handleDemoLogin('customer'); }} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            {/* Seed Credentials Notice Box */}
+            <div style={{
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-active)',
+              borderRadius: 'var(--radius-md)',
+              padding: '0.85rem',
+              fontSize: '0.78rem'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, marginBottom: '0.4rem', color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
+                <Shield size={15} /> Seeded Admin & Customer Credentials
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span><strong>Admin:</strong> admin@aura.io / admin123</span>
+                  <button type="button" onClick={() => autofillSeed('admin')} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>Autofill</button>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span><strong>Customer:</strong> alex@aura.io / user123</span>
+                  <button type="button" onClick={() => autofillSeed('customer')} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>Autofill</button>
+                </div>
+              </div>
+            </div>
+
+            <form onSubmit={handleCredentialSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {isRegister && (
                 <div>
                   <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Full Name</label>
@@ -121,7 +145,7 @@ export const AuthPage = () => {
                 <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Email Address</label>
                 <input
                   type="email"
-                  placeholder="alex@switches.io"
+                  placeholder="admin@aura.io"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
@@ -146,14 +170,14 @@ export const AuthPage = () => {
 
             <div style={{ paddingTop: '0.85rem', borderTop: '1px solid var(--border-light)', textAlign: 'center' }}>
               <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.65rem' }}>
-                ⚡ Quick Demo One-Tap Login:
+                ⚡ Quick 1-Click Seed Login:
               </p>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <button onClick={() => handleDemoLogin('customer')} className="btn btn-secondary" style={{ flex: 1, fontSize: '0.78rem', padding: '0.45rem' }}>
-                  Customer Demo
+                  Customer Seed Login
                 </button>
                 <button onClick={() => handleDemoLogin('admin')} className="btn btn-secondary" style={{ flex: 1, fontSize: '0.78rem', padding: '0.45rem' }}>
-                  <Shield size={13} color="hsl(var(--hue-primary), 85%, 50%)" /> Admin Demo
+                  <Shield size={13} color="hsl(var(--hue-primary), 85%, 50%)" /> Admin Seed Login
                 </button>
               </div>
             </div>

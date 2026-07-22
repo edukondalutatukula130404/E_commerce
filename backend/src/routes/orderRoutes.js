@@ -31,4 +31,14 @@ router.put('/:id/status', (req, res) => {
   res.json({ success: true, data: order });
 });
 
+// DELETE /api/orders/:id - Delete / cancel order (Admin)
+router.delete('/:id', (req, res) => {
+  const index = db.orders.findIndex(o => o.id === req.params.id);
+  if (index === -1) {
+    return res.status(404).json({ success: false, message: 'Order not found' });
+  }
+  const deleted = db.orders.splice(index, 1);
+  res.json({ success: true, data: deleted[0] });
+});
+
 export default router;

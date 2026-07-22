@@ -1,486 +1,774 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Shield, Package, ShoppingBag, Plus, Trash2, Edit3, ArrowLeft, BarChart3, PieChart, Users, DollarSign, TrendingUp, Building2, CheckCircle2, X } from 'lucide-react';
+import { 
+  Shield, Package, ShoppingBag, Plus, Trash2, Edit3, ArrowLeft, LogOut,
+  BarChart3, Users, Building2, X, Search, CheckCircle2, AlertTriangle, UserCheck, 
+  RefreshCw, Menu, Tag, Layers, CreditCard, Image, Eye, EyeOff, PlusCircle, Check
+} from 'lucide-react';
 
 export const AdminDashboardPage = () => {
-  const { products, setProducts, orders, setCurrentPage, showToast } = useApp();
+  const { 
+    // State
+    products, addProduct, updateProduct, deleteProduct, updateStock, adjustStock,
+    categoriesList, addCategory, updateCategory, deleteCategory,
+    orders, updateOrderStatus, deleteOrder, 
+    payments, updatePaymentStatus,
+    usersList, updateUserRole, deleteUser,
+    banners, addBanner, updateBanner, toggleBannerActive, deleteBanner,
+    vendors, addVendor, disbursePayout, deleteVendor,
+    user, setUser, setCurrentPage, showToast 
+  } = useApp();
 
-  const [activeTab, setActiveTab] = useState('products');
+  // Active Tab: 8 sidebar items
+  // 'overview' | 'categories' | 'products' | 'inventory' | 'orders' | 'payments' | 'customers' | 'banners'
+  const [activeTab, setActiveTab] = useState('overview');
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  // Search & Filter States
+  const [productSearch, setProductSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [orderSearch, setOrderSearch] = useState('');
+  const [customerSearch, setCustomerSearch] = useState('');
+
+  // Modals & Forms State
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [newCat, setNewCat] = useState({ name: '', icon: 'Cpu', color: '#ba0c2f' });
+  const [editingCat, setEditingCat] = useState(null);
+
   const [newProduct, setNewProduct] = useState({
-    name: '',
-    tagline: '',
-    price: '',
-    category: 'Tech',
-    description: '',
+    name: '', tagline: '', price: '', originalPrice: '', stock: 25, category: 'Tech', description: '',
     images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80']
   });
+  const [editingProduct, setEditingProduct] = useState(null);
 
-  // Multi-Vendor State
-  const [vendors, setVendors] = useState([
-    { id: 'v1', name: 'AURA Audio Labs', store: 'Aura Official Store', commission: 10, totalSales: 18400, pendingPayout: 16560, status: 'Active' },
-    { id: 'v2', name: 'SWITCHES Apparel Ltd', store: 'Switches Wearables', commission: 12, totalSales: 9200, pendingPayout: 8096, status: 'Active' },
-    { id: 'v3', name: 'SmartHome Ambient', store: 'Ambient Tech Store', commission: 8, totalSales: 7100, pendingPayout: 6532, status: 'Active' }
-  ]);
+  const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
+  const [newBanner, setNewBanner] = useState({
+    title: '', subtitle: '', ctaText: 'Shop Best Sellers', imageUrl: '', tag: 'PROMOTION', category: 'Tech'
+  });
+  const [editingBanner, setEditingBanner] = useState(null);
 
-  const [isVendorModalOpen, setIsVendorModalOpen] = useState(false);
-  const [newVendor, setNewVendor] = useState({ name: '', store: '', commission: 10 });
+  // Handle Logout
+  const handleLogout = () => {
+    setUser(null);
+    showToast('Logged out of Admin Command');
+    setCurrentPage('home');
+  };
 
-  const handleCreateProduct = (e) => {
+  // Handlers for Category CRUD
+  const handleAddCategorySubmit = (e) => {
+    e.preventDefault();
+    if (!newCat.name) {
+      showToast('Please enter category name');
+      return;
+    }
+    addCategory(newCat);
+    setIsCategoryModalOpen(false);
+    setNewCat({ name: '', icon: 'Cpu', color: '#ba0c2f' });
+  };
+
+  const handleSaveCategoryEdit = (e) => {
+    e.preventDefault();
+    if (!editingCat) return;
+    updateCategory(editingCat.id, editingCat);
+    setEditingCat(null);
+  };
+
+  // Handlers for Product CRUD
+  const handleCreateProductSubmit = (e) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.price) {
       showToast('Please fill out Product Name and Price');
       return;
     }
-
-    const created = {
-      id: `prod_${Date.now()}`,
+    addProduct({
       name: newProduct.name,
       tagline: newProduct.tagline || 'High-performance retail product',
       price: Number(newProduct.price),
+      originalPrice: newProduct.originalPrice ? Number(newProduct.originalPrice) : Number(newProduct.price) * 1.2,
+      stock: Number(newProduct.stock) || 25,
       category: newProduct.category,
-      rating: 4.8,
-      isFeatured: true,
-      isNew: true,
-      description: newProduct.description || 'Engineered by SWITCHES for peak performance.',
-      specs: { Brand: 'SWITCHES', Warranty: '2-Year Official Guarantee' },
-      colors: ['Default'],
-      sizes: ['Standard'],
+      description: newProduct.description || 'Engineered by SWITCHES.',
       images: newProduct.images
-    };
-
-    setProducts([created, ...products]);
-    showToast(`Product "${created.name}" created successfully!`);
+    });
     setNewProduct({
-      name: '',
-      tagline: '',
-      price: '',
-      category: 'Tech',
-      description: '',
+      name: '', tagline: '', price: '', originalPrice: '', stock: 25, category: 'Tech', description: '',
       images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80']
     });
   };
 
-  const handleDeleteProduct = (id) => {
-    setProducts(products.filter(p => p.id !== id));
-    showToast('Product removed from catalog');
+  const handleSaveProductEdit = (e) => {
+    e.preventDefault();
+    if (!editingProduct) return;
+    updateProduct(editingProduct.id, {
+      name: editingProduct.name,
+      tagline: editingProduct.tagline,
+      price: Number(editingProduct.price),
+      stock: Number(editingProduct.stock),
+      category: editingProduct.category,
+      description: editingProduct.description
+    });
+    setEditingProduct(null);
   };
 
-  const handleAddVendor = (e) => {
+  // Handlers for Banner CRUD
+  const handleAddBannerSubmit = (e) => {
     e.preventDefault();
-    if (!newVendor.name || !newVendor.store) {
-      showToast('Please fill out Vendor Name and Store Name');
+    if (!newBanner.title) {
+      showToast('Please enter banner title');
       return;
     }
-
-    const createdVendor = {
-      id: `v_${Date.now()}`,
-      name: newVendor.name,
-      store: newVendor.store,
-      commission: Number(newVendor.commission) || 10,
-      totalSales: 0,
-      pendingPayout: 0,
-      status: 'Active'
-    };
-
-    setVendors([...vendors, createdVendor]);
-    showToast(`Merchant "${createdVendor.store}" onboarded successfully!`);
-    setIsVendorModalOpen(false);
-    setNewVendor({ name: '', store: '', commission: 10 });
+    addBanner(newBanner);
+    setIsBannerModalOpen(false);
+    setNewBanner({ title: '', subtitle: '', ctaText: 'Shop Best Sellers', imageUrl: '', tag: 'PROMOTION', category: 'Tech' });
   };
 
-  const handleDisbursePayout = (vendorId) => {
-    setVendors(vendors.map(v => v.id === vendorId ? { ...v, pendingPayout: 0 } : v));
-    showToast('Vendor payout disbursed successfully!');
+  const handleSaveBannerEdit = (e) => {
+    e.preventDefault();
+    if (!editingBanner) return;
+    updateBanner(editingBanner.id, editingBanner);
+    setEditingBanner(null);
   };
 
-  const totalRevenue = orders.reduce((sum, o) => sum + o.totalAmount, 34700);
+  // Filtered Products
+  const filteredProducts = products.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase());
+    const matchesCat = categoryFilter === 'All' || p.category === categoryFilter;
+    return matchesSearch && matchesCat;
+  });
+
+  // Filtered Orders
+  const filteredOrders = orders.filter(o => 
+    o.id.toLowerCase().includes(orderSearch.toLowerCase()) || 
+    (o.shippingAddress?.fullName || '').toLowerCase().includes(orderSearch.toLowerCase())
+  );
+
+  // Filtered Customers
+  const filteredCustomers = usersList.filter(u => 
+    u.name.toLowerCase().includes(customerSearch.toLowerCase()) || 
+    u.email.toLowerCase().includes(customerSearch.toLowerCase())
+  );
+
+  const totalRevenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 34700);
+  const lowStockProducts = products.filter(p => (p.stock || 0) <= 15);
+
+  // Sidebar Items Definition (8 Modules)
+  const sidebarNavItems = [
+    { id: 'overview', label: '1. Overview', icon: BarChart3 },
+    { id: 'categories', label: '2. Category Management', icon: Layers, count: categoriesList.length },
+    { id: 'products', label: '3. Product Management', icon: Package, count: products.length },
+    { id: 'inventory', label: '4. Inventory Management', icon: AlertTriangle, count: lowStockProducts.length },
+    { id: 'orders', label: '5. Orders', icon: ShoppingBag, count: orders.length },
+    { id: 'payments', label: '6. Payment History', icon: CreditCard, count: payments.length },
+    { id: 'customers', label: '7. Customers', icon: Users, count: usersList.length },
+    { id: 'banners', label: '8. Banners', icon: Image, count: banners.length }
+  ];
 
   return (
-    <div className="animate-fade-in" style={{ paddingTop: '0.75rem', paddingBottom: '4rem', width: '100%' }}>
+    <div style={{ display: 'flex', minHeight: '100vh', width: '100vw', maxWidth: '100%', background: 'var(--bg-primary)', color: 'var(--text-main)', overflowX: 'hidden' }}>
       
-      {/* Back Button */}
-      <div style={{ marginBottom: '1rem' }}>
-        <button 
-          onClick={() => setCurrentPage('home')} 
-          className="btn btn-secondary"
-          style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minHeight: '34px' }}
-        >
-          <ArrowLeft size={15} /> Back
-        </button>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.65rem' }}>
+      {/* 1. LEFT ADMIN SIDEBAR */}
+      <aside className={`admin-sidebar ${isMobileSidebarOpen ? 'sidebar-open' : ''}`} style={{
+        width: '270px',
+        minWidth: '270px',
+        background: 'var(--bg-secondary)',
+        borderRight: '1px solid var(--border-light)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '1.15rem 1rem',
+        position: 'sticky',
+        top: 0,
+        height: '100vh',
+        zIndex: 2500,
+        boxShadow: 'var(--shadow-md)'
+      }}>
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <Shield size={20} color="hsl(var(--hue-primary), 85%, 50%)" />
-            <h1 style={{ fontSize: 'clamp(1.3rem, 4vw, 1.7rem)', fontWeight: 800 }}>SWITCHES Admin Command</h1>
-          </div>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Manage products, multi-vendor merchants, analytics & store orders</p>
-        </div>
-
-        <div style={{ display: 'flex', gap: '0.4rem', flexWrap: 'wrap' }}>
-          <button 
-            onClick={() => setActiveTab('products')} 
-            className="btn" 
-            style={{
-              padding: '0.4rem 0.75rem',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              background: activeTab === 'products' ? 'var(--grad-primary)' : 'var(--bg-secondary)',
-              color: activeTab === 'products' ? '#fff' : 'var(--text-main)'
-            }}
-          >
-            <Package size={15} /> Products ({products.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('analytics')} 
-            className="btn" 
-            style={{
-              padding: '0.4rem 0.75rem',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              background: activeTab === 'analytics' ? 'var(--grad-primary)' : 'var(--bg-secondary)',
-              color: activeTab === 'analytics' ? '#fff' : 'var(--text-main)'
-            }}
-          >
-            <BarChart3 size={15} /> Analytics
-          </button>
-          <button 
-            onClick={() => setActiveTab('vendors')} 
-            className="btn" 
-            style={{
-              padding: '0.4rem 0.75rem',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              background: activeTab === 'vendors' ? 'var(--grad-primary)' : 'var(--bg-secondary)',
-              color: activeTab === 'vendors' ? '#fff' : 'var(--text-main)'
-            }}
-          >
-            <Building2 size={15} /> Vendors ({vendors.length})
-          </button>
-          <button 
-            onClick={() => setActiveTab('orders')} 
-            className="btn" 
-            style={{
-              padding: '0.4rem 0.75rem',
-              fontSize: '0.8rem',
-              fontWeight: 700,
-              background: activeTab === 'orders' ? 'var(--grad-primary)' : 'var(--bg-secondary)',
-              color: activeTab === 'orders' ? '#fff' : 'var(--text-main)'
-            }}
-          >
-            <ShoppingBag size={15} /> Orders ({orders.length})
-          </button>
-        </div>
-      </div>
-
-      {/* PRODUCTS TAB */}
-      {activeTab === 'products' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* Create Product Form */}
-          <div className="card" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
-              <Plus size={16} color="hsl(var(--hue-primary), 85%, 50%)" /> Add New Product to Store Catalog
-            </h3>
-            
-            <form onSubmit={handleCreateProduct} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
+          {/* Brand Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem', paddingBottom: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+              <img src="/logo.png" alt="SWITCHES Logo" style={{ height: '2.1rem', width: 'auto', filter: 'drop-shadow(0 2px 8px rgba(186,12,47,0.4))' }} />
               <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Product Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. SWITCHES Pro Earbuds"
-                  value={newProduct.name}
-                  onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
-                />
+                <span style={{ fontSize: '1.05rem', fontWeight: 900, letterSpacing: '0.5px', display: 'block', lineHeight: 1 }}>
+                  SWITCHES<span style={{ color: '#ba0c2f' }}>.</span>
+                </span>
+                <span style={{ fontSize: '0.6rem', fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)', letterSpacing: '0.8px' }}>
+                  ADMIN COMMAND
+                </span>
               </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Price ($)</label>
-                <input
-                  type="number"
-                  placeholder="149.99"
-                  value={newProduct.price}
-                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category</label>
-                <select
-                  value={newProduct.category}
-                  onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })}
-                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
-                >
-                  <option value="Tech">Tech</option>
-                  <option value="Apparel">Apparel</option>
-                  <option value="Home">Home</option>
-                  <option value="Accessories">Accessories</option>
-                </select>
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Tagline</label>
-                <input
-                  type="text"
-                  placeholder="e.g. High-fidelity ANC wireless audio"
-                  value={newProduct.tagline}
-                  onChange={(e) => setNewProduct({ ...newProduct, tagline: e.target.value })}
-                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}
-                />
-              </div>
-
-              <div style={{ gridColumn: '1 / -1' }}>
-                <button type="submit" className="btn btn-primary" style={{ padding: '0.65rem 1.25rem', fontSize: '0.85rem' }}>
-                  <Plus size={15} /> Publish Product to Catalog
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Product List */}
-          <div className="card" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.85rem' }}>Inventory List ({products.length})</h3>
-            
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-              {products.map((p) => (
-                <div key={p.id} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                    <img src={p.images[0]} alt={p.name} style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
-                    <div>
-                      <h4 style={{ fontSize: '0.88rem', fontWeight: 700 }}>{p.name}</h4>
-                      <span className="badge badge-primary" style={{ fontSize: '0.6rem' }}>{p.category}</span>
-                    </div>
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ fontSize: '0.95rem', fontWeight: 800 }}>${p.price}</span>
-                    <button onClick={() => handleDeleteProduct(p.id)} className="btn btn-icon" style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}>
-                      <Trash2 size={14} color="#ff4757" />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* ANALYTICS & CHARTS TAB */}
-      {activeTab === 'analytics' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          {/* KPI Metrics */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
-            <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Gross Store Revenue</span>
-              <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${totalRevenue.toLocaleString()}</span>
-              <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>+24.5% vs last month</span>
             </div>
 
-            <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Conversion Rate</span>
-              <span style={{ fontSize: '1.6rem', fontWeight: 900 }}>3.42%</span>
-              <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>+0.8% SLA Target</span>
-            </div>
-
-            <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Avg Order Value (AOV)</span>
-              <span style={{ fontSize: '1.6rem', fontWeight: 900 }}>$148.50</span>
-              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Based on {orders.length + 142} orders</span>
-            </div>
-          </div>
-
-          {/* Revenue Trend Visual Chart */}
-          <div className="card" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Revenue Growth Trend (2026)</h3>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '180px', paddingTop: '1rem', paddingBottom: '0.5rem', borderBottom: '1px solid var(--border-light)' }}>
-              {[
-                { month: 'Apr', val: 42, label: '$4.2k' },
-                { month: 'May', val: 68, label: '$6.8k' },
-                { month: 'Jun', val: 95, label: '$9.5k' },
-                { month: 'Jul', val: 142, label: '$14.2k' }
-              ].map(item => (
-                <div key={item.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
-                  <span style={{ fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>{item.label}</span>
-                  <div style={{ width: '80%', height: `${item.val}%`, background: 'var(--grad-primary)', borderRadius: 'var(--radius-sm)' }} />
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>{item.month}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Category Distribution Chart */}
-          <div className="card" style={{ padding: '1.25rem' }}>
-            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Category Sales Distribution</h3>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-              {[
-                { cat: 'Tech Hardware & Audio', pct: 54, color: 'hsl(var(--hue-primary), 85%, 50%)' },
-                { cat: 'Apparel & Activewear', pct: 24, color: '#3b82f6' },
-                { cat: 'Smart Home Ambient Lighting', pct: 14, color: '#f59e0b' },
-                { cat: 'Accessories', pct: 8, color: '#10b981' }
-              ].map(c => (
-                <div key={c.cat} style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', fontWeight: 700 }}>
-                    <span>{c.cat}</span>
-                    <span>{c.pct}%</span>
-                  </div>
-                  <div style={{ width: '100%', height: '8px', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-full)', overflow: 'hidden' }}>
-                    <div style={{ width: `${c.pct}%`, height: '100%', background: c.color }} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </div>
-      )}
-
-      {/* MULTI-VENDOR / MERCHANTS TAB */}
-      {activeTab === 'vendors' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-          
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <div>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Multi-Vendor Merchants ({vendors.length})</h3>
-              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Platform commission fees and merchant payout management</p>
-            </div>
-
-            <button 
-              onClick={() => setIsVendorModalOpen(true)}
-              className="btn btn-primary"
-              style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}
-            >
-              <Plus size={14} /> Onboard New Merchant
+            <button onClick={() => setIsMobileSidebarOpen(false)} className="btn btn-icon mobile-sidebar-close" style={{ display: 'none' }}>
+              <X size={16} />
             </button>
           </div>
 
+          {/* Sidebar Nav Items (8 Modules) */}
+          <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+            <span style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.8px', marginBottom: '0.15rem', paddingLeft: '0.4rem' }}>
+              ADMIN MODULES
+            </span>
+            {sidebarNavItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeTab === item.id;
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => {
+                    setActiveTab(item.id);
+                    setIsMobileSidebarOpen(false);
+                  }}
+                  className="btn"
+                  style={{
+                    width: '100%',
+                    padding: '0.55rem 0.75rem',
+                    borderRadius: 'var(--radius-md)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontSize: '0.82rem',
+                    fontWeight: isActive ? 800 : 600,
+                    background: isActive ? 'var(--grad-primary)' : 'transparent',
+                    color: isActive ? '#ffffff' : 'var(--text-main)',
+                    border: 'none',
+                    textAlign: 'left',
+                    transition: 'all 0.15s ease'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.55rem' }}>
+                    <Icon size={16} color={isActive ? '#ffffff' : 'hsl(var(--hue-primary), 85%, 50%)'} />
+                    <span>{item.label}</span>
+                  </div>
+                  {item.count !== undefined && (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 800, background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--bg-glass-heavy)', color: isActive ? '#fff' : 'var(--text-muted)', padding: '0.1rem 0.4rem', borderRadius: 'var(--radius-full)' }}>
+                      {item.count}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem', paddingTop: '0.85rem', borderTop: '1px solid var(--border-light)' }}>
+          <button onClick={() => setCurrentPage('home')} className="btn btn-secondary" style={{ width: '100%', padding: '0.5rem 0.75rem', fontSize: '0.78rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+            <ArrowLeft size={14} /> Exit to Storefront
+          </button>
+          <button onClick={handleLogout} className="btn btn-secondary" style={{ width: '100%', padding: '0.5rem 0.75rem', fontSize: '0.78rem', color: '#ff4757', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.4rem' }}>
+            <LogOut size={14} /> Log Out
+          </button>
+        </div>
+      </aside>
+
+      {/* 2. MAIN WORKSPACE CONTENT */}
+      <main style={{ flex: 1, padding: '1.25rem clamp(1rem, 3vw, 2rem)', minWidth: 0, overflowY: 'auto' }}>
+        
+        {/* Workspace Top Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem', background: 'var(--bg-secondary)', padding: '0.85rem 1.25rem', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-light)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <button onClick={() => setIsMobileSidebarOpen(true)} className="btn btn-secondary mobile-sidebar-toggle" style={{ display: 'none', padding: '0.4rem', minHeight: '36px' }}>
+              <Menu size={18} />
+            </button>
+            <div>
+              <h1 style={{ fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', fontWeight: 900, margin: 0 }}>
+                {activeTab === 'overview' && '📊 Dashboard Overview'}
+                {activeTab === 'categories' && '🏷️ Category Management'}
+                {activeTab === 'products' && '📦 Product Management'}
+                {activeTab === 'inventory' && '📋 Inventory & Stock Control'}
+                {activeTab === 'orders' && '🛍️ Orders Fulfillment'}
+                {activeTab === 'payments' && '💳 Payment Transactions'}
+                {activeTab === 'customers' && '👥 Customer Database & Roles'}
+                {activeTab === 'banners' && '🖼️ Hero Banners & Marketing'}
+              </h1>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                Real-time dynamic administrative control panel
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+            <div style={{ fontSize: '0.78rem', background: 'var(--bg-card)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
+              <span style={{ color: 'var(--text-muted)' }}>Gross Revenue: </span>
+              <strong style={{ color: 'hsl(var(--hue-primary), 85%, 50%)', fontWeight: 900 }}>${totalRevenue.toLocaleString()}</strong>
+            </div>
+
+            {lowStockProducts.length > 0 && (
+              <div style={{ fontSize: '0.75rem', background: 'rgba(255,71,87,0.12)', color: '#ff4757', padding: '0.35rem 0.65rem', borderRadius: 'var(--radius-md)', border: '1px solid rgba(255,71,87,0.3)', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <AlertTriangle size={13} /> {lowStockProducts.length} Low Stock
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* 1. OVERVIEW MODULE */}
+        {activeTab === 'overview' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            {/* KPI Cards */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
+              <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Total Store Revenue</span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${totalRevenue.toLocaleString()}</span>
+                <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>+24.5% SLA Performance</span>
+              </div>
+              <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Total Products</span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 900 }}>{products.length} Items</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Across {categoriesList.length} Categories</span>
+              </div>
+              <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Customer Orders</span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 900 }}>{orders.length} Orders</span>
+                <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>98.2% Fulfillment Rate</span>
+              </div>
+              <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Low Stock Warnings</span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: lowStockProducts.length > 0 ? '#ff4757' : 'var(--text-main)' }}>{lowStockProducts.length} Items</span>
+                <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Stock level ≤ 15 units</span>
+              </div>
+            </div>
+
+            {/* Revenue Trend Chart */}
+            <div className="card" style={{ padding: '1.25rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Revenue Growth Trend (2026 Q2)</h3>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '160px', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>
+                {[
+                  { month: 'Apr', val: 42, label: '$4.2k' },
+                  { month: 'May', val: 68, label: '$6.8k' },
+                  { month: 'Jun', val: 95, label: '$9.5k' },
+                  { month: 'Jul', val: 142, label: '$14.2k' }
+                ].map(item => (
+                  <div key={item.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
+                    <span style={{ fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>{item.label}</span>
+                    <div style={{ width: '80%', height: `${item.val}%`, background: 'var(--grad-primary)', borderRadius: 'var(--radius-sm)' }} />
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>{item.month}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2. CATEGORY MANAGEMENT MODULE (CRUD) */}
+        {activeTab === 'categories' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Store Categories ({categoriesList.length})</h3>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Manage catalog categories, colors, and iconography</p>
+              </div>
+              <button onClick={() => setIsCategoryModalOpen(true)} className="btn btn-primary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}>
+                <Plus size={14} /> Add New Category
+              </button>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+              {categoriesList.map(cat => {
+                const prodCount = products.filter(p => p.category === cat.name).length;
+                return (
+                  <div key={cat.id} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                        <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-md)', background: `${cat.color}22`, color: cat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+                          <Tag size={18} />
+                        </div>
+                        <div>
+                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0 }}>{cat.name}</h4>
+                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>/{cat.slug}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.65rem', borderTop: '1px solid var(--border-light)' }}>
+                      <span className="badge badge-primary" style={{ fontSize: '0.65rem' }}>{prodCount} Products</span>
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button onClick={() => setEditingCat(cat)} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
+                          <Edit3 size={12} />
+                        </button>
+                        <button onClick={() => deleteCategory(cat.id)} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: '#ff4757' }}>
+                          <Trash2 size={12} />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 3. PRODUCT MANAGEMENT MODULE (CRUD) */}
+        {activeTab === 'products' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div className="card" style={{ padding: '1.25rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.85rem', display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+                <Plus size={16} color="hsl(var(--hue-primary), 85%, 50%)" /> Add New Product to Catalog (CREATE)
+              </h3>
+              <form onSubmit={handleCreateProductSubmit} style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.85rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Product Title *</label>
+                  <input type="text" placeholder="e.g. SWITCHES Pro Wireless" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Price ($) *</label>
+                  <input type="number" step="0.01" placeholder="149.99" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Stock Quantity</label>
+                  <input type="number" placeholder="35" value={newProduct.stock} onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category</label>
+                  <select value={newProduct.category} onChange={(e) => setNewProduct({ ...newProduct, category: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }}>
+                    {categoriesList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Tagline</label>
+                  <input type="text" placeholder="e.g. Studio-grade noise cancelling" value={newProduct.tagline} onChange={(e) => setNewProduct({ ...newProduct, tagline: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <button type="submit" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}>
+                    <Plus size={15} /> Publish Product to Catalog
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            <div className="card" style={{ padding: '1.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+                <div>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Store Inventory ({filteredProducts.length})</h3>
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Search, edit stock/pricing, or delete products</p>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <input type="text" placeholder="Search product..." value={productSearch} onChange={(e) => setProductSearch(e.target.value)} style={{ padding: '0.45rem 0.65rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.78rem' }} />
+                  <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} style={{ padding: '0.45rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.78rem' }}>
+                    <option value="All">All Categories</option>
+                    {categoriesList.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                {filteredProducts.map(p => (
+                  <div key={p.id} style={{ padding: '0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <img src={p.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80'} alt={p.name} style={{ width: '44px', height: '44px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
+                      <div>
+                        <h4 style={{ fontSize: '0.88rem', fontWeight: 800, margin: 0 }}>{p.name}</h4>
+                        <span className="badge badge-primary" style={{ fontSize: '0.6rem', marginTop: '0.2rem' }}>{p.category}</span>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${p.price}</span>
+                      <div style={{ display: 'flex', gap: '0.35rem' }}>
+                        <button onClick={() => setEditingProduct(p)} className="btn btn-secondary" style={{ padding: '0.3rem 0.55rem', fontSize: '0.75rem' }}><Edit3 size={13} /> Edit</button>
+                        <button onClick={() => deleteProduct(p.id)} className="btn btn-secondary" style={{ padding: '0.3rem 0.55rem', fontSize: '0.75rem', color: '#ff4757' }}><Trash2 size={13} /> Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 4. INVENTORY MANAGEMENT MODULE (CRUD & STOCK ADJUSTMENTS) */}
+        {activeTab === 'inventory' && (
           <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Inventory & Stock Control ({products.length})</h3>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Adjust real-time stock levels, resolve low stock alerts, and trigger reorders</p>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {products.map(p => {
+                const isLow = (p.stock || 0) <= 15;
+                const isOut = (p.stock || 0) === 0;
+                return (
+                  <div key={p.id} style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <img src={p.images?.[0]} alt={p.name} style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-sm)', objectFit: 'cover' }} />
+                      <div>
+                        <h4 style={{ fontSize: '0.88rem', fontWeight: 800, margin: 0 }}>{p.name}</h4>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.2rem' }}>
+                          <span className="badge badge-primary" style={{ fontSize: '0.6rem' }}>{p.category}</span>
+                          <span style={{ fontSize: '0.72rem', fontWeight: 800, color: isOut ? '#ff4757' : (isLow ? '#f59e0b' : '#10b981') }}>
+                            {isOut ? '⚠️ Out of Stock' : (isLow ? `⚠️ Low Stock: ${p.stock}` : `In Stock: ${p.stock}`)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <button onClick={() => adjustStock(p.id, -5)} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>-5</button>
+                      <input type="number" value={p.stock} onChange={(e) => updateStock(p.id, e.target.value)} style={{ width: '64px', padding: '0.35rem', textAlign: 'center', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-active)', background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.85rem', fontWeight: 800 }} />
+                      <button onClick={() => adjustStock(p.id, 5)} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem' }}>+5</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* 5. ORDERS MODULE (CRUD) */}
+        {activeTab === 'orders' && (
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Customer Orders Fulfillment ({orders.length})</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Update status, view shipping info, or cancel orders</p>
+              </div>
+              <input type="text" placeholder="Search order ID..." value={orderSearch} onChange={(e) => setOrderSearch(e.target.value)} style={{ padding: '0.45rem 0.65rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.78rem' }} />
+            </div>
+
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              {vendors.map(v => (
-                <div key={v.id} style={{ padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
-                  <div>
-                    <h4 style={{ fontSize: '0.95rem', fontWeight: 800 }}>{v.store}</h4>
-                    <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Vendor: {v.name} | Commission Rate: {v.commission}%</span>
+              {filteredOrders.map(o => (
+                <div key={o.id} style={{ padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 900 }}>{o.id}</span>
+                      <span className="badge badge-primary" style={{ fontSize: '0.68rem' }}>{o.status.toUpperCase()}</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                      <select value={o.status} onChange={(e) => updateOrderStatus(o.id, e.target.value)} style={{ padding: '0.35rem 0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-active)', background: 'var(--bg-glass-heavy)', color: 'var(--text-main)', fontSize: '0.78rem', fontWeight: 700 }}>
+                        <option value="processing">Processing</option>
+                        <option value="shipped">Shipped</option>
+                        <option value="delivered">Delivered</option>
+                        <option value="cancelled">Cancelled</option>
+                      </select>
+                      <button onClick={() => deleteOrder(o.id)} className="btn btn-icon" style={{ width: '32px', height: '32px' }}><Trash2 size={14} color="#ff4757" /></button>
+                    </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '1.25rem' }}>
-                    <div>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Sales</span>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 800 }}>${v.totalSales.toLocaleString()}</span>
-                    </div>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.4rem', borderTop: '1px solid var(--border-light)', paddingTop: '0.5rem' }}>
+                    <div><strong>Customer:</strong> {o.shippingAddress?.fullName || 'Alex Mercer'}</div>
+                    <div><strong>Total Amount:</strong> <span style={{ color: 'var(--text-main)', fontWeight: 800 }}>${o.totalAmount}</span></div>
+                    <div><strong>Payment Method:</strong> {(o.paymentMethod || 'card').toUpperCase()}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
-                    <div>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Pending Payout</span>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
-                        ${v.pendingPayout.toLocaleString()}
-                      </span>
-                    </div>
+        {/* 6. PAYMENT HISTORY MODULE (CRUD) */}
+        {activeTab === 'payments' && (
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ marginBottom: '1rem' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Payment Transactions ({payments.length})</h3>
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Financial transaction logs and payment status management</p>
+            </div>
 
-                    <button 
-                      onClick={() => handleDisbursePayout(v.id)}
-                      disabled={v.pendingPayout === 0}
-                      className="btn btn-primary"
-                      style={{ padding: '0.4rem 0.75rem', fontSize: '0.75rem', opacity: v.pendingPayout === 0 ? 0.5 : 1 }}
-                    >
-                      {v.pendingPayout === 0 ? 'Disbursed' : 'Disburse Payout'}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {payments.map(pay => (
+                <div key={pay.id} style={{ padding: '0.85rem 1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <span style={{ fontSize: '0.9rem', fontWeight: 900 }}>{pay.id}</span>
+                      <span className="badge badge-primary" style={{ fontSize: '0.6rem' }}>{pay.paymentMethod.toUpperCase()}</span>
+                    </div>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'block', marginTop: '0.2rem' }}>
+                      Customer: {pay.customerName} | Order: {pay.orderId}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                    <span style={{ fontSize: '1rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${pay.amount}</span>
+                    <select value={pay.status} onChange={(e) => updatePaymentStatus(pay.id, e.target.value)} style={{ padding: '0.35rem 0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.78rem', fontWeight: 700 }}>
+                      <option value="Paid">Paid</option>
+                      <option value="Pending">Pending</option>
+                      <option value="Refunded">Refunded</option>
+                    </select>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 7. CUSTOMERS MODULE (CRUD) */}
+        {activeTab === 'customers' && (
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Registered Customers ({usersList.length})</h3>
+                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Customer accounts database and administrative role permissions</p>
+              </div>
+              <input type="text" placeholder="Search customer..." value={customerSearch} onChange={(e) => setCustomerSearch(e.target.value)} style={{ padding: '0.45rem 0.65rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.78rem' }} />
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              {filteredCustomers.map(u => (
+                <div key={u.id} style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                    <img src={u.avatar} alt={u.name} style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-full)', objectFit: 'cover' }} />
+                    <div>
+                      <h4 style={{ fontSize: '0.88rem', fontWeight: 800, margin: 0 }}>{u.name}</h4>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.email}</span>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <span className="badge badge-primary" style={{ fontSize: '0.65rem', background: u.role === 'admin' ? 'var(--grad-primary)' : 'var(--bg-glass-heavy)' }}>
+                      {u.role.toUpperCase()}
+                    </span>
+                    <button onClick={() => updateUserRole(u.id, u.role === 'admin' ? 'customer' : 'admin')} className="btn btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}>
+                      <RefreshCw size={12} /> Make {u.role === 'admin' ? 'Customer' : 'Admin'}
+                    </button>
+                    <button onClick={() => deleteUser(u.id)} className="btn btn-secondary" style={{ padding: '0.35rem 0.55rem', fontSize: '0.75rem', color: '#ff4757' }}>
+                      <Trash2 size={13} />
                     </button>
                   </div>
                 </div>
               ))}
             </div>
           </div>
+        )}
 
-        </div>
-      )}
-
-      {/* ORDERS TAB */}
-      {activeTab === 'orders' && (
-        <div className="card" style={{ padding: '1.25rem' }}>
-          <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.85rem' }}>Customer Orders ({orders.length})</h3>
-          {orders.map((o) => (
-            <div key={o.id} style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', marginBottom: '0.65rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.85rem', fontWeight: 800, marginBottom: '0.35rem' }}>
-                <span>Order ID: {o.id}</span>
-                <span className="badge badge-primary">{o.status}</span>
+        {/* 8. BANNERS MODULE (CRUD) */}
+        {activeTab === 'banners' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
+              <div>
+                <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Marketing Banners ({banners.length})</h3>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Manage promotional hero banners displayed on the storefront</p>
               </div>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                Customer: {o.shippingAddress?.fullName || 'Customer'} | Total: ${o.totalAmount}
-              </div>
+              <button onClick={() => setIsBannerModalOpen(true)} className="btn btn-primary" style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem' }}>
+                <Plus size={14} /> Create New Banner
+              </button>
             </div>
-          ))}
-        </div>
-      )}
 
-      {/* Onboard Vendor Modal */}
-      {isVendorModalOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0,0,0,0.65)',
-          backdropFilter: 'blur(8px)',
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem'
-        }}>
-          <div className="card" style={{ maxWidth: '420px', width: '100%', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {banners.map(b => (
+                <div key={b.id} className="card" style={{ padding: '1rem', display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+                  <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flex: 1, minWidth: '240px' }}>
+                    <img src={b.imageUrl} alt={b.title} style={{ width: '90px', height: '65px', borderRadius: 'var(--radius-md)', objectFit: 'cover' }} />
+                    <div>
+                      <span className="badge badge-accent" style={{ fontSize: '0.6rem', marginBottom: '0.2rem' }}>{b.tag}</span>
+                      <h4 style={{ fontSize: '0.92rem', fontWeight: 800, margin: 0 }}>{b.title}</h4>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0 }}>{b.subtitle}</p>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                    <button onClick={() => toggleBannerActive(b.id)} className={`btn ${b.isActive ? 'btn-primary' : 'btn-secondary'}`} style={{ padding: '0.35rem 0.75rem', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                      {b.isActive ? <Eye size={13} /> : <EyeOff size={13} />} {b.isActive ? 'Active' : 'Inactive'}
+                    </button>
+                    <button onClick={() => setEditingBanner(b)} className="btn btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}><Edit3 size={13} /> Edit</button>
+                    <button onClick={() => deleteBanner(b.id)} className="btn btn-secondary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', color: '#ff4757' }}><Trash2 size={13} /> Delete</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+      </main>
+
+      {/* Category Create Modal */}
+      {isCategoryModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="card" style={{ maxWidth: '400px', width: '100%', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Onboard New Merchant</h3>
-              <button onClick={() => setIsVendorModalOpen(false)} className="btn btn-icon"><X size={16} /></button>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Add Category</h3>
+              <button onClick={() => setIsCategoryModalOpen(false)} className="btn btn-icon"><X size={16} /></button>
             </div>
-
-            <form onSubmit={handleAddVendor} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+            <form onSubmit={handleAddCategorySubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Vendor Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Acme Tech Solutions"
-                  value={newVendor.name}
-                  onChange={(e) => setNewVendor({ ...newVendor, name: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
-                />
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Category Name</label>
+                <input type="text" placeholder="e.g. Gaming Gear" value={newCat.name} onChange={(e) => setNewCat({ ...newCat, name: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
               </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Store Brand Name</label>
-                <input
-                  type="text"
-                  placeholder="e.g. Acme Audio Store"
-                  value={newVendor.store}
-                  onChange={(e) => setNewVendor({ ...newVendor, store: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Platform Commission Rate (%)</label>
-                <input
-                  type="number"
-                  placeholder="10"
-                  value={newVendor.commission}
-                  onChange={(e) => setNewVendor({ ...newVendor, commission: e.target.value })}
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
-                />
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-                <button type="button" onClick={() => setIsVendorModalOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
-                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Onboard Merchant</button>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button type="button" onClick={() => setIsCategoryModalOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Create Category</button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* Edit Product Modal */}
+      {editingProduct && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="card" style={{ maxWidth: '480px', width: '100%', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Edit Product Specs</h3>
+              <button onClick={() => setEditingProduct(null)} className="btn btn-icon"><X size={16} /></button>
+            </div>
+            <form onSubmit={handleSaveProductEdit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Product Name</label>
+                <input type="text" value={editingProduct.name} onChange={(e) => setEditingProduct({ ...editingProduct, name: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Price ($)</label>
+                  <input type="number" step="0.01" value={editingProduct.price} onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+                </div>
+                <div>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Stock Units</label>
+                  <input type="number" value={editingProduct.stock} onChange={(e) => setEditingProduct({ ...editingProduct, stock: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setEditingProduct(null)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Changes</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Banner Create Modal */}
+      {isBannerModalOpen && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', zIndex: 3000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div className="card" style={{ maxWidth: '450px', width: '100%', padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Add Hero Promotional Banner</h3>
+              <button onClick={() => setIsBannerModalOpen(false)} className="btn btn-icon"><X size={16} /></button>
+            </div>
+            <form onSubmit={handleAddBannerSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Banner Title *</label>
+                <input type="text" placeholder="e.g. Summer Tech Extravaganza" value={newBanner.title} onChange={(e) => setNewBanner({ ...newBanner, title: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Subtitle</label>
+                <input type="text" placeholder="e.g. Save up to 40% on all hardware" value={newBanner.subtitle} onChange={(e) => setNewBanner({ ...newBanner, subtitle: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Image URL</label>
+                <input type="text" placeholder="https://images.unsplash.com/..." value={newBanner.imageUrl} onChange={(e) => setNewBanner({ ...newBanner, imageUrl: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <button type="button" onClick={() => setIsBannerModalOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Publish Banner</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Responsive Styles */}
+      <style>{`
+        @media (max-width: 900px) {
+          .admin-sidebar {
+            position: fixed !important;
+            left: -290px;
+            transition: left 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+          }
+          .admin-sidebar.sidebar-open {
+            left: 0 !important;
+          }
+          .mobile-sidebar-toggle, .mobile-sidebar-close {
+            display: flex !important;
+          }
+        }
+      `}</style>
 
     </div>
   );
 };
-

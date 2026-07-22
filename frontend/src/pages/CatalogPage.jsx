@@ -5,6 +5,7 @@ import { Search, Filter, SlidersHorizontal, Star, Heart, ShoppingBag, X, ArrowLe
 export const CatalogPage = () => {
   const { 
     products, 
+    categoriesList,
     searchQuery, 
     setSearchQuery, 
     selectedCategory, 
@@ -21,7 +22,17 @@ export const CatalogPage = () => {
   const [minRating, setMinRating] = useState(0);
   const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
 
-  const categories = ['All', 'Tech', 'Apparel', 'Home', 'Accessories'];
+  // Dynamic Categories Array from Admin & AppContext
+  const categories = useMemo(() => {
+    const list = ['All'];
+    const catNamesFromList = (categoriesList || []).map(c => c.name);
+    const catNamesFromProducts = (products || []).map(p => p.category).filter(Boolean);
+    const combined = Array.from(new Set([...catNamesFromList, ...catNamesFromProducts]));
+    combined.forEach(c => {
+      if (c && !list.includes(c)) list.push(c);
+    });
+    return list;
+  }, [categoriesList, products]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
