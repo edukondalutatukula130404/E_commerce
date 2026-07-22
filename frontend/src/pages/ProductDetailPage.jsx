@@ -309,8 +309,8 @@ export const ProductDetailPage = () => {
 
       </div>
 
-      {/* 1. Customer Reviews & Verification System */}
-      <div style={{ marginTop: '2.5rem', paddingTop: '1.75rem', borderTop: '1px solid var(--border-light)' }}>
+      {/* 1. Customer Reviews & Verification System (Desktop Only) */}
+      <div className="hide-mobile" style={{ marginTop: '2.5rem', paddingTop: '1.75rem', borderTop: '1px solid var(--border-light)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
           <div>
             <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Customer Reviews & Feedback</h3>

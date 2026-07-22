@@ -302,3 +302,9 @@ main.main-content {
 .animate-bounce {
   animation: bounceSmall 2s infinite ease-in-out;
 }
+
+@media (max-width: 767px) {
+  .hide-mobile {
+    display: none !important;
+  }
+}

@@ -373,8 +373,8 @@ export const HomePage = () => {
         })}
       </section>
 
-      {/* 5. Customer Verified Reviews */}
-      <section style={{ width: '100%' }}>
+      {/* 5. Customer Verified Reviews (Desktop Only) */}
+      <section className="hide-mobile" style={{ width: '100%' }}>
         <div style={{ marginBottom: '1rem' }}>
           <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800 }}>Verified Customer Reviews</h2>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>See what real buyers are saying about SWITCHES products.</p>
