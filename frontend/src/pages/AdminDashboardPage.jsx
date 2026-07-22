@@ -44,6 +44,26 @@ export const AdminDashboardPage = () => {
   });
   const [editingProduct, setEditingProduct] = useState(null);
 
+  // Image Upload Handler
+  const handleImageUpload = (e, isEditing = false) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showToast('Image size must be less than 5MB');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        if (isEditing) {
+          setEditingProduct(prev => ({ ...prev, images: [reader.result] }));
+        } else {
+          setNewProduct(prev => ({ ...prev, images: [reader.result] }));
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
   const [newBanner, setNewBanner] = useState({
     title: '', subtitle: '', ctaText: 'Shop Best Sellers', imageUrl: '', tag: 'PROMOTION', category: 'Tech'
@@ -120,7 +140,8 @@ export const AdminDashboardPage = () => {
       price: Number(editingProduct.price),
       stock: Number(editingProduct.stock),
       category: editingProduct.category,
-      description: editingProduct.description
+      description: editingProduct.description,
+      images: editingProduct.images
     });
     setEditingProduct(null);
   };
@@ -440,6 +461,32 @@ export const AdminDashboardPage = () => {
                 <div>
                   <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Tagline</label>
                   <input type="text" placeholder="e.g. Studio-grade noise cancelling" value={newProduct.tagline} onChange={(e) => setNewProduct({ ...newProduct, tagline: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
+                </div>
+                <div style={{ gridColumn: '1 / -1' }}>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Product Image</label>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                    <label htmlFor="new-product-image" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.5rem 0.9rem', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-active)', background: 'var(--bg-secondary)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 700, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
+                      <Image size={15} /> Upload Image
+                    </label>
+                    <input
+                      id="new-product-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, false)}
+                      style={{ display: 'none' }}
+                    />
+                    {newProduct.images?.[0] && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <img
+                          src={newProduct.images[0]}
+                          alt="Preview"
+                          style={{ width: '52px', height: '52px', borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border-light)' }}
+                        />
+                        <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Preview</span>
+                      </div>
+                    )}
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>JPG, PNG, WebP — max 5MB</span>
+                  </div>
                 </div>
                 <div style={{ gridColumn: '1 / -1' }}>
                   <button type="submit" className="btn btn-primary" style={{ padding: '0.6rem 1.2rem', fontSize: '0.85rem' }}>
@@ -850,6 +897,32 @@ export const AdminDashboardPage = () => {
                   <input type="number" value={editingProduct.stock} onChange={(e) => setEditingProduct({ ...editingProduct, stock: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
                 </div>
               </div>
+
+              {/* Image Upload */}
+              <div>
+                <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Product Image</label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <img
+                    src={editingProduct.images?.[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80'}
+                    alt="Current"
+                    style={{ width: '64px', height: '64px', borderRadius: 'var(--radius-md)', objectFit: 'cover', border: '1px solid var(--border-light)' }}
+                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <label htmlFor="edit-product-image" style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', padding: '0.45rem 0.85rem', borderRadius: 'var(--radius-md)', border: '1px dashed var(--border-active)', background: 'var(--bg-secondary)', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
+                      <Image size={14} /> Change Image
+                    </label>
+                    <input
+                      id="edit-product-image"
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => handleImageUpload(e, true)}
+                      style={{ display: 'none' }}
+                    />
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>JPG, PNG, WebP — max 5MB</span>
+                  </div>
+                </div>
+              </div>
+
               <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <button type="button" onClick={() => setEditingProduct(null)} className="btn btn-secondary" style={{ flex: 1 }}>Cancel</button>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>Save Changes</button>
