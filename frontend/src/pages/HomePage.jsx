@@ -374,6 +374,57 @@ export const HomePage = () => {
         })}
       </section>
 
+      {/* Promotional Banner 1: Best Selling Products Deal */}
+      <div className="card" style={{
+        width: '100%',
+        padding: '1.4rem 1.6rem',
+        borderRadius: 'var(--radius-lg)',
+        background: 'linear-gradient(135deg, #ba0c2f 0%, #7a071c 100%)',
+        color: '#ffffff',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        boxShadow: '0 8px 24px rgba(186, 12, 47, 0.25)'
+      }}>
+        <div style={{ maxWidth: '580px' }}>
+          <span style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            padding: '0.25rem 0.6rem',
+            borderRadius: 'var(--radius-full)',
+            fontSize: '0.68rem',
+            fontWeight: 800,
+            letterSpacing: '0.5px',
+            display: 'inline-block',
+            marginBottom: '0.4rem'
+          }}>
+            🔥 LIMITED TIME OFFER — SAVE UP TO 30%
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.15rem, 3vw, 1.45rem)', fontWeight: 900, marginBottom: '0.35rem', color: '#fff' }}>
+            Top-Rated Tech & Ergonomic Hardware Sale
+          </h2>
+          <p style={{ fontSize: '0.82rem', opacity: 0.9, lineHeight: 1.5 }}>
+            Upgrade your daily workflow with studio audio headphones, titanium smartwatches, and hot-swappable keyboards.
+          </p>
+        </div>
+        <button 
+          onClick={() => setCurrentPage('catalog')}
+          className="btn"
+          style={{
+            background: '#ffffff',
+            color: '#ba0c2f',
+            fontWeight: 800,
+            padding: '0.55rem 1.2rem',
+            fontSize: '0.82rem',
+            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
+          }}
+        >
+          Shop Best Sellers
+        </button>
+      </div>
+
       {/* 5. 🔥 Best Selling Products Section */}
       <section style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -444,6 +495,57 @@ export const HomePage = () => {
           ))}
         </div>
       </section>
+
+      {/* Promotional Banner 2: New Season Drops */}
+      <div className="card" style={{
+        width: '100%',
+        padding: '1.4rem 1.6rem',
+        borderRadius: 'var(--radius-lg)',
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+        color: '#ffffff',
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        flexWrap: 'wrap',
+        gap: '1rem',
+        border: '1px solid rgba(255, 255, 255, 0.12)',
+        boxShadow: '0 8px 24px rgba(15, 23, 42, 0.3)'
+      }}>
+        <div style={{ maxWidth: '580px' }}>
+          <span style={{
+            background: 'rgba(186, 12, 47, 0.35)',
+            color: '#ff4757',
+            border: '1px solid rgba(255, 71, 87, 0.4)',
+            padding: '0.25rem 0.6rem',
+            borderRadius: 'var(--radius-full)',
+            fontSize: '0.68rem',
+            fontWeight: 800,
+            letterSpacing: '0.5px',
+            display: 'inline-block',
+            marginBottom: '0.4rem'
+          }}>
+            ✨ NEW 2026 RELEASE DROPS
+          </span>
+          <h2 style={{ fontSize: 'clamp(1.15rem, 3vw, 1.45rem)', fontWeight: 900, marginBottom: '0.35rem', color: '#fff' }}>
+            Next-Generation Smart Lighting & Audio Gear
+          </h2>
+          <p style={{ fontSize: '0.82rem', color: '#94a3b8', lineHeight: 1.5 }}>
+            Be among the first to experience our latest sub-second ANC audio, titanium display watches, and ambient lightbars.
+          </p>
+        </div>
+        <button 
+          onClick={() => setCurrentPage('catalog')}
+          className="btn btn-primary"
+          style={{
+            fontWeight: 800,
+            padding: '0.55rem 1.2rem',
+            fontSize: '0.82rem',
+            borderRadius: 'var(--radius-md)'
+          }}
+        >
+          Discover New Drops
+        </button>
+      </div>
 
       {/* 5.5 ✨ New Arrivals Section */}
       <section style={{ width: '100%' }}>
