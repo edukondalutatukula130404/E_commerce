@@ -363,10 +363,7 @@ export const AppProvider = ({ children }) => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map(p => p.id));
-          const missing = initialProducts.filter(p => !existingIds.has(p.id));
-          const combined = [...parsed, ...missing];
-          return combined.map(p => {
+          return parsed.map(p => {
             if (!p.subCategory) {
               const match = initialProducts.find(init => init.id === p.id);
               if (match && match.subCategory) p.subCategory = match.subCategory;
@@ -476,7 +473,7 @@ export const AppProvider = ({ children }) => {
     try {
       const saved = localStorage.getItem('switches_vendors');
       return saved ? JSON.parse(saved) : [
-        { id: 'v1', name: 'AURA Audio Labs', store: 'Aura Official Store', commission: 10, totalSales: 18400, pendingPayout: 16560, status: 'Active' },
+        { id: 'v1', name: 'SWITCHES Audio Labs', store: 'Switches Official Store', commission: 10, totalSales: 18400, pendingPayout: 16560, status: 'Active' },
         { id: 'v2', name: 'SWITCHES Apparel Ltd', store: 'Switches Wearables', commission: 12, totalSales: 9200, pendingPayout: 8096, status: 'Active' },
         { id: 'v3', name: 'SmartHome Ambient', store: 'Ambient Tech Store', commission: 8, totalSales: 7100, pendingPayout: 6532, status: 'Active' }
       ];
@@ -526,23 +523,33 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('switches_products', JSON.stringify(products));
   }, [products]);
 
-  // Attempt backend API sync on mount
-  useEffect(() => {
+  const fetchProductsAndSync = () => {
     api.getProducts().then(res => {
       if (res && res.data && Array.isArray(res.data)) {
-        setProducts(prev => {
-          const localMap = new Map(prev.map(item => [item.id, item]));
-          res.data.forEach(backendItem => {
-            if (!localMap.has(backendItem.id)) {
-              localMap.set(backendItem.id, backendItem);
-            }
-          });
-          const merged = Array.from(localMap.values());
-          localStorage.setItem('switches_products', JSON.stringify(merged));
-          return merged;
+        const mapped = res.data.map(p => {
+          if (!p.subCategory) {
+            const match = initialProducts.find(init => init.id === p.id);
+            if (match && match.subCategory) p.subCategory = match.subCategory;
+            else if (p.category?.toLowerCase() === 'tech') p.subCategory = 'Headphones & ANC';
+            else if (p.category?.toLowerCase() === 'apparel') p.subCategory = 'Hoodies';
+            else if (p.category?.toLowerCase() === 'home') p.subCategory = 'Ambient Lighting';
+            else if (p.category?.toLowerCase() === 'accessories') p.subCategory = 'Backpacks';
+            else if (p.category?.toLowerCase() === 'switches') p.subCategory = 'Mechanical Switches';
+            else if (p.category?.toLowerCase() === 'electronics') p.subCategory = 'Power Banks';
+            else if (p.category?.toLowerCase() === 'phones') p.subCategory = 'Smartphones';
+            else p.subCategory = 'General';
+          }
+          return p;
         });
+        setProducts(mapped);
       }
     });
+  };
+
+  // Attempt backend API sync on mount and on window focus
+  useEffect(() => {
+    fetchProductsAndSync();
+
     api.getVendors().then(res => {
       if (res && res.data) {
         setVendors(res.data);
@@ -553,6 +560,15 @@ export const AppProvider = ({ children }) => {
         setUsersList(res.data);
       }
     });
+
+    const handleFocus = () => {
+      fetchProductsAndSync();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   const showToast = (text) => {
@@ -629,6 +645,10 @@ export const AppProvider = ({ children }) => {
 
   // Product CRUD
   const addProduct = (prodData) => {
+    const uploadedImages = prodData.images && prodData.images.length > 0
+      ? prodData.images
+      : ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'];
+
     const created = {
       id: `p_${Date.now()}`,
       rating: 5.0,
@@ -638,9 +658,20 @@ export const AppProvider = ({ children }) => {
       colors: prodData.colors || [{ name: 'Default', hex: '#6C5CE7' }],
       sizes: prodData.sizes || ['Standard'],
       features: prodData.features || ['Premium Build', 'Official Warranty'],
-      images: prodData.images && prodData.images.length > 0 ? prodData.images : ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80'],
-      ...prodData
+      ...prodData,
+      images: uploadedImages  // always set images AFTER spread so it's never overwritten
     };
+
+    if (!created.subCategory) {
+      if (created.category?.toLowerCase() === 'tech') created.subCategory = 'Headphones & ANC';
+      else if (created.category?.toLowerCase() === 'apparel') created.subCategory = 'Hoodies';
+      else if (created.category?.toLowerCase() === 'home') created.subCategory = 'Ambient Lighting';
+      else if (created.category?.toLowerCase() === 'accessories') created.subCategory = 'Backpacks';
+      else if (created.category?.toLowerCase() === 'switches') created.subCategory = 'Mechanical Switches';
+      else if (created.category?.toLowerCase() === 'electronics') created.subCategory = 'Power Banks';
+      else if (created.category?.toLowerCase() === 'phones') created.subCategory = 'Smartphones';
+      else created.subCategory = 'General';
+    }
 
     if (prodData.category && prodData.subCategory) {
       setCategoriesList(prev => prev.map(c => {
@@ -944,23 +975,35 @@ export const AppProvider = ({ children }) => {
     localStorage.setItem('switches_banners', JSON.stringify(banners));
   }, [banners]);
 
-  // Sync with API backend
-  useEffect(() => {
+  const fetchCategoriesAndSync = () => {
     api.getCategories().then(res => { 
       if (res && res.data && Array.isArray(res.data)) {
-        setCategoriesList(prev => {
-          const combined = [...res.data];
-          prev.forEach(item => {
-            if (!combined.some(c => c.id === item.id || c.name.toLowerCase() === item.name.toLowerCase())) {
-              combined.push(item);
-            }
-          });
-          return combined;
+        const mapped = res.data.map(c => {
+          if (!c.subCategories || !Array.isArray(c.subCategories) || c.subCategories.length === 0) {
+            const match = defaultCategories.find(def => def.name.toLowerCase() === (c.name || '').toLowerCase());
+            c.subCategories = match ? match.subCategories : [(c.name || 'General') + ' Pro', (c.name || 'General') + ' Lite'];
+          }
+          return c;
         });
+        setCategoriesList(mapped);
       } 
     });
+  };
+
+  // Sync with API backend
+  useEffect(() => {
+    fetchCategoriesAndSync();
     api.getPayments().then(res => { if (res && res.data) setPayments(res.data); });
     api.getBanners().then(res => { if (res && res.data) setBanners(res.data); });
+
+    const handleFocus = () => {
+      fetchCategoriesAndSync();
+    };
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
   }, []);
 
   // Category CRUD
