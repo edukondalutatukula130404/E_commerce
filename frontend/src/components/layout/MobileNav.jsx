@@ -213,7 +213,12 @@ export const MobileNav = () => {
                   </span>
                 )}
               </div>
-              <span style={{ fontSize: '0.68rem', fontWeight: isActive ? 800 : 500 }}>
+              <span style={{ 
+                fontSize: '0.72rem', 
+                fontWeight: isActive ? 900 : 750,
+                color: isActive ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                marginTop: '0.1rem'
+              }}>
                 {item.label}
               </span>
             </button>

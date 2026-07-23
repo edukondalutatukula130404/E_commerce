@@ -399,20 +399,32 @@ export const CartCheckoutPage = () => {
                   />
                 </div>
 
-                <div style={{ display: 'flex', gap: '0.75rem' }}>
-                  <div style={{ flex: 1 }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '0.75rem' }}>
+                  <div>
                     <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>City</label>
                     <input
                       type="text"
+                      placeholder="San Francisco"
                       value={shippingInfo.city}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
                       style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.875rem' }}
                     />
                   </div>
-                  <div style={{ flex: 1 }}>
+                  <div>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>State</label>
+                    <input
+                      type="text"
+                      placeholder="CA"
+                      value={shippingInfo.state || ''}
+                      onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
+                      style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.875rem' }}
+                    />
+                  </div>
+                  <div>
                     <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>Zip Code</label>
                     <input
                       type="text"
+                      placeholder="94107"
                       value={shippingInfo.zip}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, zip: e.target.value })}
                       style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.875rem' }}
