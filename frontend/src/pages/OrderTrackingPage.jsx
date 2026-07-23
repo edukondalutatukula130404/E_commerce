@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Package, Clock, CheckCircle2, Truck, AlertCircle, Radio, Wifi, ArrowLeft } from 'lucide-react';
 
 export const OrderTrackingPage = () => {
-  const { orders, setCurrentPage, showToast } = useApp();
+  const { orders, setCurrentPage, setUserDashboardTab, showToast } = useApp();
   const [wsConnected, setWsConnected] = useState(true);
   const [lastSocketPing, setLastSocketPing] = useState(new Date().toLocaleTimeString());
 
@@ -28,11 +28,14 @@ export const OrderTrackingPage = () => {
       {/* Back Button */}
       <div style={{ marginBottom: '0.85rem' }}>
         <button 
-          onClick={() => setCurrentPage('home')} 
+          onClick={() => {
+            if (typeof setUserDashboardTab === 'function') setUserDashboardTab('menu');
+            setCurrentPage('user-dashboard');
+          }} 
           className="btn btn-secondary"
           style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minHeight: '34px' }}
         >
-          <ArrowLeft size={15} /> Back
+          <ArrowLeft size={15} /> Back to Account Menu
         </button>
       </div>
       

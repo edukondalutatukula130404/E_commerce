@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Heart, ShoppingBag, Trash2, ArrowLeft } from 'lucide-react';
 
 export const WishlistPage = () => {
-  const { wishlist, products, toggleWishlist, addToCart, navigateToProduct, setCurrentPage } = useApp();
+  const { wishlist, products, toggleWishlist, addToCart, navigateToProduct, setCurrentPage, setUserDashboardTab } = useApp();
 
   const savedProducts = products.filter(p => wishlist.includes(p.id));
 
@@ -13,11 +13,14 @@ export const WishlistPage = () => {
       {/* Back Button */}
       <div style={{ marginBottom: '1rem' }}>
         <button 
-          onClick={() => setCurrentPage('home')} 
+          onClick={() => {
+            if (typeof setUserDashboardTab === 'function') setUserDashboardTab('menu');
+            setCurrentPage('user-dashboard');
+          }} 
           className="btn btn-secondary"
           style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minHeight: '34px' }}
         >
-          <ArrowLeft size={15} /> Back
+          <ArrowLeft size={15} /> Back to Account Menu
         </button>
       </div>
 
