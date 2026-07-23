@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
+import { api } from '../services/api';
 import { 
   Shield, Package, ShoppingBag, Plus, Trash2, Edit3, ArrowLeft, LogOut,
   BarChart3, Users, Building2, X, Search, CheckCircle2, AlertTriangle, UserCheck, 
@@ -34,6 +35,10 @@ export const AdminDashboardPage = () => {
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [newCat, setNewCat] = useState({ name: '', slug: '', icon: 'Cpu', color: '#ba0c2f', description: '' });
   const [editingCat, setEditingCat] = useState(null);
+  const [selectedAdminCatId, setSelectedAdminCatId] = useState(null);
+  const [newSubTextMap, setNewSubTextMap] = useState({});
+  const [editingSubIndex, setEditingSubIndex] = useState(null); // { catId, index }
+  const [editingSubText, setEditingSubText] = useState('');
 
   const availableColors = ['#ba0c2f', '#00CEC9', '#6C5CE7', '#FDCB6E', '#E84393', '#10B981', '#0984e3', '#fd79a8'];
   const availableIcons = ['Cpu', 'Shirt', 'HomeIcon', 'Briefcase', 'Tag', 'Sparkles', 'Smartphone', 'Headphones'];
@@ -44,23 +49,70 @@ export const AdminDashboardPage = () => {
   });
   const [editingProduct, setEditingProduct] = useState(null);
 
+  // Image Compression Helper (base64, no backend needed)
+  const compressAndUploadImage = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1000;
+          const MAX_HEIGHT = 1000;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG at 80% quality and use as base64 directly
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+          resolve(compressedBase64);
+        };
+        img.onerror = (err) => reject(err);
+        img.src = event.target.result;
+      };
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(file);
+    });
+  };
+
   // Image Upload Handler
   const handleImageUpload = (e, isEditing = false) => {
     const file = e.target.files[0];
     if (file) {
-      if (file.size > 5 * 1024 * 1024) { // 5MB limit
-        showToast('Image size must be less than 5MB');
+      if (file.size > 5 * 1024 * 1024) {
+        showToast('Image must be under 5MB');
         return;
       }
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (isEditing) {
-          setEditingProduct(prev => ({ ...prev, images: [reader.result] }));
-        } else {
-          setNewProduct(prev => ({ ...prev, images: [reader.result] }));
-        }
-      };
-      reader.readAsDataURL(file);
+      compressAndUploadImage(file)
+        .then(url => {
+          if (isEditing) {
+            setEditingProduct(prev => ({ ...prev, images: [url] }));
+          } else {
+            setNewProduct(prev => ({ ...prev, images: [url] }));
+          }
+          showToast('Image ready!');
+        })
+        .catch(err => {
+          console.error(err);
+          showToast('Failed to process image');
+        });
     }
   };
 
@@ -404,44 +456,208 @@ export const AdminDashboardPage = () => {
               </button>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', width: '100%' }}>
               {categoriesList.map(cat => {
                 const prodCount = products.filter(p => p.category === cat.name).length;
+                const isSelected = selectedAdminCatId === cat.id;
                 return (
-                  <div key={cat.id} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', gap: '0.75rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-md)', background: `${cat.color}22`, color: cat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
-                          <Tag size={18} />
+                  <div 
+                    key={cat.id} 
+                    className="card" 
+                    onClick={() => setSelectedAdminCatId(isSelected ? null : cat.id)}
+                    style={{ 
+                      width: '100%',
+                      padding: '1.25rem', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      gap: '0.85rem',
+                      cursor: 'pointer',
+                      border: isSelected ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
+                      background: isSelected ? 'rgba(186, 12, 47, 0.02)' : 'var(--bg-card)',
+                      boxShadow: isSelected ? 'var(--shadow-md)' : 'var(--shadow-sm)',
+                      transition: 'all 0.2s ease',
+                      height: 'auto'
+                    }}
+                  >
+                    {/* Header Row: Title, Icons, Actions */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                        <div style={{ width: '40px', height: '40px', borderRadius: 'var(--radius-md)', background: `${cat.color}22`, color: cat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800 }}>
+                          <Tag size={20} />
                         </div>
                         <div>
-                          <h4 style={{ fontSize: '0.95rem', fontWeight: 800, margin: 0 }}>{cat.name}</h4>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>/{cat.slug}</span>
+                          <h4 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>{cat.name}</h4>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>/{cat.slug}</span>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} onClick={(e) => e.stopPropagation()}>
+                        <span className="badge badge-primary" style={{ fontSize: '0.72rem', padding: '0.25rem 0.5rem' }}>{prodCount} Products</span>
+                        <div style={{ display: 'flex', gap: '0.35rem' }}>
+                          <button onClick={() => setEditingCat(cat)} className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', minHeight: '32px' }}>
+                            <Edit3 size={14} />
+                          </button>
+                          <button onClick={() => deleteCategory(cat.id)} className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', color: '#ff4757', minHeight: '32px' }}>
+                            <Trash2 size={14} />
+                          </button>
                         </div>
                       </div>
                     </div>
 
-                    {cat.subCategories && cat.subCategories.length > 0 && (
-                      <div style={{ display: 'flex', gap: '0.25rem', flexWrap: 'wrap', margin: '0.2rem 0' }}>
-                        {cat.subCategories.map(sub => (
-                          <span key={sub} style={{ fontSize: '0.62rem', padding: '0.1rem 0.35rem', background: 'var(--bg-secondary)', borderRadius: '4px', border: '1px solid var(--border-light)', color: 'var(--text-muted)' }}>
-                            {sub}
-                          </span>
-                        ))}
+                    {/* Subcategories Management Area - Collapsible */}
+                    {isSelected && (
+                      <div 
+                        style={{ 
+                          marginTop: '0.5rem',
+                          paddingTop: '1rem',
+                          borderTop: '1px solid var(--border-light)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.85rem'
+                        }}
+                        onClick={(e) => e.stopPropagation()} // Prevent closing card when clicking CRUD actions
+                      >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <h5 style={{ fontSize: '0.82rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', margin: 0 }}>
+                            Manage Sub-Categories ({cat.subCategories?.length || 0})
+                          </h5>
+                        </div>
+
+                        {/* Subcategories List */}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                          {cat.subCategories && cat.subCategories.length > 0 ? (
+                            cat.subCategories.map((sub, idx) => {
+                              const isSubEditing = editingSubIndex && editingSubIndex.catId === cat.id && editingSubIndex.index === idx;
+                              return (
+                                <div 
+                                  key={idx} 
+                                  style={{ 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'space-between', 
+                                    padding: '0.45rem 0.75rem', 
+                                    background: 'var(--bg-secondary)', 
+                                    borderRadius: 'var(--radius-sm)', 
+                                    border: '1px solid var(--border-light)',
+                                    gap: '0.5rem'
+                                  }}
+                                >
+                                  {isSubEditing ? (
+                                    <div style={{ display: 'flex', width: '100%', gap: '0.4rem', alignItems: 'center' }}>
+                                      <input 
+                                        type="text" 
+                                        value={editingSubText} 
+                                        onChange={(e) => setEditingSubText(e.target.value)} 
+                                        style={{ 
+                                          flex: 1, 
+                                          padding: '0.25rem 0.45rem', 
+                                          fontSize: '0.8rem', 
+                                          borderRadius: 'var(--radius-sm)', 
+                                          border: '1px solid var(--border-active)',
+                                          background: 'var(--bg-card)',
+                                          color: 'var(--text-main)'
+                                        }} 
+                                        autoFocus
+                                      />
+                                      <button 
+                                        onClick={() => {
+                                          const updatedSubs = [...cat.subCategories];
+                                          updatedSubs[idx] = editingSubText.trim();
+                                          updateCategory(cat.id, { ...cat, subCategories: updatedSubs });
+                                          setEditingSubIndex(null);
+                                        }}
+                                        className="btn btn-secondary" 
+                                        style={{ padding: '0.25rem', minWidth: '28px', minHeight: '28px' }}
+                                      >
+                                        <Check size={14} color="#10B981" />
+                                      </button>
+                                      <button 
+                                        onClick={() => setEditingSubIndex(null)}
+                                        className="btn btn-secondary" 
+                                        style={{ padding: '0.25rem', minWidth: '28px', minHeight: '28px' }}
+                                      >
+                                        <X size={14} color="#ff4757" />
+                                      </button>
+                                    </div>
+                                  ) : (
+                                    <>
+                                      <span style={{ fontSize: '0.82rem', fontWeight: 600 }}>{sub}</span>
+                                      <div style={{ display: 'flex', gap: '0.25rem' }}>
+                                        <button 
+                                          onClick={() => {
+                                            setEditingSubIndex({ catId: cat.id, index: idx });
+                                            setEditingSubText(sub);
+                                          }}
+                                          className="btn btn-secondary" 
+                                          style={{ padding: '0.25rem', minWidth: '26px', minHeight: '26px' }}
+                                        >
+                                          <Edit3 size={11} />
+                                        </button>
+                                        <button 
+                                          onClick={() => {
+                                            const updatedSubs = cat.subCategories.filter((_, subIdx) => subIdx !== idx);
+                                            updateCategory(cat.id, { ...cat, subCategories: updatedSubs });
+                                          }}
+                                          className="btn btn-secondary" 
+                                          style={{ padding: '0.25rem', minWidth: '26px', minHeight: '26px', color: '#ff4757' }}
+                                        >
+                                          <Trash2 size={11} />
+                                        </button>
+                                      </div>
+                                    </>
+                                  )}
+                                </div>
+                              );
+                            })
+                          ) : (
+                            <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic', margin: '0.2rem 0' }}>
+                              No sub-categories defined. Add one below!
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Add New Sub-category Form */}
+                        <div style={{ display: 'flex', gap: '0.45rem', marginTop: '0.25rem' }}>
+                          <input 
+                            type="text" 
+                            placeholder="Add new sub-category..." 
+                            value={newSubTextMap[cat.id] || ''}
+                            onChange={(e) => setNewSubTextMap(prev => ({ ...prev, [cat.id]: e.target.value }))}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                const val = (newSubTextMap[cat.id] || '').trim();
+                                if (!val) return;
+                                const updatedSubs = [...(cat.subCategories || []), val];
+                                updateCategory(cat.id, { ...cat, subCategories: updatedSubs });
+                                setNewSubTextMap(prev => ({ ...prev, [cat.id]: '' }));
+                              }
+                            }}
+                            style={{ 
+                              flex: 1, 
+                              padding: '0.45rem 0.65rem', 
+                              fontSize: '0.8rem', 
+                              borderRadius: 'var(--radius-md)', 
+                              border: '1px solid var(--border-light)', 
+                              background: 'var(--bg-secondary)', 
+                              color: 'var(--text-main)' 
+                            }}
+                          />
+                          <button 
+                            onClick={() => {
+                              const val = (newSubTextMap[cat.id] || '').trim();
+                              if (!val) return;
+                              const updatedSubs = [...(cat.subCategories || []), val];
+                              updateCategory(cat.id, { ...cat, subCategories: updatedSubs });
+                              setNewSubTextMap(prev => ({ ...prev, [cat.id]: '' }));
+                            }}
+                            className="btn btn-primary"
+                            style={{ padding: '0.45rem 0.85rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem', minHeight: '34px' }}
+                          >
+                            <PlusCircle size={14} /> Add
+                          </button>
+                        </div>
                       </div>
                     )}
-
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.65rem', borderTop: '1px solid var(--border-light)' }}>
-                      <span className="badge badge-primary" style={{ fontSize: '0.65rem' }}>{prodCount} Products</span>
-                      <div style={{ display: 'flex', gap: '0.35rem' }}>
-                        <button onClick={() => setEditingCat(cat)} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem' }}>
-                          <Edit3 size={12} />
-                        </button>
-                        <button onClick={() => deleteCategory(cat.id)} className="btn btn-secondary" style={{ padding: '0.25rem 0.5rem', fontSize: '0.72rem', color: '#ff4757' }}>
-                          <Trash2 size={12} />
-                        </button>
-                      </div>
-                    </div>
                   </div>
                 );
               })}
