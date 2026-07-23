@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   ArrowRight, 
@@ -15,13 +15,23 @@ import {
   MessageSquare, 
   CheckCircle2, 
   ChevronDown, 
-  ChevronUp 
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 export const HomePage = () => {
   const { products, categoriesList, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, setSelectedSubCategory, selectedSubCategory, setIsFilterDrawerOpen, toggleWishlist, wishlist } = useApp();
 
   const [openFaqId, setOpenFaqId] = useState(null);
+  const bestSellersRef = useRef(null);
+
+  const scrollCarousel = (direction) => {
+    if (bestSellersRef.current) {
+      const scrollAmount = 280;
+      bestSellersRef.current.scrollBy({ left: direction === 'left' ? -scrollAmount : scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   const featured = React.useMemo(() => {
     return products.filter(p => {
@@ -396,7 +406,7 @@ export const HomePage = () => {
         </div>
       </div>
 
-      {/* 5. 🔥 Best Selling Products Section */}
+      {/* 5. 🔥 Best Selling Products Carousel */}
       <section style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
@@ -407,62 +417,96 @@ export const HomePage = () => {
               Top-rated hardware & tech accessories chosen by tech enthusiasts worldwide
             </p>
           </div>
-          <button 
-            onClick={() => setCurrentPage('catalog')}
-            className="btn btn-secondary"
-            style={{ padding: '0.35rem 0.85rem', fontSize: '0.8rem' }}
-          >
-            Explore All
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <button
+              onClick={() => scrollCarousel('left')}
+              className="btn btn-secondary"
+              style={{ padding: '0.35rem 0.55rem', minHeight: '36px', minWidth: '36px' }}
+            >
+              <ChevronLeft size={18} />
+            </button>
+            <button
+              onClick={() => scrollCarousel('right')}
+              className="btn btn-secondary"
+              style={{ padding: '0.35rem 0.55rem', minHeight: '36px', minWidth: '36px' }}
+            >
+              <ChevronRight size={18} />
+            </button>
+            <button 
+              onClick={() => setCurrentPage('catalog')}
+              className="btn btn-secondary"
+              style={{ padding: '0.35rem 0.85rem', fontSize: '0.8rem' }}
+            >
+              Explore All
+            </button>
+          </div>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: '1rem',
-          width: '100%'
-        }}>
-          {bestSellers.map((product) => (
-            <div 
-              key={product.id}
-              className="card product-card-hover"
-              style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
-              onClick={() => navigateToProduct(product.id)}
-            >
-              <div>
-                <div className="product-image-container" style={{ height: '220px', borderRadius: 'var(--radius-md)', marginBottom: '0.65rem' }}>
-                  <img 
-                    src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"} 
-                    alt={product.name} 
-                  />
-                  <span className="badge" style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(186, 12, 47, 0.85)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, backdropFilter: 'blur(6px)', padding: '0.25rem 0.6rem', border: '1px solid rgba(255,255,255,0.2)' }}>
-                    🔥 BEST SELLER
-                  </span>
+        {/* Carousel Track */}
+        <div style={{ position: 'relative', width: '100%' }}>
+          <div
+            ref={bestSellersRef}
+            style={{
+              display: 'flex',
+              gap: '1rem',
+              overflowX: 'auto',
+              scrollSnapType: 'x mandatory',
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none',
+              paddingBottom: '0.5rem'
+            }}
+          >
+            {bestSellers.map((product) => (
+              <div
+                key={product.id}
+                className="card product-card-hover"
+                style={{
+                  flex: '0 0 220px',
+                  width: '220px',
+                  scrollSnapAlign: 'start',
+                  padding: '0.85rem',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+                onClick={() => navigateToProduct(product.id)}
+              >
+                <div>
+                  <div className="product-image-container" style={{ height: '200px', borderRadius: 'var(--radius-md)', marginBottom: '0.65rem' }}>
+                    <img
+                      src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"}
+                      alt={product.name}
+                      onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"; }}
+                    />
+                    <span className="badge" style={{ position: 'absolute', top: '10px', left: '10px', background: 'rgba(186, 12, 47, 0.85)', color: '#fff', fontSize: '0.65rem', fontWeight: 800, backdropFilter: 'blur(6px)', padding: '0.25rem 0.6rem', border: '1px solid rgba(255,255,255,0.2)' }}>
+                      🔥 BEST SELLER
+                    </span>
+                  </div>
+                  <h3 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                    {product.name}
+                  </h3>
+                  <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                    {product.tagline}
+                  </p>
                 </div>
-                <h3 style={{ fontSize: '0.88rem', fontWeight: 700, marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {product.name}
-                </h3>
-                <p style={{ fontSize: '0.74rem', color: 'var(--text-muted)', marginBottom: '0.5rem', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                  {product.tagline}
-                </p>
-              </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    addToCart(product, product.colors?.[0]?.name || 'Standard', product.sizes?.[0] || 'Default');
-                    showToast(`Added ${product.name} to Cart!`);
-                  }}
-                  className="btn btn-primary"
-                  style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
-                >
-                  Add to Cart
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      navigateToProduct(product.id);
+                    }}
+                    className="btn btn-primary"
+                    style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
+                  >
+                    View
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -645,6 +689,8 @@ export const HomePage = () => {
         @media (max-width: 768px) {
           .hero-product-image-container { display: none !important; }
         }
+        /* Hide scrollbar for carousel */
+        [data-carousel]::-webkit-scrollbar { display: none; }
       `}</style>
 
     </div>
