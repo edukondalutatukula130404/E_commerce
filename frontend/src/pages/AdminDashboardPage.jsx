@@ -54,7 +54,7 @@ export const AdminDashboardPage = () => {
   // Upload directly to Cloudinary from browser (no backend needed)
   const uploadToCloudinary = async (file) => {
     const CLOUD_NAME = 'ypbj1iiy';
-    const UPLOAD_PRESET = 'switches_unsigned';
+    const UPLOAD_PRESET = 'ml_default'; // Cloudinary default unsigned preset
 
     const formData = new FormData();
     formData.append('file', file);
@@ -70,28 +70,22 @@ export const AdminDashboardPage = () => {
     console.log('Cloudinary response:', data);
 
     if (data.secure_url) {
-      return { url: data.secure_url, source: 'cloudinary' };
+      return data.secure_url;
     } else {
-      // Return the exact Cloudinary error
       const errorMsg = data.error?.message || JSON.stringify(data);
       throw new Error(errorMsg);
     }
   };
 
-  // Read file as base64 fallback
-  const readAsBase64 = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
-  };
-
-  // Image upload handler — tries Cloudinary first, falls back to base64
+  // Image upload handler — always uploads to Cloudinary
   const handleImageUpload = async (e, isEditing = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast('Please select an image file');
+      return;
+    }
 
     if (file.size > 10 * 1024 * 1024) {
       showToast('Image must be under 10MB');
@@ -99,31 +93,19 @@ export const AdminDashboardPage = () => {
     }
 
     setImageUploading(true);
-    showToast('Uploading image...');
+    showToast('Uploading to Cloudinary...');
 
     try {
-      // Try Cloudinary first
-      const { url } = await uploadToCloudinary(file);
+      const cloudinaryUrl = await uploadToCloudinary(file);
       if (isEditing) {
-        setEditingProduct(prev => ({ ...prev, images: [url] }));
+        setEditingProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
       } else {
-        setNewProduct(prev => ({ ...prev, images: [url] }));
+        setNewProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
       }
-      showToast('Image uploaded to Cloudinary!');
-    } catch (cloudErr) {
-      console.warn('Cloudinary failed, using local base64:', cloudErr.message);
-      // Fallback: store as base64 so the image still works
-      try {
-        const base64 = await readAsBase64(file);
-        if (isEditing) {
-          setEditingProduct(prev => ({ ...prev, images: [base64] }));
-        } else {
-          setNewProduct(prev => ({ ...prev, images: [base64] }));
-        }
-        showToast('Image saved locally (Cloudinary: ' + cloudErr.message + ')');
-      } catch (localErr) {
-        showToast('Image upload failed completely');
-      }
+      showToast('✓ Image uploaded to Cloudinary!');
+    } catch (err) {
+      console.error('Cloudinary upload error:', err);
+      showToast('Upload failed: ' + err.message);
     } finally {
       setImageUploading(false);
     }
