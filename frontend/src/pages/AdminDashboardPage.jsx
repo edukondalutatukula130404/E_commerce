@@ -45,32 +45,88 @@ export const AdminDashboardPage = () => {
 
   const [newProduct, setNewProduct] = useState({
     name: '', tagline: '', price: '', originalPrice: '', stock: 25, category: 'Tech', description: '',
-    images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80']
+    images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80'],
+    isBestSeller: false, isNew: true
   });
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // Simple, reliable image handler - reads file directly as base64, no compression needed
-  const handleImageUpload = (e, isEditing = false) => {
-    const file = e.target.files[0];
+  // Compress image and upload to Cloudinary via backend
+  const compressAndUploadToCloudinary = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = async () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG 80%
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
+
+          // Upload to Cloudinary via backend
+          try {
+            const res = await api.uploadImage(compressedBase64);
+            if (res.success && res.url) {
+              resolve(res.url);
+            } else {
+              reject(new Error(res.message || 'Upload failed'));
+            }
+          } catch (err) {
+            reject(err);
+          }
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = event.target.result;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Image upload handler
+  const handleImageUpload = async (e, isEditing = false) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be under 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Image must be under 10MB');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result;
+    showToast('Uploading image to Cloudinary...');
+
+    try {
+      const cloudinaryUrl = await compressAndUploadToCloudinary(file);
       if (isEditing) {
-        setEditingProduct(prev => ({ ...prev, images: [base64] }));
+        setEditingProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
       } else {
-        setNewProduct(prev => ({ ...prev, images: [base64] }));
+        setNewProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
       }
-      showToast('Image ready!');
-    };
-    reader.onerror = () => showToast('Failed to read image file');
-    reader.readAsDataURL(file);
+      showToast('Image uploaded successfully!');
+    } catch (err) {
+      console.error('Upload error:', err);
+      showToast('Upload failed: ' + err.message);
+    }
   };
 
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
