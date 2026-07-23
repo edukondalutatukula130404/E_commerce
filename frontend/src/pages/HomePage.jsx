@@ -556,7 +556,7 @@ export const HomePage = () => {
         </div>
       </div>
 
-      {/* 5.5 ✨ New Arrivals Section */}
+      {/* 5.5 ✨ New Arrivals Carousel */}
       <section style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
@@ -576,24 +576,40 @@ export const HomePage = () => {
           </button>
         </div>
 
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-          gap: '1rem',
-          width: '100%'
-        }}>
+        {/* Carousel Track */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '1rem',
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            paddingBottom: '0.5rem'
+          }}
+        >
           {newArrivals.map((product) => (
-            <div 
+            <div
               key={`new-${product.id}`}
               className="card product-card-hover"
-              style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', cursor: 'pointer' }}
+              style={{
+                flex: '0 0 220px',
+                width: '220px',
+                scrollSnapAlign: 'start',
+                padding: '0.85rem',
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                cursor: 'pointer'
+              }}
               onClick={() => navigateToProduct(product.id)}
             >
               <div>
-                <div className="product-image-container" style={{ height: '220px', borderRadius: 'var(--radius-md)', marginBottom: '0.65rem' }}>
-                  <img 
-                    src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"} 
-                    alt={product.name} 
+                <div className="product-image-container" style={{ height: '200px', borderRadius: 'var(--radius-md)', marginBottom: '0.65rem' }}>
+                  <img
+                    src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"}
+                    alt={product.name}
+                    onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"; }}
                   />
                   <span className="badge badge-accent" style={{ position: 'absolute', top: '10px', left: '10px', fontSize: '0.65rem', fontWeight: 800, backdropFilter: 'blur(6px)', background: 'rgba(255, 71, 87, 0.85)', color: '#fff', padding: '0.25rem 0.6rem', border: '1px solid rgba(255,255,255,0.2)' }}>
                     ✨ NEW RELEASE
@@ -609,16 +625,15 @@ export const HomePage = () => {
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
                 <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
-                <button 
+                <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    addToCart(product, product.colors?.[0]?.name || 'Standard', product.sizes?.[0] || 'Default');
-                    showToast(`Added ${product.name} to Cart!`);
+                    navigateToProduct(product.id);
                   }}
                   className="btn btn-primary"
                   style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem' }}
                 >
-                  Add to Cart
+                  View
                 </button>
               </div>
             </div>
