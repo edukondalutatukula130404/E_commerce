@@ -138,7 +138,7 @@ export const UserDashboardPage = () => {
           { id: 'profile', label: '1. My Profile', icon: User },
           { id: 'orders', label: '2. My Orders', icon: Package, count: userOrders.length },
           { id: 'wishlist', label: '3. My Wishlist', icon: Heart, count: wishlist.length },
-          { id: 'addresses', label: '4. Saved Addresses', icon: MapPin, count: userAddresses.length },
+          { id: 'addresses', label: '4. Saved Address', icon: MapPin, count: userAddresses.length },
           { id: 'payments', label: '5. Payment History', icon: CreditCard },
           { id: 'wallet', label: '6. My Wallet', icon: Wallet, badge: `$${walletBalance.toFixed(2)}` }
         ].map(tab => {

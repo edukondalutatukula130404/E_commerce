@@ -315,7 +315,7 @@ export const Navbar = () => {
                     borderRadius: 'var(--radius-md)'
                   }}
                 >
-                  <MapPin size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Saved Addresses
+                  <MapPin size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Saved Address
                 </button>
 
                 {/* 4. Payment History */}
