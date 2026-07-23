@@ -107,7 +107,7 @@ const MainContent = () => {
 
       {/* Top Promotional Popup Banner — above everything */}
       {showTopBanner && !isAdminView && (
-        <div style={{
+        <div id="top-promo-banner" style={{
           position: 'fixed',
           top: 0,
           left: 0,
@@ -123,7 +123,8 @@ const MainContent = () => {
           fontSize: '0.8rem',
           fontWeight: 700,
           textAlign: 'center',
-          boxShadow: '0 2px 12px rgba(186,12,47,0.4)'
+          boxShadow: '0 2px 12px rgba(186,12,47,0.4)',
+          height: '38px'
         }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
             🔥 <strong>LIMITED TIME:</strong> Use code
@@ -141,6 +142,9 @@ const MainContent = () => {
           </button>
         </div>
       )}
+
+      {/* Push content below the banner */}
+      {showTopBanner && !isAdminView && <div style={{ height: '38px', flexShrink: 0 }} />}
       
       {/* Toast Alert Banner */}
       {toast && (

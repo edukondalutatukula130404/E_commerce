@@ -55,7 +55,7 @@ export const Navbar = () => {
         width: '100%', 
         borderBottom: '1px solid var(--border-light)', 
         position: 'sticky', 
-        top: 0, 
+        top: document.getElementById('top-promo-banner') ? '38px' : 0,
         zIndex: 1000, 
         background: 'var(--bg-glass-heavy)', 
         backdropFilter: 'blur(16px)',
