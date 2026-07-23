@@ -165,7 +165,17 @@ export const UserDashboardPage = () => {
             return (
               <button
                 key={tab.id}
-                onClick={() => setUserDashboardTab(tab.id)}
+                onClick={() => {
+                  if (tab.id === 'orders') {
+                    setCurrentPage('orders');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else if (tab.id === 'wishlist') {
+                    setCurrentPage('wishlist');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  } else {
+                    setUserDashboardTab(tab.id);
+                  }
+                }}
                 className="btn"
                 style={{
                   width: '100%',
