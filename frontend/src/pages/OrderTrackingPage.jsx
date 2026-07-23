@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Package, Clock, CheckCircle2, Truck, AlertCircle, Radio, Wifi } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, AlertCircle, Radio, Wifi, ArrowLeft } from 'lucide-react';
 
 export const OrderTrackingPage = () => {
   const { orders, setCurrentPage, showToast } = useApp();
@@ -23,7 +23,18 @@ export const OrderTrackingPage = () => {
   };
 
   return (
-    <div className="animate-fade-in" style={{ paddingTop: '1rem', paddingBottom: '4rem' }}>
+    <div className="animate-fade-in" style={{ paddingTop: '0.75rem', paddingBottom: '4rem' }}>
+      
+      {/* Back Button */}
+      <div style={{ marginBottom: '0.85rem' }}>
+        <button 
+          onClick={() => setCurrentPage('home')} 
+          className="btn btn-secondary"
+          style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minHeight: '34px' }}
+        >
+          <ArrowLeft size={15} /> Back
+        </button>
+      </div>
       
       {/* Page Header with WebSocket Status Badge */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
