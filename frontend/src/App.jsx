@@ -98,11 +98,49 @@ class ErrorBoundary extends React.Component {
 
 const MainContent = () => {
   const { currentPage, toast } = useApp();
+  const [showTopBanner, setShowTopBanner] = React.useState(true);
 
   const isAdminView = currentPage === 'admin';
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: isAdminView ? 0 : 'calc(var(--mobile-nav-height) + 1rem)' }}>
+
+      {/* Top Promotional Popup Banner — above everything */}
+      {showTopBanner && !isAdminView && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 99999,
+          background: 'linear-gradient(90deg, #ba0c2f 0%, #7a071c 100%)',
+          color: '#fff',
+          padding: '0.5rem 1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '0.75rem',
+          fontSize: '0.8rem',
+          fontWeight: 700,
+          textAlign: 'center',
+          boxShadow: '0 2px 12px rgba(186,12,47,0.4)'
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            🔥 <strong>LIMITED TIME:</strong> Use code
+            <span style={{ background: 'rgba(255,255,255,0.22)', padding: '0.1rem 0.55rem', borderRadius: '4px', letterSpacing: '0.5px', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+              SWITCHES20
+            </span>
+            for <strong>20% OFF</strong> your entire order!
+          </span>
+          <button
+            onClick={() => setShowTopBanner(false)}
+            style={{ position: 'absolute', right: '0.85rem', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0.25rem' }}
+            aria-label="Close banner"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       
       {/* Toast Alert Banner */}
       {toast && (
