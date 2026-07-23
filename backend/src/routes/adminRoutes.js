@@ -176,7 +176,7 @@ router.post('/upload', async (req, res) => {
 
     console.log('[UPLOAD] Received image upload request, data length:', image.length);
 
-    const cloudName = 'dypbj1iiy';  // Fixed typo: was 'ypbj1iiy'
+    const cloudName = 'ypbj1iiy';  // Your Cloudinary cloud name
     const apiKey = '228485191495714';
     const apiSecret = 'gQm7RgW11x_hLyu_LkZIkJ1xlvU';
     const timestamp = Math.round(Date.now() / 1000);

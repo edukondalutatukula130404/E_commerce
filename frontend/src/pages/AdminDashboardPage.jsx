@@ -50,28 +50,85 @@ export const AdminDashboardPage = () => {
   });
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // Simple image handler - stores as base64 directly, no upload needed
-  const handleImageUpload = (e, isEditing = false) => {
+  // Compress and upload to Cloudinary
+  const compressAndUploadImage = async (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = async () => {
+          // Create canvas for compression
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 1200;
+          const MAX_HEIGHT = 1200;
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height = Math.round((height * MAX_WIDTH) / width);
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width = Math.round((width * MAX_HEIGHT) / height);
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          // Compress to JPEG
+          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+
+          // Upload to Cloudinary via backend
+          try {
+            const response = await api.uploadImage(compressedBase64);
+            if (response.success && response.url) {
+              resolve(response.url);
+            } else {
+              reject(new Error(response.message || 'Upload failed'));
+            }
+          } catch (err) {
+            reject(err);
+          }
+        };
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = event.target.result;
+      };
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Image upload handler
+  const handleImageUpload = async (e, isEditing = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 5 * 1024 * 1024) {
-      showToast('Image must be under 5MB');
+    if (file.size > 10 * 1024 * 1024) {
+      showToast('Image must be under 10MB');
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      const base64 = reader.result;
+    showToast('Uploading to Cloudinary...');
+
+    try {
+      const cloudinaryUrl = await compressAndUploadImage(file);
       if (isEditing) {
-        setEditingProduct(prev => ({ ...prev, images: [base64] }));
+        setEditingProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
       } else {
-        setNewProduct(prev => ({ ...prev, images: [base64] }));
+        setNewProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
       }
-      showToast('Image loaded successfully!');
-    };
-    reader.onerror = () => showToast('Failed to read image');
-    reader.readAsDataURL(file);
+      showToast('✓ Image uploaded to Cloudinary!');
+    } catch (err) {
+      console.error('Cloudinary upload error:', err);
+      showToast('Upload failed: ' + err.message);
+    }
   };
 
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
