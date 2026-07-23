@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Grid, Heart, Home, Search, User, Shield, ShoppingBag, X, ChevronRight, Layers, Tag } from 'lucide-react';
+import { Grid, Heart, Home, Search, User, Shield, ShoppingBag, X, ChevronRight, Layers, Tag, Package } from 'lucide-react';
 
 export const MobileNav = () => {
   const {
@@ -50,9 +50,13 @@ export const MobileNav = () => {
 
   const navItems = [
     { 
-      id: 'categories', 
+      id: 'catalog', 
       label: 'Categories', 
-      icon: Grid
+      icon: Grid,
+      onClick: () => {
+        setCurrentPage('catalog');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     },
     { 
       id: 'wishlist', 
@@ -66,10 +70,13 @@ export const MobileNav = () => {
       icon: Home 
     },
     { 
-      id: 'search', 
-      label: 'Search', 
-      icon: Search, 
-      onClick: () => setIsSearchOpen(true) 
+      id: 'orders', 
+      label: 'My Orders', 
+      icon: Package,
+      onClick: () => {
+        setCurrentPage('orders');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     },
     { 
       id: user ? (user.role === 'admin' ? 'admin' : 'user-dashboard') : 'auth', 

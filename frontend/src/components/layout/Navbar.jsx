@@ -19,13 +19,13 @@ export const Navbar = () => {
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const navLinks = [
-    { id: 'home', label: 'Home' },
-    { id: 'categories', label: 'Categories' },
-    { id: 'catalog', label: 'Catalog' },
-    { id: 'about', label: 'About Us' },
-    { id: 'blogs', label: 'Blogs' },
-    { id: 'faq', label: 'FAQ' },
-    { id: 'terms', label: 'Terms' }
+    { id: 'home', label: 'Home', page: 'home' },
+    { id: 'categories', label: 'Categories', page: 'catalog' },
+    { id: 'catalog', label: 'Catalog', page: 'catalog' },
+    { id: 'about', label: 'About Us', page: 'about' },
+    { id: 'blogs', label: 'Blogs', page: 'blogs' },
+    { id: 'faq', label: 'FAQ', page: 'faq' },
+    { id: 'terms', label: 'Terms', page: 'terms' }
   ];
 
   // Close dropdown on click outside
@@ -400,11 +400,12 @@ export const Navbar = () => {
       >
         <nav style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', flexWrap: 'wrap', maxWidth: 'var(--container-max)', width: '100%' }}>
           {navLinks.map((link) => {
-            const isActive = currentPage === link.id;
+            const targetPage = link.page || link.id;
+            const isActive = currentPage === targetPage;
             return (
               <button
                 key={link.id}
-                onClick={() => setCurrentPage(link.id)}
+                onClick={() => setCurrentPage(targetPage)}
                 className="btn"
                 style={{
                   padding: '0.35rem 0.95rem',
