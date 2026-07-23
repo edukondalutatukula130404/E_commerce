@@ -8,17 +8,45 @@ import {
 } from 'lucide-react';
 
 export const AdminDashboardPage = () => {
-  const { 
-    // State
-    products, addProduct, updateProduct, deleteProduct, updateStock, adjustStock,
-    categoriesList, addCategory, updateCategory, deleteCategory,
-    orders, updateOrderStatus, deleteOrder, 
-    payments, updatePaymentStatus,
-    usersList, updateUserRole, deleteUser,
-    banners, addBanner, updateBanner, toggleBannerActive, deleteBanner,
-    vendors, addVendor, disbursePayout, deleteVendor,
-    user, setUser, setCurrentPage, showToast 
-  } = useApp();
+  const context = useApp() || {};
+  const products = context.products || [];
+  const addProduct = context.addProduct;
+  const updateProduct = context.updateProduct;
+  const deleteProduct = context.deleteProduct;
+  const updateStock = context.updateStock;
+  const adjustStock = context.adjustStock;
+
+  const categoriesList = context.categoriesList || [];
+  const addCategory = context.addCategory;
+  const updateCategory = context.updateCategory;
+  const deleteCategory = context.deleteCategory;
+
+  const orders = context.orders || [];
+  const updateOrderStatus = context.updateOrderStatus;
+  const deleteOrder = context.deleteOrder;
+
+  const payments = context.payments || [];
+  const updatePaymentStatus = context.updatePaymentStatus;
+
+  const usersList = context.usersList || [];
+  const updateUserRole = context.updateUserRole;
+  const deleteUser = context.deleteUser;
+
+  const banners = context.banners || [];
+  const addBanner = context.addBanner;
+  const updateBanner = context.updateBanner;
+  const toggleBannerActive = context.toggleBannerActive;
+  const deleteBanner = context.deleteBanner;
+
+  const vendors = context.vendors || [];
+  const addVendor = context.addVendor;
+  const disbursePayout = context.disbursePayout;
+  const deleteVendor = context.deleteVendor;
+
+  const user = context.user;
+  const setUser = context.setUser;
+  const setCurrentPage = context.setCurrentPage;
+  const showToast = context.showToast || (() => {});
 
   // Active Tab: 8 sidebar items
   // 'overview' | 'categories' | 'products' | 'inventory' | 'orders' | 'payments' | 'customers' | 'banners'
@@ -246,37 +274,47 @@ export const AdminDashboardPage = () => {
   };
 
   // Filtered Products
-  const filteredProducts = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(productSearch.toLowerCase()) || p.category.toLowerCase().includes(productSearch.toLowerCase());
+  const filteredProducts = (products || []).filter(p => {
+    if (!p) return false;
+    const pName = String(p.name || '').toLowerCase();
+    const pCat = String(p.category || '').toLowerCase();
+    const search = String(productSearch || '').toLowerCase();
+    const matchesSearch = pName.includes(search) || pCat.includes(search);
     const matchesCat = categoryFilter === 'All' || p.category === categoryFilter;
     return matchesSearch && matchesCat;
   });
 
   // Filtered Orders
-  const filteredOrders = orders.filter(o => 
-    o.id.toLowerCase().includes(orderSearch.toLowerCase()) || 
-    (o.shippingAddress?.fullName || '').toLowerCase().includes(orderSearch.toLowerCase())
-  );
+  const filteredOrders = (orders || []).filter(o => {
+    if (!o) return false;
+    const orderId = String(o.id || o.orderId || o._id || '').toLowerCase();
+    const custName = String(o.shippingAddress?.fullName || o.customerName || '').toLowerCase();
+    const search = String(orderSearch || '').toLowerCase();
+    return orderId.includes(search) || custName.includes(search);
+  });
 
   // Filtered Customers
-  const filteredCustomers = usersList.filter(u => 
-    u.name.toLowerCase().includes(customerSearch.toLowerCase()) || 
-    u.email.toLowerCase().includes(customerSearch.toLowerCase())
-  );
+  const filteredCustomers = (usersList || []).filter(u => {
+    if (!u) return false;
+    const uName = String(u.name || '').toLowerCase();
+    const uEmail = String(u.email || '').toLowerCase();
+    const search = String(customerSearch || '').toLowerCase();
+    return uName.includes(search) || uEmail.includes(search);
+  });
 
-  const totalRevenue = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 34700);
-  const lowStockProducts = products.filter(p => (p.stock || 0) <= 15);
+  const totalRevenue = (orders || []).reduce((sum, o) => sum + (o?.totalAmount || 0), 34700);
+  const lowStockProducts = (products || []).filter(p => (p?.stock || 0) <= 15);
 
   // Sidebar Items Definition (8 Modules)
   const sidebarNavItems = [
     { id: 'overview', label: '1. Overview', icon: BarChart3 },
-    { id: 'categories', label: '2. Category Management', icon: Layers, count: categoriesList.length },
-    { id: 'products', label: '3. Product Management', icon: Package, count: products.length },
+    { id: 'categories', label: '2. Category Management', icon: Layers, count: (categoriesList || []).length },
+    { id: 'products', label: '3. Product Management', icon: Package, count: (products || []).length },
     { id: 'inventory', label: '4. Inventory Management', icon: AlertTriangle, count: lowStockProducts.length },
-    { id: 'orders', label: '5. Orders', icon: ShoppingBag, count: orders.length },
-    { id: 'payments', label: '6. Payment History', icon: CreditCard, count: payments.length },
-    { id: 'customers', label: '7. Customers', icon: Users, count: usersList.length },
-    { id: 'banners', label: '8. Banners', icon: Image, count: banners.length }
+    { id: 'orders', label: '5. Orders', icon: ShoppingBag, count: (orders || []).length },
+    { id: 'payments', label: '6. Payment History', icon: CreditCard, count: (payments || []).length },
+    { id: 'customers', label: '7. Customers', icon: Users, count: (usersList || []).length },
+    { id: 'banners', label: '8. Banners', icon: Image, count: (banners || []).length }
   ];
 
   return (
@@ -1453,3 +1491,5 @@ export const AdminDashboardPage = () => {
     </div>
   );
 };
+
+export default AdminDashboardPage;

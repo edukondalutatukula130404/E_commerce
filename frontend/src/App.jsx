@@ -15,7 +15,7 @@ const WishlistPage = lazy(() => import('./pages/WishlistPage').then(module => ({
 const AuthPage = lazy(() => import('./pages/AuthPage').then(module => ({ default: module.AuthPage })));
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(module => ({ default: module.ForgotPasswordPage })));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(module => ({ default: module.OrderTrackingPage })));
-const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(module => ({ default: module.AdminDashboardPage })));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(module => ({ default: module.AdminDashboardPage || module.default })));
 const UserDashboardPage = lazy(() => import('./pages/UserDashboardPage').then(module => ({ default: module.UserDashboardPage })));
 
 // Additional Pages
@@ -62,6 +62,40 @@ const PageLoader = () => (
   </div>
 );
 
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('Page rendering error caught:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ padding: '3rem 1.5rem', textAlign: 'center', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-primary)' }}>
+          <h2 style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text-main)', marginBottom: '0.5rem' }}>
+            Admin Panel Workspace
+          </h2>
+          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem', maxWidth: '440px' }}>
+            {this.state.error?.message || 'An unexpected rendering issue occurred.'}
+          </p>
+          <button onClick={() => window.location.reload()} className="btn btn-primary">
+            Reload Admin Panel
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
+
 const MainContent = () => {
   const { currentPage, toast } = useApp();
 
@@ -101,7 +135,9 @@ const MainContent = () => {
         {isAdminView ? (
           /* Standalone Dedicated Full-Screen Admin Workspace */
           <div style={{ flex: 1, minHeight: '100vh', width: '100%' }}>
-            <AdminDashboardPage />
+            <ErrorBoundary>
+              <AdminDashboardPage />
+            </ErrorBoundary>
           </div>
         ) : (
           <>
