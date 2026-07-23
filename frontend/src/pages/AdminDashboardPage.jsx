@@ -50,83 +50,28 @@ export const AdminDashboardPage = () => {
   });
   const [editingProduct, setEditingProduct] = useState(null);
 
-  // Compress image and upload to Cloudinary via backend
-  const compressAndUploadToCloudinary = async (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = async () => {
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1200;
-          let width = img.width;
-          let height = img.height;
-
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height = Math.round((height * MAX_WIDTH) / width);
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width = Math.round((width * MAX_HEIGHT) / height);
-              height = MAX_HEIGHT;
-            }
-          }
-
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
-
-          // Compress to JPEG 80%
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.8);
-
-          // Upload to Cloudinary via backend
-          try {
-            const res = await api.uploadImage(compressedBase64);
-            if (res.success && res.url) {
-              resolve(res.url);
-            } else {
-              reject(new Error(res.message || 'Upload failed'));
-            }
-          } catch (err) {
-            reject(err);
-          }
-        };
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = event.target.result;
-      };
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
-  };
-
-  // Image upload handler
-  const handleImageUpload = async (e, isEditing = false) => {
+  // Simple image handler - stores as base64 directly, no upload needed
+  const handleImageUpload = (e, isEditing = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 10 * 1024 * 1024) {
-      showToast('Image must be under 10MB');
+    if (file.size > 5 * 1024 * 1024) {
+      showToast('Image must be under 5MB');
       return;
     }
 
-    showToast('Uploading image to Cloudinary...');
-
-    try {
-      const cloudinaryUrl = await compressAndUploadToCloudinary(file);
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      const base64 = reader.result;
       if (isEditing) {
-        setEditingProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
+        setEditingProduct(prev => ({ ...prev, images: [base64] }));
       } else {
-        setNewProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
+        setNewProduct(prev => ({ ...prev, images: [base64] }));
       }
-      showToast('Image uploaded successfully!');
-    } catch (err) {
-      console.error('Upload error:', err);
-      showToast('Upload failed: ' + err.message);
-    }
+      showToast('Image loaded successfully!');
+    };
+    reader.onerror = () => showToast('Failed to read image');
+    reader.readAsDataURL(file);
   };
 
   const [isBannerModalOpen, setIsBannerModalOpen] = useState(false);
