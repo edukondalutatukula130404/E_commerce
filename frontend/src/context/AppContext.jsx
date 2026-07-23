@@ -429,6 +429,97 @@ export const AppProvider = ({ children }) => {
   // Auth User State & Redirect State
   const [redirectAfterAuth, setRedirectAfterAuth] = useState(null);
   const [pendingCheckoutStep, setPendingCheckoutStep] = useState('cart');
+  const [userDashboardTab, setUserDashboardTab] = useState('profile');
+
+  const [userAddresses, setUserAddresses] = useState(() => {
+    try {
+      const saved = localStorage.getItem('switches_user_addresses');
+      if (saved) return JSON.parse(saved);
+    } catch (e) {}
+    return [
+      {
+        id: 'addr-1',
+        fullName: 'Alex Mercer',
+        phone: '+1 (555) 234-5678',
+        street: '742 Evergreen Terrace',
+        city: 'San Francisco',
+        state: 'CA',
+        zip: '94107',
+        country: 'USA',
+        type: 'Home',
+        isDefault: true
+      },
+      {
+        id: 'addr-2',
+        fullName: 'Alex Mercer',
+        phone: '+1 (555) 987-6543',
+        street: '100 Market Street, Suite 400',
+        city: 'San Francisco',
+        state: 'CA',
+        zip: '94105',
+        country: 'USA',
+        type: 'Work',
+        isDefault: false
+      }
+    ];
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('switches_user_addresses', JSON.stringify(userAddresses));
+    } catch (e) {}
+  }, [userAddresses]);
+
+  const addUserAddress = (newAddr) => {
+    const created = {
+      id: `addr-${Date.now()}`,
+      fullName: newAddr.fullName || user?.name || 'Customer',
+      phone: newAddr.phone || '',
+      street: newAddr.street || '',
+      city: newAddr.city || '',
+      state: newAddr.state || '',
+      zip: newAddr.zip || '',
+      country: newAddr.country || 'USA',
+      type: newAddr.type || 'Home',
+      isDefault: Boolean(newAddr.isDefault) || userAddresses.length === 0
+    };
+    setUserAddresses(prev => {
+      let updated = [...prev];
+      if (created.isDefault) {
+        updated = updated.map(a => ({ ...a, isDefault: false }));
+      }
+      return [created, ...updated];
+    });
+    showToast('Saved new delivery address!');
+    return created;
+  };
+
+  const updateUserAddress = (id, fields) => {
+    setUserAddresses(prev => prev.map(a => {
+      if (a.id === id) {
+        const updated = { ...a, ...fields };
+        if (fields.isDefault) {
+          prev.forEach(other => { if (other.id !== id) other.isDefault = false; });
+        }
+        return updated;
+      }
+      return a;
+    }));
+    showToast('Address updated!');
+  };
+
+  const deleteUserAddress = (id) => {
+    setUserAddresses(prev => prev.filter(a => a.id !== id));
+    showToast('Address removed');
+  };
+
+  const setDefaultUserAddress = (id) => {
+    setUserAddresses(prev => prev.map(a => ({
+      ...a,
+      isDefault: a.id === id
+    })));
+    showToast('Set as default address!');
+  };
 
   const [user, setUser] = useState(() => {
     try {
@@ -1302,6 +1393,13 @@ export const AppProvider = ({ children }) => {
         applyCouponCode,
         wishlist,
         toggleWishlist,
+        userDashboardTab,
+        setUserDashboardTab,
+        userAddresses,
+        addUserAddress,
+        updateUserAddress,
+        deleteUserAddress,
+        setDefaultUserAddress,
         user,
         setUser,
         loginWithCredentials,

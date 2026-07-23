@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShoppingBag, Shield, User, Package, Heart, CreditCard, Wallet, LogOut, ChevronDown } from 'lucide-react';
+import { ShoppingBag, Shield, User, Package, Heart, CreditCard, Wallet, LogOut, ChevronDown, MapPin } from 'lucide-react';
 
 export const Navbar = () => {
   const { 
@@ -9,6 +9,7 @@ export const Navbar = () => {
     cart, 
     user,
     setUser,
+    setUserDashboardTab,
     showToast
   } = useApp();
 
@@ -293,6 +294,28 @@ export const Navbar = () => {
                   }}
                 >
                   <Heart size={15} color="#ff4757" /> My Wishlist
+                </button>
+
+                {/* 4. Saved Addresses */}
+                <button
+                  onClick={() => {
+                    setUserDashboardTab('addresses');
+                    setCurrentPage('user-dashboard');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="btn"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    justifyContent: 'flex-start',
+                    gap: '0.6rem',
+                    color: 'var(--text-main)',
+                    background: 'transparent',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <MapPin size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Saved Addresses
                 </button>
 
                 {/* 4. Payment History */}

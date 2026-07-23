@@ -13,6 +13,7 @@ export const CartCheckoutPage = () => {
     placeOrder, 
     setCurrentPage,
     user,
+    userAddresses,
     setRedirectAfterAuth,
     pendingCheckoutStep,
     setPendingCheckoutStep,
@@ -245,7 +246,47 @@ export const CartCheckoutPage = () => {
             {/* Step 2: Shipping Form View */}
             {checkoutStep === 'shipping' && (
               <div className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <h3 style={{ fontSize: '1rem', fontWeight: 700 }}>Shipping Address</h3>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Shipping Address</h3>
+                  {userAddresses && userAddresses.length > 0 && (
+                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                      ⚡ Click a saved address to autofill
+                    </span>
+                  )}
+                </div>
+
+                {/* Quick Select Saved Address Pills */}
+                {userAddresses && userAddresses.length > 0 && (
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
+                    {userAddresses.map((addr) => (
+                      <button
+                        key={addr.id}
+                        type="button"
+                        onClick={() => {
+                          setShippingInfo({
+                            fullName: addr.fullName || user?.name || '',
+                            email: user?.email || '',
+                            street: addr.street || '',
+                            city: addr.city || '',
+                            zip: addr.zip || ''
+                          });
+                          showToast(`Selected ${addr.type || 'Saved'} Address!`);
+                        }}
+                        className="btn btn-secondary"
+                        style={{
+                          padding: '0.35rem 0.75rem',
+                          fontSize: '0.78rem',
+                          fontWeight: 700,
+                          borderRadius: 'var(--radius-full)',
+                          border: '1px solid var(--border-active)',
+                          background: 'rgba(186, 12, 47, 0.08)'
+                        }}
+                      >
+                        📍 {addr.type || 'Address'} ({addr.city}) {addr.isDefault ? '• Default' : ''}
+                      </button>
+                    ))}
+                  </div>
+                )}
                 
                 <div>
                   <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Full Name</label>
