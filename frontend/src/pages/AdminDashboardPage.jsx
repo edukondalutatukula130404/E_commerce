@@ -54,7 +54,7 @@ export const AdminDashboardPage = () => {
   // Upload directly to Cloudinary from browser (no backend needed)
   const uploadToCloudinary = async (file) => {
     const CLOUD_NAME = 'ypbj1iiy';
-    const UPLOAD_PRESET = 'switches_unsigned'; // unsigned preset
+    const UPLOAD_PRESET = 'switches_unsigned';
 
     const formData = new FormData();
     formData.append('file', file);
@@ -67,15 +67,28 @@ export const AdminDashboardPage = () => {
     );
 
     const data = await response.json();
+    console.log('Cloudinary response:', data);
 
     if (data.secure_url) {
-      return data.secure_url;
+      return { url: data.secure_url, source: 'cloudinary' };
     } else {
-      throw new Error(data.error?.message || 'Cloudinary upload failed');
+      // Return the exact Cloudinary error
+      const errorMsg = data.error?.message || JSON.stringify(data);
+      throw new Error(errorMsg);
     }
   };
 
-  // Image upload handler
+  // Read file as base64 fallback
+  const readAsBase64 = (file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('Failed to read file'));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  // Image upload handler — tries Cloudinary first, falls back to base64
   const handleImageUpload = async (e, isEditing = false) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -89,16 +102,28 @@ export const AdminDashboardPage = () => {
     showToast('Uploading image...');
 
     try {
-      const url = await uploadToCloudinary(file);
+      // Try Cloudinary first
+      const { url } = await uploadToCloudinary(file);
       if (isEditing) {
         setEditingProduct(prev => ({ ...prev, images: [url] }));
       } else {
         setNewProduct(prev => ({ ...prev, images: [url] }));
       }
       showToast('Image uploaded to Cloudinary!');
-    } catch (err) {
-      console.error('Upload error:', err);
-      showToast('Upload failed: ' + err.message);
+    } catch (cloudErr) {
+      console.warn('Cloudinary failed, using local base64:', cloudErr.message);
+      // Fallback: store as base64 so the image still works
+      try {
+        const base64 = await readAsBase64(file);
+        if (isEditing) {
+          setEditingProduct(prev => ({ ...prev, images: [base64] }));
+        } else {
+          setNewProduct(prev => ({ ...prev, images: [base64] }));
+        }
+        showToast('Image saved locally (Cloudinary: ' + cloudErr.message + ')');
+      } catch (localErr) {
+        showToast('Image upload failed completely');
+      }
     } finally {
       setImageUploading(false);
     }
