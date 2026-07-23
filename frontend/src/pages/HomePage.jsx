@@ -207,7 +207,7 @@ export const HomePage = () => {
         </div>
       </section>
 
-      {/* 3. Featured SWITCHES Products Grid */}
+      {/* 3. Featured SWITCHES Products Carousel */}
       <section style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
           <div>
@@ -219,50 +219,49 @@ export const HomePage = () => {
           </button>
         </div>
 
-        <div className="product-grid">
+        {/* Carousel Track */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '1rem',
+            overflowX: 'auto',
+            scrollSnapType: 'x mandatory',
+            scrollbarWidth: 'none',
+            msOverflowStyle: 'none',
+            paddingBottom: '0.5rem'
+          }}
+        >
           {featured.map((product) => {
             const isWishlisted = wishlist.includes(product.id);
             return (
-              <div 
-                key={product.id} 
-                className="card" 
+              <div
+                key={product.id}
+                className="card"
                 onClick={() => navigateToProduct(product.id)}
-                style={{ display: 'flex', flexDirection: 'column', width: '100%', cursor: 'pointer' }}
+                style={{
+                  flex: '0 0 200px',
+                  width: '200px',
+                  scrollSnapAlign: 'start',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  cursor: 'pointer'
+                }}
               >
-                
-                {/* Image Container */}
+                {/* Image */}
                 <div className="product-image-container">
                   <img
                     src={product.images?.[0] || product.image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"}
                     alt={product.name}
                     loading="lazy"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80";
-                    }}
+                    onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=600&q=80"; }}
                   />
                   {product.isNew && (
-                    <span className="badge badge-primary" style={{ position: 'absolute', top: '8px', left: '8px', zIndex: 2 }}>
-                      NEW
-                    </span>
+                    <span className="badge badge-primary" style={{ position: 'absolute', top: '8px', left: '8px', zIndex: 2 }}>NEW</span>
                   )}
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      toggleWishlist(product.id);
-                    }}
+                    onClick={(e) => { e.stopPropagation(); toggleWishlist(product.id); }}
                     className="btn btn-icon"
-                    style={{
-                      position: 'absolute',
-                      top: '8px',
-                      right: '8px',
-                      zIndex: 2,
-                      background: 'var(--bg-glass-heavy)',
-                      width: '32px',
-                      height: '32px',
-                      minWidth: '32px',
-                      minHeight: '32px'
-                    }}
+                    style={{ position: 'absolute', top: '8px', right: '8px', zIndex: 2, background: 'var(--bg-glass-heavy)', width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}
                   >
                     <Heart size={14} color={isWishlisted ? '#ff4757' : 'var(--text-main)'} fill={isWishlisted ? '#ff4757' : 'none'} />
                   </button>
@@ -278,35 +277,24 @@ export const HomePage = () => {
                         <span>{product.rating}</span>
                       </div>
                     </div>
-                    <h3 
-                      style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.2rem', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}
-                    >
+                    <h3 style={{ fontSize: '0.85rem', fontWeight: 700, marginBottom: '0.2rem', lineHeight: 1.25, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {product.name}
                     </h3>
                     <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {product.tagline}
                     </p>
                   </div>
-
-                  {/* Price & Action */}
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px solid var(--border-light)' }}>
-                    <div>
-                      <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
-                    </div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigateToProduct(product.id);
-                      }} 
-                      className="btn btn-secondary" 
+                    <span style={{ fontSize: '1rem', fontWeight: 800 }}>${product.price}</span>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); navigateToProduct(product.id); }}
+                      className="btn btn-secondary"
                       style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', minHeight: '32px' }}
                     >
                       Details
                     </button>
                   </div>
-
                 </div>
-
               </div>
             );
           })}
