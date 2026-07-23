@@ -149,21 +149,7 @@ export const UserDashboardPage = () => {
         </button>
       </div>
 
-      {/* User Info Header Banner */}
-      <div className="card" style={{ padding: '1.25rem', marginBottom: '1.5rem', display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-        <img
-          src={user?.avatar || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"}
-          alt={user?.name || "Customer"}
-          style={{ width: '60px', height: '60px', borderRadius: 'var(--radius-full)', border: '2px solid var(--border-active)', objectFit: 'cover' }}
-        />
-        <div style={{ flex: 1, minWidth: '180px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
-            <h1 style={{ fontSize: '1.2rem', fontWeight: 800, margin: 0 }}>{user?.name || "Customer Account"}</h1>
-            <ShieldCheck size={16} color="hsl(var(--hue-primary), 85%, 50%)" />
-          </div>
-          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>{user?.email || "alex@switches.io"}</p>
-        </div>
-      </div>
+
 
       {/* 1. MAIN ACCOUNT MENU VIEW */}
       {isMainMenuView && (
