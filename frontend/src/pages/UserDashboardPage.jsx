@@ -1,15 +1,35 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { User, Package, Heart, LogOut, ArrowRight, ShieldCheck, ArrowLeft } from 'lucide-react';
+import { User, Package, Heart, LogOut, ArrowRight, ShieldCheck, ArrowLeft, CreditCard, Wallet, Plus, CheckCircle2, Clock, Smartphone, DollarSign } from 'lucide-react';
 
 export const UserDashboardPage = () => {
-  const { user, setUser, setCurrentPage, orders, wishlist, products } = useApp();
+  const { user, setUser, setCurrentPage, orders, wishlist, products, showToast } = useApp();
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' | 'orders' | 'wishlist' | 'payments' | 'wallet'
+  const [walletBalance, setWalletBalance] = useState(150.00);
+  const [addWalletAmount, setAddWalletAmount] = useState('');
 
-  const userOrders = orders.filter(o => o.shippingAddress?.fullName === user?.name || user?.role === 'customer');
+  const userOrders = (orders || []).filter(o => o.shippingAddress?.fullName === user?.name || user?.role === 'customer');
+
+  const wishlistProducts = (wishlist || []).map(id => products.find(p => p.id === id || p._id === id)).filter(Boolean);
 
   const handleLogout = () => {
     setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('switches_user');
+    showToast('Logged out successfully');
     setCurrentPage('home');
+  };
+
+  const handleAddWalletCash = (e) => {
+    e.preventDefault();
+    const val = parseFloat(addWalletAmount);
+    if (isNaN(val) || val <= 0) {
+      showToast('Please enter a valid amount');
+      return;
+    }
+    setWalletBalance(prev => prev + val);
+    setAddWalletAmount('');
+    showToast(`$${val.toFixed(2)} added to your SWITCHES Wallet!`);
   };
 
   return (
@@ -22,7 +42,7 @@ export const UserDashboardPage = () => {
           className="btn btn-secondary"
           style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', minHeight: '34px' }}
         >
-          <ArrowLeft size={15} /> Back
+          <ArrowLeft size={15} /> Back to Storefront
         </button>
       </div>
 
@@ -35,7 +55,7 @@ export const UserDashboardPage = () => {
         />
         <div style={{ flex: 1, minWidth: '180px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', marginBottom: '0.2rem' }}>
-            <h1 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Welcome back, {user?.name || "Customer"}</h1>
+            <h1 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{user?.name || "Customer Account"}</h1>
             <ShieldCheck size={16} color="hsl(var(--hue-primary), 85%, 50%)" />
           </div>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{user?.email || "alex@switches.io"}</p>
@@ -46,30 +66,186 @@ export const UserDashboardPage = () => {
         </button>
       </div>
 
-      {/* Quick Navigation Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
-        <div className="card" style={{ padding: '1.1rem', cursor: 'pointer' }} onClick={() => setCurrentPage('orders')}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>My Orders</span>
-            <Package size={20} color="hsl(var(--hue-primary), 85%, 50%)" />
-          </div>
-          <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{userOrders.length} Orders</h3>
-          <span style={{ fontSize: '0.75rem', color: 'hsl(var(--hue-primary), 85%, 50%)', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.35rem' }}>
-            View Order History <ArrowRight size={12} />
-          </span>
-        </div>
-
-        <div className="card" style={{ padding: '1.1rem', cursor: 'pointer' }} onClick={() => setCurrentPage('wishlist')}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)' }}>Saved Wishlist</span>
-            <Heart size={20} color="#ff4757" />
-          </div>
-          <h3 style={{ fontSize: '1.4rem', fontWeight: 900 }}>{wishlist.length} Items</h3>
-          <span style={{ fontSize: '0.75rem', color: '#ff4757', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '0.2rem', marginTop: '0.35rem' }}>
-            View Saved Products <ArrowRight size={12} />
-          </span>
-        </div>
+      {/* 5 User Navigation Tabs */}
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.25rem' }}>
+        {[
+          { id: 'profile', label: '1. My Profile', icon: User },
+          { id: 'orders', label: '2. My Orders', icon: Package, count: userOrders.length },
+          { id: 'wishlist', label: '3. My Wishlist', icon: Heart, count: wishlist.length },
+          { id: 'payments', label: '4. Payment History', icon: CreditCard },
+          { id: 'wallet', label: '5. My Wallet', icon: Wallet, badge: `$${walletBalance.toFixed(2)}` }
+        ].map(tab => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className="btn"
+              style={{
+                padding: '0.5rem 0.85rem',
+                fontSize: '0.82rem',
+                fontWeight: isActive ? 800 : 600,
+                background: isActive ? 'var(--grad-primary)' : 'var(--bg-secondary)',
+                color: isActive ? '#fff' : 'var(--text-main)',
+                borderRadius: 'var(--radius-md)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                whiteSpace: 'nowrap'
+              }}
+            >
+              <Icon size={15} />
+              <span>{tab.label}</span>
+              {tab.count !== undefined && (
+                <span className="badge" style={{ background: isActive ? 'rgba(255,255,255,0.25)' : 'var(--bg-glass-heavy)', color: isActive ? '#fff' : 'var(--text-muted)', fontSize: '0.65rem' }}>
+                  {tab.count}
+                </span>
+              )}
+              {tab.badge && (
+                <span className="badge" style={{ background: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(186, 12, 47, 0.12)', color: isActive ? '#fff' : 'hsl(var(--hue-primary), 85%, 50%)', fontSize: '0.7rem', fontWeight: 800 }}>
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
       </div>
+
+      {/* Tab 1: MY PROFILE */}
+      {activeTab === 'profile' && (
+        <div className="card" style={{ padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Personal Information</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
+            <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: 'var(--radius-md)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Full Name</span>
+              <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{user?.name || 'Alex Mercer'}</div>
+            </div>
+            <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: 'var(--radius-md)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Email Address</span>
+              <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{user?.email || 'alex@switches.io'}</div>
+            </div>
+            <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: 'var(--radius-md)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Role Access</span>
+              <div style={{ fontWeight: 800, fontSize: '0.95rem', color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
+                {(user?.role || 'customer').toUpperCase()}
+              </div>
+            </div>
+            <div style={{ background: 'var(--bg-secondary)', padding: '0.85rem', borderRadius: 'var(--radius-md)' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Default Address</span>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem' }}>742 Evergreen Terrace, San Francisco, CA</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Tab 2: MY ORDERS */}
+      {activeTab === 'orders' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          {userOrders.length === 0 ? (
+            <div className="card" style={{ padding: '2.5rem', textAlign: 'center' }}>
+              <Package size={40} style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }} />
+              <h3>No Order History Yet</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Your placed orders will appear here.</p>
+            </div>
+          ) : (
+            userOrders.map((o, idx) => (
+              <div key={idx} className="card" style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <span style={{ fontWeight: 800, fontSize: '0.95rem' }}>Order #{o.id || o.orderId}</span>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
+                      {new Date(o.createdAt || Date.now()).toLocaleDateString()}
+                    </span>
+                  </div>
+                  <span className="badge badge-primary" style={{ background: o.status === 'delivered' ? '#10b981' : '#ba0c2f' }}>
+                    {o.status?.toUpperCase() || 'PROCESSING'}
+                  </span>
+                </div>
+                <div style={{ fontSize: '0.85rem' }}>
+                  <strong>Total Amount:</strong> ${o.totalAmount?.toFixed(2)} | <strong>Payment:</strong> {o.paymentMethod?.toUpperCase()}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Tab 3: MY WISHLIST */}
+      {activeTab === 'wishlist' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
+          {wishlistProducts.length === 0 ? (
+            <div className="card" style={{ padding: '2.5rem', textAlign: 'center', gridColumn: '1 / -1' }}>
+              <Heart size={40} style={{ color: 'var(--text-muted)', marginBottom: '0.5rem' }} />
+              <h3>Your Wishlist is Empty</h3>
+              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>Explore our catalog and click the heart icon to save products.</p>
+            </div>
+          ) : (
+            wishlistProducts.map((p, idx) => (
+              <div key={idx} className="card" style={{ padding: '0.85rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <img src={p.images?.[0]} alt={p.name} style={{ width: '100%', height: '120px', objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                <h4 style={{ fontSize: '0.85rem', fontWeight: 800 }}>{p.name}</h4>
+                <span style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${p.price}</span>
+              </div>
+            ))
+          )}
+        </div>
+      )}
+
+      {/* Tab 4: PAYMENT HISTORY */}
+      {activeTab === 'payments' && (
+        <div className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <h3 style={{ fontSize: '1rem', fontWeight: 800 }}>Transaction & Invoice Receipts</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {[
+              { id: 'TXN-88210', date: '2026-07-23', method: 'Credit Card', amount: 599.98, status: 'Completed' },
+              { id: 'TXN-88209', date: '2026-07-18', method: 'UPI Pay', amount: 199.99, status: 'Completed' }
+            ].map((tx, idx) => (
+              <div key={idx} style={{ background: 'var(--bg-secondary)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-md)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>{tx.id}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{tx.date} via {tx.method}</div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${tx.amount.toFixed(2)}</div>
+                  <span style={{ fontSize: '0.7rem', color: '#10b981', fontWeight: 700 }}>✓ {tx.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Tab 5: MY WALLET */}
+      {activeTab === 'wallet' && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+          <div className="card" style={{ padding: '1.5rem', background: 'var(--grad-primary)', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <span style={{ fontSize: '0.8rem', opacity: 0.9, fontWeight: 700 }}>SWITCHES Store Credit Wallet</span>
+              <h2 style={{ fontSize: '2rem', fontWeight: 900, marginTop: '0.2rem' }}>${walletBalance.toFixed(2)}</h2>
+            </div>
+            <div style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.2)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-full)', fontWeight: 800 }}>
+              ⚡ 1-Click Instant Checkout Ready
+            </div>
+          </div>
+
+          <div className="card" style={{ padding: '1.25rem' }}>
+            <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '0.75rem' }}>Add Money to Wallet</h3>
+            <form onSubmit={handleAddWalletCash} style={{ display: 'flex', gap: '0.5rem', maxWidth: '360px' }}>
+              <input
+                type="number"
+                placeholder="Enter amount (e.g. 50)"
+                value={addWalletAmount}
+                onChange={(e) => setAddWalletAmount(e.target.value)}
+                style={{ flex: 1, padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', fontSize: '0.85rem', color: 'var(--text-main)' }}
+              />
+              <button type="submit" className="btn btn-primary" style={{ padding: '0.55rem 1rem' }}>
+                <Plus size={16} /> Add Cash
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
     </div>
   );

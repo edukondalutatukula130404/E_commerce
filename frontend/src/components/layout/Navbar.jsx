@@ -1,14 +1,19 @@
-import React from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShoppingBag, Shield, User } from 'lucide-react';
+import { ShoppingBag, Shield, User, Package, Heart, CreditCard, Wallet, LogOut, ChevronDown } from 'lucide-react';
 
 export const Navbar = () => {
   const { 
     currentPage, 
     setCurrentPage, 
     cart, 
-    user
+    user,
+    setUser,
+    showToast
   } = useApp();
+
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
@@ -21,6 +26,26 @@ export const Navbar = () => {
     { id: 'faq', label: 'FAQ' },
     { id: 'terms', label: 'Terms' }
   ];
+
+  // Close dropdown on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('token');
+    localStorage.removeItem('switches_user');
+    showToast('Logged out of SWITCHES');
+    setCurrentPage('home');
+    setIsDropdownOpen(false);
+  };
 
   return (
     <header 
@@ -92,7 +117,7 @@ export const Navbar = () => {
           </span>
         </a>
 
-        {/* FAR RIGHT / LAST: Cart & Admin/Login Actions */}
+        {/* FAR RIGHT / LAST: Cart & User Dropdown Actions */}
         <div className="hide-mobile" style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <button
             onClick={() => setCurrentPage('cart')}
@@ -108,14 +133,232 @@ export const Navbar = () => {
             )}
           </button>
 
-          <button
-            onClick={() => setCurrentPage(user ? (user.role === 'admin' ? 'admin' : 'user-dashboard') : 'auth')}
-            className="btn btn-secondary"
-            style={{ padding: '0.4rem 0.85rem', height: '36px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
-          >
-            {user?.role === 'admin' ? <Shield size={15} color="#ba0c2f" /> : <User size={15} />}
-            <span>{user ? (user.role === 'admin' ? 'Admin' : user.name.split(' ')[0]) : 'Login'}</span>
-          </button>
+          {/* User Account Button & Interactive Dropdown Menu */}
+          <div style={{ position: 'relative' }} ref={dropdownRef}>
+            <button
+              onClick={() => {
+                if (!user) {
+                  setCurrentPage('auth');
+                } else {
+                  setIsDropdownOpen(!isDropdownOpen);
+                }
+              }}
+              className="btn btn-secondary"
+              style={{
+                padding: '0.4rem 0.85rem',
+                height: '36px',
+                fontSize: '0.8rem',
+                fontWeight: 700,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                borderRadius: 'var(--radius-md)',
+                background: isDropdownOpen ? 'rgba(186, 12, 47, 0.15)' : undefined
+              }}
+            >
+              {user?.role === 'admin' ? <Shield size={15} color="#ba0c2f" /> : <User size={15} />}
+              <span>{user ? (user.role === 'admin' ? 'Admin' : (user.name ? user.name.split(' ')[0] : 'User')) : 'Login'}</span>
+              {user && (
+                <ChevronDown 
+                  size={13} 
+                  style={{ 
+                    transform: isDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', 
+                    transition: 'transform 0.2s ease',
+                    opacity: 0.7 
+                  }} 
+                />
+              )}
+            </button>
+
+            {/* Glassmorphic Dropdown Menu */}
+            {user && isDropdownOpen && (
+              <div
+                className="animate-fade-in"
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 0.5rem)',
+                  right: 0,
+                  width: '230px',
+                  background: 'var(--bg-glass-heavy)',
+                  backdropFilter: 'blur(16px)',
+                  WebkitBackdropFilter: 'blur(16px)',
+                  border: '1px solid var(--border-active)',
+                  borderRadius: 'var(--radius-lg)',
+                  boxShadow: 'var(--shadow-xl)',
+                  padding: '0.5rem',
+                  zIndex: 2000,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.25rem'
+                }}
+              >
+                {/* Header User Card */}
+                <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid var(--border-light)', display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+                  <img
+                    src={user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
+                    alt={user.name}
+                    style={{ width: '34px', height: '34px', borderRadius: '50%', objectFit: 'cover', border: '1px solid var(--border-active)' }}
+                  />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: '0.85rem', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {user.name || 'Member User'}
+                    </div>
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {user.email}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Admin Command Panel Link if Admin Role */}
+                {user.role === 'admin' && (
+                  <button
+                    onClick={() => {
+                      setCurrentPage('admin');
+                      setIsDropdownOpen(false);
+                    }}
+                    className="btn"
+                    style={{
+                      padding: '0.5rem 0.75rem',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      justifyContent: 'flex-start',
+                      gap: '0.6rem',
+                      color: '#ba0c2f',
+                      background: 'rgba(186, 12, 47, 0.08)',
+                      borderRadius: 'var(--radius-md)'
+                    }}
+                  >
+                    <Shield size={15} color="#ba0c2f" /> Admin Command Panel
+                  </button>
+                )}
+
+                {/* 1. My Profile */}
+                <button
+                  onClick={() => {
+                    setCurrentPage('user-dashboard');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="btn"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    justifyContent: 'flex-start',
+                    gap: '0.6rem',
+                    color: 'var(--text-main)',
+                    background: 'transparent',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <User size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Profile
+                </button>
+
+                {/* 2. My Orders */}
+                <button
+                  onClick={() => {
+                    setCurrentPage('orders');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="btn"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    justifyContent: 'flex-start',
+                    gap: '0.6rem',
+                    color: 'var(--text-main)',
+                    background: 'transparent',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <Package size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Orders
+                </button>
+
+                {/* 3. My Wishlist */}
+                <button
+                  onClick={() => {
+                    setCurrentPage('wishlist');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="btn"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    justifyContent: 'flex-start',
+                    gap: '0.6rem',
+                    color: 'var(--text-main)',
+                    background: 'transparent',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <Heart size={15} color="#ff4757" /> My Wishlist
+                </button>
+
+                {/* 4. Payment History */}
+                <button
+                  onClick={() => {
+                    setCurrentPage('user-dashboard');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="btn"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    justifyContent: 'flex-start',
+                    gap: '0.6rem',
+                    color: 'var(--text-main)',
+                    background: 'transparent',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <CreditCard size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Payment History
+                </button>
+
+                {/* 5. My Wallet */}
+                <button
+                  onClick={() => {
+                    setCurrentPage('user-dashboard');
+                    setIsDropdownOpen(false);
+                  }}
+                  className="btn"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 600,
+                    justifyContent: 'flex-start',
+                    gap: '0.6rem',
+                    color: 'var(--text-main)',
+                    background: 'transparent',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <Wallet size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Wallet
+                </button>
+
+                <div style={{ height: '1px', background: 'var(--border-light)', margin: '0.15rem 0' }} />
+
+                {/* 6. Logout (Last Option) */}
+                <button
+                  onClick={handleLogout}
+                  className="btn"
+                  style={{
+                    padding: '0.5rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 700,
+                    justifyContent: 'flex-start',
+                    gap: '0.6rem',
+                    color: '#ff4757',
+                    background: 'rgba(255, 71, 87, 0.08)',
+                    borderRadius: 'var(--radius-md)'
+                  }}
+                >
+                  <LogOut size={15} /> Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
