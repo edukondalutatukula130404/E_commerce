@@ -9,7 +9,7 @@ export const FaqPage = () => {
     {
       category: "Shipping & Delivery",
       icon: Truck,
-      question: "How fast is AURA express shipping?",
+      question: "How fast is SWITCHES express shipping?",
       answer: "We offer sub-second order processing and same-day dispatch for orders placed before 2 PM. Express delivery typically arrives within 1 to 3 business days nationwide. All orders over $150 qualify for free express shipping."
     },
     {
@@ -21,13 +21,13 @@ export const FaqPage = () => {
     {
       category: "Returns & Refunds",
       icon: RefreshCw,
-      question: "What is AURA's return policy?",
+      question: "What is SWITCHES's return policy?",
       answer: "We offer a 30-day no-questions-asked money-back guarantee. If you are not 100% satisfied with your item, submit a return request for a free return shipping label and instant refund processing."
     },
     {
       category: "Warranty & Quality",
       icon: ShieldCheck,
-      question: "Do AURA products come with a warranty?",
+      question: "Do SWITCHES products come with a warranty?",
       answer: "All hardware, audio, smartwatch, and ambient lighting products come standard with our 2-Year Comprehensive Hardware Replacement Warranty covering any manufacturing or performance defects."
     },
     {
@@ -40,7 +40,7 @@ export const FaqPage = () => {
       category: "Promo Codes",
       icon: HelpCircle,
       question: "How do I apply a discount promo code?",
-      answer: "You can enter your promo code in the checkout drawer or cart summary page. Try using code 'AURA10' for 10% off or 'AURA20' for VIP discount."
+      answer: "You can enter your promo code in the checkout drawer or cart summary page. Try using code 'SWITCHES10' for 10% off or 'SWITCHES20' for VIP discount."
     }
   ];
 
@@ -72,7 +72,7 @@ export const FaqPage = () => {
           Frequently Asked Questions
         </h1>
         <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
-          Got questions? We're here to help you get the most out of your AURA experience.
+          Got questions? We're here to help you get the most out of your SWITCHES experience.
         </p>
       </div>
 

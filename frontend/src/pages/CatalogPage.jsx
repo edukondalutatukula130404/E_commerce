@@ -56,13 +56,11 @@ export const CatalogPage = () => {
   const categories = useMemo(() => {
     const list = ['All'];
     const catNamesFromList = (categoriesList || []).map(c => c.name);
-    const catNamesFromProducts = (products || []).map(p => p.category).filter(Boolean);
-    const combined = Array.from(new Set([...catNamesFromList, ...catNamesFromProducts]));
-    combined.forEach(c => {
+    catNamesFromList.forEach(c => {
       if (c && !list.includes(c)) list.push(c);
     });
     return list;
-  }, [categoriesList, products]);
+  }, [categoriesList]);
 
   const activeCategoryObj = useMemo(() => {
     return (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === (selectedCategory || '').trim().toLowerCase());

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 
 // Layout Components
@@ -6,27 +6,61 @@ import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { MobileNav } from './components/layout/MobileNav';
 
-// Public Pages
-import { HomePage } from './pages/HomePage';
-import { CatalogPage } from './pages/CatalogPage';
-import { ProductDetailPage } from './pages/ProductDetailPage';
-import { CartCheckoutPage } from './pages/CartCheckoutPage';
-import { WishlistPage } from './pages/WishlistPage';
-import { AuthPage } from './pages/AuthPage';
-import { OrderTrackingPage } from './pages/OrderTrackingPage';
-import { AdminDashboardPage } from './pages/AdminDashboardPage';
-import { UserDashboardPage } from './pages/UserDashboardPage';
+// React.lazy Dynamic Route Imports for Performance Code-Splitting
+const HomePage = lazy(() => import('./pages/HomePage').then(module => ({ default: module.HomePage })));
+const CatalogPage = lazy(() => import('./pages/CatalogPage').then(module => ({ default: module.CatalogPage })));
+const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then(module => ({ default: module.ProductDetailPage })));
+const CartCheckoutPage = lazy(() => import('./pages/CartCheckoutPage').then(module => ({ default: module.CartCheckoutPage })));
+const WishlistPage = lazy(() => import('./pages/WishlistPage').then(module => ({ default: module.WishlistPage })));
+const AuthPage = lazy(() => import('./pages/AuthPage').then(module => ({ default: module.AuthPage })));
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage').then(module => ({ default: module.ForgotPasswordPage })));
+const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(module => ({ default: module.OrderTrackingPage })));
+const AdminDashboardPage = lazy(() => import('./pages/AdminDashboardPage').then(module => ({ default: module.AdminDashboardPage })));
+const UserDashboardPage = lazy(() => import('./pages/UserDashboardPage').then(module => ({ default: module.UserDashboardPage })));
 
 // Additional Pages
-import { FaqPage } from './pages/FaqPage';
-import { TermsPage } from './pages/TermsPage';
-import { BlogsPage } from './pages/BlogsPage';
-import { AboutUsPage } from './pages/AboutUsPage';
+const FaqPage = lazy(() => import('./pages/FaqPage').then(module => ({ default: module.FaqPage })));
+const TermsPage = lazy(() => import('./pages/TermsPage').then(module => ({ default: module.TermsPage })));
+const BlogsPage = lazy(() => import('./pages/BlogsPage').then(module => ({ default: module.BlogsPage })));
+const AboutUsPage = lazy(() => import('./pages/AboutUsPage').then(module => ({ default: module.AboutUsPage })));
+const CategoriesPage = lazy(() => import('./pages/CategoriesPage').then(module => ({ default: module.CategoriesPage })));
 
 // Styles Import
 import './styles/variables.css';
 import './styles/components.css';
 import './styles/animations.css';
+
+// Sleek Glassmorphic Page Loader for React.Suspense
+const PageLoader = () => (
+  <div style={{
+    minHeight: '60vh',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '1rem',
+    width: '100%',
+    padding: '3rem 1rem'
+  }}>
+    <div style={{
+      width: '48px',
+      height: '48px',
+      borderRadius: '50%',
+      border: '4px solid var(--border-light)',
+      borderTopColor: 'hsl(var(--hue-primary), 85%, 50%)',
+      animation: 'spin 0.8s linear infinite'
+    }} />
+    <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+      Loading SWITCHES...
+    </span>
+    <style>{`
+      @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+      }
+    `}</style>
+  </div>
+);
 
 const MainContent = () => {
   const { currentPage, toast } = useApp();
@@ -63,41 +97,45 @@ const MainContent = () => {
         </div>
       )}
 
-      {isAdminView ? (
-        /* Standalone Dedicated Full-Screen Admin Workspace */
-        <div style={{ flex: 1, minHeight: '100vh', width: '100%' }}>
-          <AdminDashboardPage />
-        </div>
-      ) : (
-        <>
-          {/* Public Sticky Navbar */}
-          <Navbar />
+      <Suspense fallback={<PageLoader />}>
+        {isAdminView ? (
+          /* Standalone Dedicated Full-Screen Admin Workspace */
+          <div style={{ flex: 1, minHeight: '100vh', width: '100%' }}>
+            <AdminDashboardPage />
+          </div>
+        ) : (
+          <>
+            {/* Public Sticky Navbar */}
+            <Navbar />
 
-          {/* Main Public View Container */}
-          <main className="app-container" style={{ flex: 1 }}>
-            {currentPage === 'home' && <HomePage />}
-            {currentPage === 'catalog' && <CatalogPage />}
-            {currentPage === 'product-detail' && <ProductDetailPage />}
-            {currentPage === 'cart' && <CartCheckoutPage />}
-            {currentPage === 'wishlist' && <WishlistPage />}
-            {currentPage === 'auth' && <AuthPage />}
-            {currentPage === 'orders' && <OrderTrackingPage />}
-            {currentPage === 'user-dashboard' && <UserDashboardPage />}
-            
-            {/* Content pages */}
-            {currentPage === 'about' && <AboutUsPage />}
-            {currentPage === 'faq' && <FaqPage />}
-            {currentPage === 'terms' && <TermsPage />}
-            {currentPage === 'blogs' && <BlogsPage />}
-          </main>
+            {/* Main Public View Container */}
+            <main className="app-container" style={{ flex: 1 }}>
+              {currentPage === 'home' && <HomePage />}
+              {currentPage === 'catalog' && <CatalogPage />}
+              {currentPage === 'product-detail' && <ProductDetailPage />}
+              {currentPage === 'cart' && <CartCheckoutPage />}
+              {currentPage === 'wishlist' && <WishlistPage />}
+              {currentPage === 'auth' && <AuthPage />}
+              {currentPage === 'forgot-password' && <ForgotPasswordPage />}
+              {currentPage === 'orders' && <OrderTrackingPage />}
+              {currentPage === 'user-dashboard' && <UserDashboardPage />}
+              
+              {/* Content pages */}
+              {currentPage === 'about' && <AboutUsPage />}
+              {currentPage === 'faq' && <FaqPage />}
+              {currentPage === 'terms' && <TermsPage />}
+              {currentPage === 'blogs' && <BlogsPage />}
+              {currentPage === 'categories' && <CategoriesPage />}
+            </main>
 
-          {/* Public Footer */}
-          <Footer />
+            {/* Public Footer */}
+            <Footer />
 
-          {/* Mobile Sticky Navigation Bar */}
-          <MobileNav />
-        </>
-      )}
+            {/* Mobile Sticky Navigation Bar */}
+            <MobileNav />
+          </>
+        )}
+      </Suspense>
 
     </div>
   );

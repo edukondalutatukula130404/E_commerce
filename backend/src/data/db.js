@@ -1,10 +1,10 @@
-// Database mock store for AURA E-Commerce REST API
+// Database mock store for SWITCHES E-Commerce REST API
 export const db = {
   products: [
     {
       id: "p1",
-      name: "AURA SoundPulse Wireless Pro",
-      slug: "aura-soundpulse-wireless-pro",
+      name: "SWITCHES SoundPulse Wireless Pro",
+      slug: "switches-soundpulse-wireless-pro",
       tagline: "Ultra-low latency ANC Headphones with Hifi Audio",
       price: 199.99,
       originalPrice: 249.99,
@@ -34,8 +34,8 @@ export const db = {
     },
     {
       id: "p2",
-      name: "AURA Horizon Smartwatch Ultra",
-      slug: "aura-horizon-smartwatch-ultra",
+      name: "SWITCHES Horizon Smartwatch Ultra",
+      slug: "switches-horizon-smartwatch-ultra",
       tagline: "Titanium Chassis with Sapphire OLED Display",
       price: 299.99,
       originalPrice: 349.99,
@@ -123,8 +123,8 @@ export const db = {
     },
     {
       id: "p5",
-      name: "AURA Lumina Smart Ambient Light",
-      slug: "aura-lumina-ambient-light",
+      name: "SWITCHES Lumina Smart Ambient Light",
+      slug: "switches-lumina-ambient-light",
       tagline: "Dynamic RGBIC Lightbar with Music Sync",
       price: 69.99,
       originalPrice: 89.99,
@@ -177,13 +177,167 @@ export const db = {
       stock: 22,
       isNew: false,
       isFeatured: false
+    },
+    {
+      id: "p7",
+      name: "SWITCHES Crimson Mechanical Switch Pack (110 Pcs)",
+      slug: "switches-crimson-mechanical-switch-pack",
+      tagline: "Pre-lubed Smooth Linear Mechanical Keyboard Switches",
+      price: 49.99,
+      originalPrice: 65.00,
+      category: "Switches",
+      subCategory: "Mechanical Switches",
+      rating: 5.0,
+      reviewCount: 142,
+      images: [
+        "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80"
+      ],
+      colors: [{ name: "Crimson Red", hex: "#BA0C2F" }],
+      sizes: ["110 Switches"],
+      description: "Ultra-smooth linear switches factory pre-lubricated with Krytox 205g0. Designed for ultra-fast typing speed and deep sound profile.",
+      features: ["45g Operating Force", "5-pin PCB Mount", "Factory Pre-lubed", "50M Keystrokes Lifespan"],
+      stock: 60,
+      isNew: true,
+      isFeatured: true
+    },
+    {
+      id: "p8",
+      name: "SWITCHES Cyberpunk PBT Keycap Set",
+      slug: "switches-cyberpunk-pbt-keycap-set",
+      tagline: "Double-shot Cherry Profile Custom Keycaps",
+      price: 39.99,
+      originalPrice: 49.99,
+      category: "Switches",
+      subCategory: "Keycaps",
+      rating: 4.9,
+      reviewCount: 96,
+      images: [
+        "https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=800&q=80"
+      ],
+      colors: [{ name: "Neon Red & Black", hex: "#BA0C2F" }],
+      sizes: ["Full 140 Key Set"],
+      description: "Durable PBT double-shot keycaps designed to resist shine and oil over years of intense gaming and typing.",
+      features: ["Double-shot PBT Material", "Cherry Profile", "Wide Compatibility (ANSI/ISO)", "Novelty Keys Included"],
+      stock: 45,
+      isNew: true,
+      isFeatured: true
+    },
+    {
+      id: "p9",
+      name: "SWITCHES Braided Aviator Coiled Cable",
+      slug: "switches-braided-aviator-coiled-cable",
+      tagline: "Custom USB-C Coiled Cable with GX16 Aviator Connector",
+      price: 29.99,
+      originalPrice: 39.99,
+      category: "Switches",
+      subCategory: "Custom Cables",
+      rating: 4.8,
+      reviewCount: 75,
+      images: [
+        "https://images.unsplash.com/photo-1544652478-6653e09f18a2?auto=format&fit=crop&w=800&q=80"
+      ],
+      colors: [{ name: "Crimson Red Tech Sleeve", hex: "#BA0C2F" }],
+      sizes: ["1.5m Coiled"],
+      description: "Double-sleeved custom USB-C cable featuring a detachable 5-pin GX16 metal aviator connector.",
+      features: ["Double Sleeved Techflex", "GX16 Aviator Connector", "Gold Plated USB-C", "Ultra Durable"],
+      stock: 50,
+      isNew: true,
+      isFeatured: true
+    },
+    {
+      id: "p10",
+      name: "SWITCHES TurboPower 25000mAh Power Bank",
+      slug: "switches-turbopower-power-bank",
+      tagline: "100W PD Ultra Fast Charging Station",
+      price: 79.99,
+      originalPrice: 99.99,
+      category: "Electronics",
+      subCategory: "Power Banks",
+      rating: 4.9,
+      reviewCount: 110,
+      images: [
+        "https://images.unsplash.com/photo-1609592424109-dd9892f1b177?auto=format&fit=crop&w=800&q=80"
+      ],
+      colors: [{ name: "Matte Slate", hex: "#2C3E50" }],
+      sizes: ["25000mAh"],
+      description: "Charge laptops, tablets, and phones at high speed with 100W Power Delivery and real-time OLED status display.",
+      features: ["100W Power Delivery", "25,000mAh Capacity", "Smart LED Power Display", "Triple Device Charge"],
+      stock: 30,
+      isNew: true,
+      isFeatured: false
+    },
+    {
+      id: "p11",
+      name: "SWITCHES Phone 1 Ultra 5G",
+      slug: "switches-phone-1-ultra",
+      tagline: "Snapdragon 8 Gen 3 with 200MP Camera",
+      price: 799.99,
+      originalPrice: 899.99,
+      category: "phones",
+      subCategory: "Smartphones",
+      rating: 4.9,
+      reviewCount: 310,
+      images: [
+        "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=800&q=80"
+      ],
+      colors: [{ name: "Phantom Black", hex: "#000000" }, { name: "Crimson Red", hex: "#BA0C2F" }],
+      sizes: ["256GB", "512GB"],
+      description: "Flagship mobile power with 120Hz LTPO AMOLED display, 200MP OIS primary sensor, and 65W fast charging.",
+      features: ["200MP OIS Camera System", "Snapdragon 8 Gen 3", "120Hz 3000-nit Display", "5000mAh Battery"],
+      stock: 25,
+      isNew: true,
+      isFeatured: true
+    },
+    {
+      id: "p12",
+      name: "SWITCHES Radiant Glow Herbal Face Wash",
+      slug: "switches-radiant-glow-herbal-face-wash",
+      tagline: "Gentle Foaming Deep Cleansing Face Wash",
+      price: 24.99,
+      originalPrice: 32.00,
+      category: "beauty",
+      subCategory: "facewash",
+      rating: 4.9,
+      reviewCount: 84,
+      images: [
+        "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80"
+      ],
+      colors: [{ name: "Botanical Green", hex: "#00b894" }],
+      sizes: ["200ml"],
+      description: "Deep purifying foaming face wash infused with natural botanical extracts, vitamin C, and hyaluronic acid.",
+      features: ["Dermatologist Tested", "Sulfate & Paraben Free", "Hydrating Formula"],
+      stock: 40,
+      isNew: true,
+      isFeatured: true
+    },
+    {
+      id: "p13",
+      name: "SWITCHES Smart Air Purifier HEPA 13",
+      slug: "switches-smart-air-purifier-hepa-13",
+      tagline: "Ultra Quiet Smart Home Air Filtration",
+      price: 149.99,
+      originalPrice: 189.99,
+      category: "home appliances",
+      subCategory: "Air Quality & Cooling",
+      rating: 4.9,
+      reviewCount: 42,
+      images: [
+        "https://images.unsplash.com/photo-1585771724684-38269d6639fd?auto=format&fit=crop&w=800&q=80"
+      ],
+      colors: [{ name: "Arctic White", hex: "#FFFFFF" }],
+      sizes: ["Medium Room"],
+      description: "Remove 99.97% of airborne dust, allergens, and odors with real-time AQI digital display and app control.",
+      features: ["True HEPA H13 Filter", "Real-time AQI Sensor", "Whisper-quiet 24dB Sleep Mode"],
+      stock: 20,
+      isNew: true,
+      isFeatured: true
     }
   ],
 
   users: [
     {
       id: "u1",
-      email: "alex@aura.io",
+      email: "alex@switches.io",
       password: "user123",
       name: "Alex Mercer",
       role: "customer",
@@ -191,7 +345,7 @@ export const db = {
     },
     {
       id: "u2",
-      email: "admin@aura.io",
+      email: "admin@switches.io",
       password: "admin123",
       name: "Elena Rostova (Admin)",
       role: "admin",
@@ -200,7 +354,7 @@ export const db = {
   ],
 
   vendors: [
-    { id: 'v1', name: 'AURA Audio Labs', store: 'Aura Official Store', commission: 10, totalSales: 18400, pendingPayout: 16560, status: 'Active' },
+    { id: 'v1', name: 'SWITCHES Audio Labs', store: 'Switches Official Store', commission: 10, totalSales: 18400, pendingPayout: 16560, status: 'Active' },
     { id: 'v2', name: 'SWITCHES Apparel Ltd', store: 'Switches Wearables', commission: 12, totalSales: 9200, pendingPayout: 8096, status: 'Active' },
     { id: 'v3', name: 'SmartHome Ambient', store: 'Ambient Tech Store', commission: 8, totalSales: 7100, pendingPayout: 6532, status: 'Active' }
   ],
@@ -215,12 +369,30 @@ export const db = {
   ],
 
   categories: [
-    { id: "c1", name: "Tech", slug: "tech", icon: "Cpu", color: "#00CEC9" },
-    { id: "c2", name: "Apparel", slug: "apparel", icon: "Shirt", color: "#6C5CE7" },
-    { id: "c3", name: "Home", slug: "home", icon: "HomeIcon", color: "#FDCB6E" },
-    { id: "c4", name: "Accessories", slug: "accessories", icon: "Briefcase", color: "#E84393" },
-    { id: "c5", name: "Switches", slug: "switches", icon: "Cpu", color: "#ba0c2f" },
-    { id: "c6", name: "Electronics", slug: "electronics", icon: "Cpu", color: "#00b894" }
+    { id: "c1", name: "Tech", slug: "tech", icon: "Cpu", color: "#00CEC9", subCategories: ["Headphones & ANC", "Smartwatches", "Keyboards", "Smartphones", "Audio"] },
+    { id: "c2", name: "Apparel", slug: "apparel", icon: "Shirt", color: "#6C5CE7", subCategories: ["Hoodies", "Activewear", "Jackets", "Caps & Hats"] },
+    { id: "c3", name: "Home", slug: "home", icon: "HomeIcon", color: "#FDCB6E", subCategories: ["Ambient Lighting", "Desk Accessories", "Smart Gadgets"] },
+    { id: "c4", name: "Accessories", slug: "accessories", icon: "Briefcase", color: "#E84393", subCategories: ["Backpacks", "Travel Gear", "Cases & Sleeves"] },
+    { id: "c5", name: "Switches", slug: "switches", icon: "Cpu", color: "#ba0c2f", subCategories: ["Mechanical Switches", "Keycaps", "Custom Cables"] },
+  ],
+
+  users: [
+    {
+      id: "u1",
+      name: "Elena Rostova (Admin)",
+      email: "admin@switches.io",
+      password: "admin123",
+      role: "admin",
+      avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=150&q=80"
+    },
+    {
+      id: "u2",
+      name: "Alex Mercer",
+      email: "alex@switches.io",
+      password: "user123",
+      role: "customer",
+      avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80"
+    }
   ],
 
   payments: [
@@ -259,7 +431,7 @@ export const db = {
       items: [
         {
           productId: "p1",
-          name: "AURA SoundPulse Wireless Pro",
+          name: "SWITCHES SoundPulse Wireless Pro",
           price: 199.99,
           quantity: 1,
           selectedColor: "Electric Indigo",
@@ -270,7 +442,7 @@ export const db = {
       discount: 0,
       shippingAddress: {
         fullName: "Alex Mercer",
-        email: "alex@aura.io",
+        email: "alex@switches.io",
         street: "742 Evergreen Terrace",
         city: "San Francisco",
         zip: "94107"

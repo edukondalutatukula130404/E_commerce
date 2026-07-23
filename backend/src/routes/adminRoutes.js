@@ -1,170 +1,212 @@
 import express from 'express';
-import { db } from '../data/db.js';
+import crypto from 'crypto';
+import { User } from '../models/User.js';
+import { Product } from '../models/Product.js';
+import { Order } from '../models/Order.js';
+import { Vendor } from '../models/Vendor.js';
+import { Category } from '../models/Category.js';
+import { Banner } from '../models/Banner.js';
+import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// GET /api/admin/metrics
-router.get('/metrics', (req, res) => {
-  const totalRevenue = db.orders.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
-  const totalOrders = db.orders.length;
-  const totalProducts = db.products.length;
-  const lowStockCount = db.products.filter(p => p.stock <= 15).length;
+// GET /api/admin/metrics (Protected, Admin Only)
+router.get('/metrics', protect, adminOnly, async (req, res) => {
+  try {
+    const orders = await Order.find({});
+    const products = await Product.find({});
 
-  res.json({
-    success: true,
-    data: {
-      totalRevenue,
-      totalOrders,
-      totalProducts,
-      lowStockCount
-    }
-  });
+    const totalRevenue = orders.reduce((acc, order) => acc + (order.totalAmount || 0), 0);
+    const totalOrders = orders.length;
+    const totalProducts = products.length;
+    const lowStockCount = products.filter(p => p.stock <= 15).length;
+
+    res.json({
+      success: true,
+      data: {
+        totalRevenue,
+        totalOrders,
+        totalProducts,
+        lowStockCount
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 // GET /api/admin/inventory
-router.get('/inventory', (req, res) => {
-  res.json({ success: true, data: db.products });
+router.get('/inventory', async (req, res) => {
+  try {
+    const products = await Product.find({});
+    res.json({ success: true, data: products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
-// GET /api/admin/vendors
-router.get('/vendors', (req, res) => {
-  res.json({ success: true, data: db.vendors || [] });
+// VENDORS CRUD
+router.get('/vendors', async (req, res) => {
+  try {
+    const vendors = await Vendor.find({});
+    res.json({ success: true, data: vendors });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
-// POST /api/admin/vendors
-router.post('/vendors', (req, res) => {
-  const newVendor = {
-    id: `v_${Date.now()}`,
-    name: req.body.name,
-    store: req.body.store,
-    commission: Number(req.body.commission) || 10,
-    totalSales: 0,
-    pendingPayout: 0,
-    status: 'Active'
-  };
-  if (!db.vendors) db.vendors = [];
-  db.vendors.push(newVendor);
-  res.status(201).json({ success: true, data: newVendor });
+router.post('/vendors', protect, adminOnly, async (req, res) => {
+  try {
+    const vendor = await Vendor.create(req.body);
+    if (req.io) req.io.emit('vendors:changed', await Vendor.find({}));
+    res.status(201).json({ success: true, data: vendor });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-// POST /api/admin/vendors/:id/payout
-router.post('/vendors/:id/payout', (req, res) => {
-  const vendor = (db.vendors || []).find(v => v.id === req.params.id);
-  if (!vendor) return res.status(404).json({ success: false, message: 'Vendor not found' });
-  vendor.pendingPayout = 0;
-  res.json({ success: true, data: vendor });
+router.post('/vendors/:id/payout', protect, adminOnly, async (req, res) => {
+  try {
+    const vendor = await Vendor.findById(req.params.id);
+    if (!vendor) return res.status(404).json({ success: false, message: 'Vendor not found' });
+    vendor.pendingPayout = 0;
+    await vendor.save();
+    if (req.io) req.io.emit('vendors:changed', await Vendor.find({}));
+    res.json({ success: true, data: vendor });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-// DELETE /api/admin/vendors/:id
-router.delete('/vendors/:id', (req, res) => {
-  const index = (db.vendors || []).findIndex(v => v.id === req.params.id);
-  if (index === -1) return res.status(404).json({ success: false, message: 'Vendor not found' });
-  const deleted = db.vendors.splice(index, 1);
-  res.json({ success: true, data: deleted[0] });
+router.delete('/vendors/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const deleted = await Vendor.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Vendor not found' });
+    if (req.io) req.io.emit('vendors:changed', await Vendor.find({}));
+    res.json({ success: true, data: deleted });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-// GET /api/admin/users
-router.get('/users', (req, res) => {
-  const sanitizedUsers = db.users.map(({ password, ...u }) => u);
-  res.json({ success: true, data: sanitizedUsers });
+// USERS CRUD (Protected, Admin Only)
+router.get('/users', protect, adminOnly, async (req, res) => {
+  try {
+    const users = await User.find({}).select('-password');
+    res.json({ success: true, data: users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
-// PUT /api/admin/users/:id/role
-router.put('/users/:id/role', (req, res) => {
-  const user = db.users.find(u => u.id === req.params.id);
-  if (!user) return res.status(404).json({ success: false, message: 'User not found' });
-  user.role = req.body.role || user.role;
-  const { password, ...userWithoutPass } = user;
-  res.json({ success: true, data: userWithoutPass });
+router.put('/users/:id/role', protect, adminOnly, async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) return res.status(404).json({ success: false, message: 'User not found' });
+    user.role = req.body.role || user.role;
+    await user.save();
+    if (req.io) req.io.emit('users:changed', await User.find({}).select('-password'));
+    res.json({ success: true, data: user });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-// DELETE /api/admin/users/:id
-router.delete('/users/:id', (req, res) => {
-  const index = db.users.findIndex(u => u.id === req.params.id);
-  if (index === -1) return res.status(404).json({ success: false, message: 'User not found' });
-  const deleted = db.users.splice(index, 1);
-  const { password, ...sanitized } = deleted[0];
-  res.json({ success: true, data: sanitized });
+router.delete('/users/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const deleted = await User.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'User not found' });
+    if (req.io) req.io.emit('users:changed', await User.find({}).select('-password'));
+    res.json({ success: true, data: deleted });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
 // CATEGORIES CRUD
-router.get('/categories', (req, res) => {
-  res.json({ success: true, data: db.categories || [] });
-});
-
-router.post('/categories', (req, res) => {
-  const newCat = {
-    id: `c_${Date.now()}`,
-    name: req.body.name,
-    slug: (req.body.name || '').toLowerCase().replace(/\s+/g, '-'),
-    icon: req.body.icon || 'Cpu',
-    color: req.body.color || '#ba0c2f'
-  };
-  if (!db.categories) db.categories = [];
-  db.categories.push(newCat);
-  res.status(201).json({ success: true, data: newCat });
-});
-
-router.put('/categories/:id', (req, res) => {
-  const cat = (db.categories || []).find(c => c.id === req.params.id);
-  if (!cat) return res.status(404).json({ success: false, message: 'Category not found' });
-  if (req.body.name) {
-    cat.name = req.body.name;
-    cat.slug = req.body.name.toLowerCase().replace(/\s+/g, '-');
+router.get('/categories', async (req, res) => {
+  try {
+    const categories = await Category.find({});
+    res.json({ success: true, data: categories });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  if (req.body.icon) cat.icon = req.body.icon;
-  if (req.body.color) cat.color = req.body.color;
-  res.json({ success: true, data: cat });
 });
 
-router.delete('/categories/:id', (req, res) => {
-  const index = (db.categories || []).findIndex(c => c.id === req.params.id);
-  if (index === -1) return res.status(404).json({ success: false, message: 'Category not found' });
-  const deleted = db.categories.splice(index, 1);
-  res.json({ success: true, data: deleted[0] });
+router.post('/categories', protect, adminOnly, async (req, res) => {
+  try {
+    const slug = (req.body.name || '').toLowerCase().replace(/\s+/g, '-');
+    const category = await Category.create({ ...req.body, slug });
+    if (req.io) req.io.emit('categories:changed', await Category.find({}));
+    res.status(201).json({ success: true, data: category });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-// PAYMENTS CRUD
-router.get('/payments', (req, res) => {
-  res.json({ success: true, data: db.payments || [] });
+router.put('/categories/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!category) return res.status(404).json({ success: false, message: 'Category not found' });
+    if (req.io) req.io.emit('categories:changed', await Category.find({}));
+    res.json({ success: true, data: category });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-router.put('/payments/:id', (req, res) => {
-  const p = (db.payments || []).find(pay => pay.id === req.params.id);
-  if (!p) return res.status(404).json({ success: false, message: 'Payment not found' });
-  p.status = req.body.status || p.status;
-  res.json({ success: true, data: p });
+router.delete('/categories/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const deleted = await Category.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Category not found' });
+    if (req.io) req.io.emit('categories:changed', await Category.find({}));
+    res.json({ success: true, data: deleted });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
 // BANNERS CRUD
-router.get('/banners', (req, res) => {
-  res.json({ success: true, data: db.banners || [] });
+router.get('/banners', async (req, res) => {
+  try {
+    const banners = await Banner.find({});
+    res.json({ success: true, data: banners });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
-router.post('/banners', (req, res) => {
-  const newBanner = {
-    id: `b_${Date.now()}`,
-    title: req.body.title,
-    subtitle: req.body.subtitle || '',
-    ctaText: req.body.ctaText || 'Shop Now',
-    imageUrl: req.body.imageUrl || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
-    tag: req.body.tag || 'PROMOTION',
-    category: req.body.category || 'Tech',
-    isActive: req.body.isActive !== undefined ? req.body.isActive : true
-  };
-  if (!db.banners) db.banners = [];
-  db.banners.push(newBanner);
-  res.status(201).json({ success: true, data: newBanner });
+router.post('/banners', protect, adminOnly, async (req, res) => {
+  try {
+    const banner = await Banner.create(req.body);
+    if (req.io) req.io.emit('banners:changed', await Banner.find({}));
+    res.status(201).json({ success: true, data: banner });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-router.put('/banners/:id', (req, res) => {
-  const banner = (db.banners || []).find(b => b.id === req.params.id);
-  if (!banner) return res.status(404).json({ success: false, message: 'Banner not found' });
-  Object.assign(banner, req.body);
-  res.json({ success: true, data: banner });
+router.put('/banners/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const banner = await Banner.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!banner) return res.status(404).json({ success: false, message: 'Banner not found' });
+    if (req.io) req.io.emit('banners:changed', await Banner.find({}));
+    res.json({ success: true, data: banner });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-import crypto from 'crypto';
+router.delete('/banners/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const deleted = await Banner.findByIdAndDelete(req.params.id);
+    if (!deleted) return res.status(404).json({ success: false, message: 'Banner not found' });
+    if (req.io) req.io.emit('banners:changed', await Banner.find({}));
+    res.json({ success: true, data: deleted });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
+});
 
 // IMAGE UPLOAD TO CLOUDINARY
 router.post('/upload', async (req, res) => {
@@ -174,22 +216,16 @@ router.post('/upload', async (req, res) => {
       return res.status(400).json({ success: false, message: 'No image data provided' });
     }
 
-    console.log('[UPLOAD] Received image upload request, data length:', image.length);
-
-    const cloudName = 'ypbj1iiy';  // Your Cloudinary cloud name
+    const cloudName = 'ypbj1iiy';
     const apiKey = '228485191495714';
     const apiSecret = 'gQm7RgW11x_hLyu_LkZIkJ1xlvU';
     const timestamp = Math.round(Date.now() / 1000);
-    
-    // Generate signature: SHA1 of "timestamp=<value><apiSecret>"
+
     const signature = crypto
       .createHash('sha1')
       .update(`timestamp=${timestamp}${apiSecret}`)
       .digest('hex');
 
-    console.log('[UPLOAD] Signature generated, timestamp:', timestamp);
-
-    // Upload to Cloudinary
     const formData = new URLSearchParams();
     formData.append('file', image);
     formData.append('api_key', apiKey);
@@ -197,7 +233,6 @@ router.post('/upload', async (req, res) => {
     formData.append('signature', signature);
 
     const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
-    console.log('[UPLOAD] Posting to:', cloudinaryUrl);
 
     const response = await fetch(cloudinaryUrl, {
       method: 'POST',
@@ -205,30 +240,18 @@ router.post('/upload', async (req, res) => {
     });
 
     const result = await response.json();
-    console.log('[UPLOAD] Cloudinary response:', result);
 
     if (result.secure_url) {
-      console.log('[UPLOAD] Success! URL:', result.secure_url);
       res.json({ success: true, url: result.secure_url });
     } else {
-      console.error('[UPLOAD] Cloudinary error:', result.error);
-      res.status(500).json({ 
-        success: false, 
-        message: result.error?.message || 'Cloudinary upload failed',
-        error: result.error
+      res.status(500).json({
+        success: false,
+        message: result.error?.message || 'Cloudinary upload failed'
       });
     }
   } catch (err) {
-    console.error('[UPLOAD] Exception:', err);
     res.status(500).json({ success: false, message: err.message || 'Upload failed' });
   }
-});
-
-router.delete('/banners/:id', (req, res) => {
-  const index = (db.banners || []).findIndex(b => b.id === req.params.id);
-  if (index === -1) return res.status(404).json({ success: false, message: 'Banner not found' });
-  const deleted = db.banners.splice(index, 1);
-  res.json({ success: true, data: deleted[0] });
 });
 
 export default router;

@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Shield, ArrowLeft } from 'lucide-react';
+import { Shield, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export const AuthPage = () => {
   const { user, setUser, loginWithCredentials, setCurrentPage, showToast } = useApp();
@@ -8,6 +8,13 @@ export const AuthPage = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    if (user?.role === 'admin') {
+      setCurrentPage('admin');
+    }
+  }, [user, setCurrentPage]);
 
   const handleCredentialSubmit = async (e) => {
     e.preventDefault();
@@ -20,19 +27,19 @@ export const AuthPage = () => {
 
   const autofillSeed = (type) => {
     if (type === 'admin') {
-      setEmail('admin@aura.io');
+      setEmail('admin@switches.io');
       setPassword('admin123');
     } else {
-      setEmail('alex@aura.io');
+      setEmail('alex@switches.io');
       setPassword('user123');
     }
   };
 
   const handleDemoLogin = (role) => {
     if (role === 'admin') {
-      loginWithCredentials('admin@aura.io', 'admin123');
+      loginWithCredentials('admin@switches.io', 'admin123');
     } else {
-      loginWithCredentials('alex@aura.io', 'user123');
+      loginWithCredentials('alex@switches.io', 'user123');
     }
   };
 
@@ -104,29 +111,6 @@ export const AuthPage = () => {
           </div>
         ) : (
           <>
-            {/* Seed Credentials Notice Box */}
-            <div style={{
-              background: 'var(--bg-secondary)',
-              border: '1px solid var(--border-active)',
-              borderRadius: 'var(--radius-md)',
-              padding: '0.85rem',
-              fontSize: '0.78rem'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontWeight: 800, marginBottom: '0.4rem', color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
-                <Shield size={15} /> Seeded Admin & Customer Credentials
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span><strong>Admin:</strong> admin@aura.io / admin123</span>
-                  <button type="button" onClick={() => autofillSeed('admin')} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>Autofill</button>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span><strong>Customer:</strong> alex@aura.io / user123</span>
-                  <button type="button" onClick={() => autofillSeed('customer')} className="btn btn-secondary" style={{ padding: '0.2rem 0.5rem', fontSize: '0.7rem' }}>Autofill</button>
-                </div>
-              </div>
-            </div>
-
             <form onSubmit={handleCredentialSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
               {isRegister && (
                 <div>
@@ -145,7 +129,7 @@ export const AuthPage = () => {
                 <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Email Address</label>
                 <input
                   type="email"
-                  placeholder="admin@aura.io"
+                  placeholder="name@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
@@ -153,14 +137,47 @@ export const AuthPage = () => {
               </div>
 
               <div>
-                <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Password</label>
-                <input
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{ width: '100%', padding: '0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
-                />
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.2rem' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 700 }}>Password</label>
+                  {!isRegister && (
+                    <button
+                      type="button"
+                      onClick={() => setCurrentPage('forgot-password')}
+                      style={{ background: 'none', border: 'none', color: 'hsl(var(--hue-primary), 85%, 50%)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer' }}
+                    >
+                      Forgot Password?
+                    </button>
+                  )}
+                </div>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    placeholder="••••••••"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    style={{ width: '100%', padding: '0.6rem 2.4rem 0.6rem 0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    style={{
+                      position: 'absolute',
+                      right: '0.6rem',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--text-muted)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '0.2rem'
+                    }}
+                    title={showPassword ? 'Hide Password' : 'Show Password'}
+                  >
+                    {showPassword ? <Eye size={16} color="hsl(var(--hue-primary), 85%, 50%)" /> : <EyeOff size={16} />}
+                  </button>
+                </div>
               </div>
 
               <button type="submit" className="btn btn-primary" style={{ padding: '0.7rem', marginTop: '0.35rem', fontSize: '0.875rem' }}>
@@ -168,21 +185,7 @@ export const AuthPage = () => {
               </button>
             </form>
 
-            <div style={{ paddingTop: '0.85rem', borderTop: '1px solid var(--border-light)', textAlign: 'center' }}>
-              <p style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--text-muted)', marginBottom: '0.65rem' }}>
-                ⚡ Quick 1-Click Seed Login:
-              </p>
-              <div style={{ display: 'flex', gap: '0.5rem' }}>
-                <button onClick={() => handleDemoLogin('customer')} className="btn btn-secondary" style={{ flex: 1, fontSize: '0.78rem', padding: '0.45rem' }}>
-                  Customer Seed Login
-                </button>
-                <button onClick={() => handleDemoLogin('admin')} className="btn btn-secondary" style={{ flex: 1, fontSize: '0.78rem', padding: '0.45rem' }}>
-                  <Shield size={13} color="hsl(var(--hue-primary), 85%, 50%)" /> Admin Seed Login
-                </button>
-              </div>
-            </div>
-
-            <div style={{ textAlign: 'center', fontSize: '0.8rem' }}>
+            <div style={{ textAlign: 'center', fontSize: '0.8rem', marginTop: '0.5rem' }}>
               <button 
                 onClick={() => setIsRegister(!isRegister)} 
                 style={{ background: 'none', border: 'none', color: 'hsl(var(--hue-primary), 85%, 50%)', fontWeight: 700, cursor: 'pointer' }}

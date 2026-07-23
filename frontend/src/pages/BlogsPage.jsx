@@ -8,7 +8,7 @@ export const BlogsPage = () => {
   const blogs = [
     {
       id: "b1",
-      title: "The Architecture of Sub-Second E-Commerce: How We Built AURA",
+      title: "The Architecture of Sub-Second E-Commerce: How We Built SWITCHES",
       category: "Tech",
       readTime: "5 min read",
       date: "July 20, 2026",
@@ -16,7 +16,7 @@ export const BlogsPage = () => {
       authorRole: "Lead Architect",
       summary: "Exploring modern CSS hardware acceleration, Vite concurrent HMR, and optimistic state synchronization for 60 FPS mobile shopping.",
       image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80",
-      content: `In the modern digital landscape, millisecond delays convert directly to lost revenue. When building AURA, our engineering goal was simple: achieve zero-friction UI rendering across any viewport size from a 320px mobile phone to a 4K desktop display.
+      content: `In the modern digital landscape, millisecond delays convert directly to lost revenue. When building SWITCHES, our engineering goal was simple: achieve zero-friction UI rendering across any viewport size from a 320px mobile phone to a 4K desktop display.
 
 ### 1. Hardware-Accelerated CSS Transitions
 By relying exclusively on CSS \`transform3d\` and \`opacity\` properties, we ensure the GPU handles all card elevations, spring physics drawer slide-overs, and active button scaling without causing main-thread layout reflows.
@@ -25,7 +25,7 @@ By relying exclusively on CSS \`transform3d\` and \`opacity\` properties, we ens
 Search responsiveness is critical for mobile shoppers on the go. Our custom debouncer allows instant query filtering under 10ms delay.
 
 ### 3. Glassmorphism Aesthetics
-Utilizing HSL CSS custom properties and \`backdrop-filter: blur(14px)\`, AURA delivers futuristic glass surfaces with a clean light aesthetic.`
+Utilizing HSL CSS custom properties and \`backdrop-filter: blur(14px)\`, SWITCHES delivers futuristic glass surfaces with a clean light aesthetic.`
     },
     {
       id: "b2",
@@ -93,7 +93,7 @@ Titanium drivers offer extreme stiffness-to-weight ratios, eliminating harmonic 
           <BookOpen size={28} />
         </div>
         <h1 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800, marginBottom: '0.5rem' }}>
-          AURA Insights & Engineering Blog
+          SWITCHES Insights & Engineering Blog
         </h1>
         <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
           Articles on modern hardware, UI performance, smart home automation, and product design.

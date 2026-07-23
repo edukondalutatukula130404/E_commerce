@@ -1,79 +1,158 @@
 import express from 'express';
-import { db } from '../data/db.js';
+import { Product } from '../models/Product.js';
+import { protect, adminOnly } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// GET /api/products - Get all products with filtering & search
-router.get('/products', (req, res) => {
-  const { q, category, sort } = req.query;
-  let result = [...db.products];
+// GET /api/products - Get all products with filtering, search & sorting
+router.get('/products', async (req, res) => {
+  try {
+    const { q, category, sort } = req.query;
+    let queryFilter = {};
 
-  // Search filter
-  if (q) {
-    const query = q.toLowerCase();
-    result = result.filter(p => 
-      p.name.toLowerCase().includes(query) || 
-      p.description.toLowerCase().includes(query) ||
-      p.category.toLowerCase().includes(query)
-    );
+    if (q) {
+      const regex = new RegExp(q, 'i');
+      queryFilter.$or = [
+        { name: regex },
+        { description: regex },
+        { category: regex }
+      ];
+    }
+
+    if (category && category !== 'All') {
+      queryFilter.category = new RegExp(`^${category}$`, 'i');
+    }
+
+    let query = Product.find(queryFilter);
+
+    if (sort === 'price-low') {
+      query = query.sort({ price: 1 });
+    } else if (sort === 'price-high') {
+      query = query.sort({ price: -1 });
+    } else if (sort === 'rating') {
+      query = query.sort({ rating: -1 });
+    } else {
+      query = query.sort({ createdAt: -1 });
+    }
+
+    const products = await query;
+
+    // Transform products to include fallback `id` field for frontend compatibility
+    const mapped = products.map(p => {
+      const doc = p.toObject();
+      doc.id = doc._id.toString();
+      return doc;
+    });
+
+    res.json({ success: true, count: mapped.length, data: mapped });
+  } catch (error) {
+    console.error('Fetch Products Error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch products' });
   }
-
-  // Category filter
-  if (category && category !== 'All') {
-    result = result.filter(p => p.category.toLowerCase() === category.toLowerCase());
-  }
-
-  // Sorting
-  if (sort === 'price-low') {
-    result.sort((a, b) => a.price - b.price);
-  } else if (sort === 'price-high') {
-    result.sort((a, b) => b.price - a.price);
-  } else if (sort === 'rating') {
-    result.sort((a, b) => b.rating - a.rating);
-  }
-
-  res.json({ success: true, count: result.length, data: result });
 });
 
-// GET /api/products/:id - Get single product
-router.get('/products/:id', (req, res) => {
-  const product = db.products.find(p => p.id === req.params.id || p.slug === req.params.id);
-  if (!product) {
-    return res.status(404).json({ success: false, message: 'Product not found' });
+// GET /api/products/:id - Get single product by Mongo _id or slug
+router.get('/products/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    let product;
+
+    if (id.match(/^[0-9a-fA-F]{24}$/)) {
+      product = await Product.findById(id);
+    }
+
+    if (!product) {
+      product = await Product.findOne({ $or: [{ slug: id }, { name: id }] });
+    }
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    const doc = product.toObject();
+    doc.id = doc._id.toString();
+
+    res.json({ success: true, data: doc });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
-  res.json({ success: true, data: product });
 });
 
-// POST /api/products - Create product (Admin)
-router.post('/products', (req, res) => {
-  const newProduct = {
-    id: `p${db.products.length + 1}`,
-    ...req.body,
-    rating: 5.0,
-    reviewCount: 0
-  };
-  db.products.push(newProduct);
-  res.status(201).json({ success: true, data: newProduct });
+// POST /api/products - Create product (Protected, Admin Only)
+router.post('/products', protect, adminOnly, async (req, res) => {
+  try {
+    const product = await Product.create(req.body);
+    const doc = product.toObject();
+    doc.id = doc._id.toString();
+
+    if (req.io) {
+      const allProducts = await Product.find({});
+      req.io.emit('products:changed', allProducts);
+      req.io.emit('product:created', doc);
+    }
+
+    res.status(201).json({ success: true, data: doc });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
+  }
 });
 
-// PUT /api/products/:id - Update product (Admin)
-router.put('/products/:id', (req, res) => {
-  const index = db.products.findIndex(p => p.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ success: false, message: 'Product not found' });
+// PUT /api/products/:id - Update product (Protected, Admin Only)
+router.put('/products/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    let product = await Product.findById(id);
+
+    if (!product) {
+      product = await Product.findOne({ slug: id });
+    }
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    Object.assign(product, req.body);
+    await product.save();
+
+    const doc = product.toObject();
+    doc.id = doc._id.toString();
+
+    if (req.io) {
+      const allProducts = await Product.find({});
+      req.io.emit('products:changed', allProducts);
+      req.io.emit('product:updated', doc);
+    }
+
+    res.json({ success: true, data: doc });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
-  db.products[index] = { ...db.products[index], ...req.body };
-  res.json({ success: true, data: db.products[index] });
 });
 
-// DELETE /api/products/:id - Delete product (Admin)
-router.delete('/products/:id', (req, res) => {
-  const index = db.products.findIndex(p => p.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ success: false, message: 'Product not found' });
+// DELETE /api/products/:id - Delete product (Protected, Admin Only)
+router.delete('/products/:id', protect, adminOnly, async (req, res) => {
+  try {
+    const { id } = req.params;
+    let product = await Product.findByIdAndDelete(id);
+
+    if (!product) {
+      product = await Product.findOneAndDelete({ slug: id });
+    }
+
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+
+    if (req.io) {
+      const allProducts = await Product.find({});
+      req.io.emit('products:changed', allProducts);
+      req.io.emit('product:deleted', id);
+    }
+
+    res.json({ success: true, data: product });
+  } catch (error) {
+    res.status(400).json({ success: false, message: error.message });
   }
-  const deleted = db.products.splice(index, 1);
-  res.json({ success: true, data: deleted[0] });
 });
 
 export default router;

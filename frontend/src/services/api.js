@@ -1,6 +1,21 @@
-// API Client for AURA E-Commerce Backend
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL;
+  }
+  const hostname = window.location.hostname || 'localhost';
+  return `http://${hostname}:5000/api`;
+};
 
-const API_BASE = '/api';
+const API_BASE = getApiBaseUrl();
+
+const getHeaders = () => {
+  const token = localStorage.getItem('switches_auth_token') || localStorage.getItem('token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 export const api = {
   // Products
@@ -11,7 +26,7 @@ export const api = {
       if (!res.ok) throw new Error('Failed to fetch products');
       return await res.json();
     } catch (err) {
-      console.warn('Backend offline, using fallback mock product data', err);
+      console.warn('Backend offline, using fallback product data', err);
       return null;
     }
   },
@@ -32,10 +47,15 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/auth/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ email, password })
       });
-      return await res.json();
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('switches_auth_token', data.token);
+      }
+      return data;
     } catch (err) {
       return { success: false, message: 'Server unreachable' };
     }
@@ -45,8 +65,38 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ name, email, password })
+      });
+      const data = await res.json();
+      if (data.token) {
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('switches_auth_token', data.token);
+      }
+      return data;
+    } catch (err) {
+      return { success: false, message: 'Server unreachable' };
+    }
+  },
+
+  getCurrentUser: async () => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/me`, {
+        headers: getHeaders()
+      });
+      if (!res.ok) return null;
+      return await res.json();
+    } catch (err) {
+      return null;
+    }
+  },
+
+  forgotPassword: async (email) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ email })
       });
       return await res.json();
     } catch (err) {
@@ -54,12 +104,38 @@ export const api = {
     }
   },
 
-  // Product CRUD
+  verifyOtp: async (email, otp) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/verify-otp`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ email, otp })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: 'Server unreachable' };
+    }
+  },
+
+  resetPassword: async (email, otp, newPassword) => {
+    try {
+      const res = await fetch(`${API_BASE}/auth/reset-password`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ email, otp, newPassword })
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: 'Server unreachable' };
+    }
+  },
+
+  // Product CRUD (Admin Protected)
   createProduct: async (productData) => {
     try {
       const res = await fetch(`${API_BASE}/products`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(productData)
       });
       return await res.json();
@@ -72,7 +148,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/products/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(productData)
       });
       return await res.json();
@@ -84,7 +160,8 @@ export const api = {
   deleteProduct: async (id) => {
     try {
       const res = await fetch(`${API_BASE}/products/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getHeaders()
       });
       return await res.json();
     } catch (err) {
@@ -95,7 +172,9 @@ export const api = {
   // Orders
   getOrders: async () => {
     try {
-      const res = await fetch(`${API_BASE}/orders`);
+      const res = await fetch(`${API_BASE}/orders`, {
+        headers: getHeaders()
+      });
       if (!res.ok) throw new Error('Failed to fetch orders');
       return await res.json();
     } catch (err) {
@@ -107,7 +186,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(orderData)
       });
       return await res.json();
@@ -120,7 +199,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/orders/${id}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ status })
       });
       return await res.json();
@@ -132,7 +211,8 @@ export const api = {
   deleteOrder: async (id) => {
     try {
       const res = await fetch(`${API_BASE}/orders/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getHeaders()
       });
       return await res.json();
     } catch (err) {
@@ -143,7 +223,9 @@ export const api = {
   // Vendors
   getVendors: async () => {
     try {
-      const res = await fetch(`${API_BASE}/admin/vendors`);
+      const res = await fetch(`${API_BASE}/admin/vendors`, {
+        headers: getHeaders()
+      });
       if (!res.ok) throw new Error('Failed to fetch vendors');
       return await res.json();
     } catch (err) {
@@ -155,7 +237,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/admin/vendors`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(vendorData)
       });
       return await res.json();
@@ -167,7 +249,8 @@ export const api = {
   disburseVendorPayout: async (id) => {
     try {
       const res = await fetch(`${API_BASE}/admin/vendors/${id}/payout`, {
-        method: 'POST'
+        method: 'POST',
+        headers: getHeaders()
       });
       return await res.json();
     } catch (err) {
@@ -178,7 +261,8 @@ export const api = {
   deleteVendor: async (id) => {
     try {
       const res = await fetch(`${API_BASE}/admin/vendors/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getHeaders()
       });
       return await res.json();
     } catch (err) {
@@ -201,7 +285,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/admin/categories`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(categoryData)
       });
       return await res.json();
@@ -214,7 +298,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/admin/categories/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(categoryData)
       });
       return await res.json();
@@ -226,7 +310,22 @@ export const api = {
   deleteCategory: async (id) => {
     try {
       const res = await fetch(`${API_BASE}/admin/categories/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getHeaders()
+      });
+      return await res.json();
+    } catch (err) {
+      return { success: false, message: 'Server unreachable' };
+    }
+  },
+
+  uploadImage: async (base64Image) => {
+    try {
+      const backendUrl = window.location.hostname === 'localhost' ? 'http://localhost:5000' : '';
+      const res = await fetch(`${backendUrl}/api/admin/upload`, {
+        method: 'POST',
+        headers: getHeaders(),
+        body: JSON.stringify({ image: base64Image })
       });
       return await res.json();
     } catch (err) {
@@ -237,7 +336,9 @@ export const api = {
   // Payments
   getPayments: async () => {
     try {
-      const res = await fetch(`${API_BASE}/admin/payments`);
+      const res = await fetch(`${API_BASE}/admin/payments`, {
+        headers: getHeaders()
+      });
       if (!res.ok) throw new Error('Failed to fetch payments');
       return await res.json();
     } catch (err) {
@@ -249,7 +350,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/admin/payments/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ status })
       });
       return await res.json();
@@ -273,7 +374,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/admin/banners`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(bannerData)
       });
       return await res.json();
@@ -286,7 +387,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(bannerData)
       });
       return await res.json();
@@ -298,7 +399,8 @@ export const api = {
   deleteBanner: async (id) => {
     try {
       const res = await fetch(`${API_BASE}/admin/banners/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getHeaders()
       });
       return await res.json();
     } catch (err) {
@@ -309,7 +411,9 @@ export const api = {
   // Users
   getUsers: async () => {
     try {
-      const res = await fetch(`${API_BASE}/admin/users`);
+      const res = await fetch(`${API_BASE}/admin/users`, {
+        headers: getHeaders()
+      });
       if (!res.ok) throw new Error('Failed to fetch users');
       return await res.json();
     } catch (err) {
@@ -321,7 +425,7 @@ export const api = {
     try {
       const res = await fetch(`${API_BASE}/admin/users/${id}/role`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ role })
       });
       return await res.json();
@@ -333,7 +437,8 @@ export const api = {
   deleteUser: async (id) => {
     try {
       const res = await fetch(`${API_BASE}/admin/users/${id}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: getHeaders()
       });
       return await res.json();
     } catch (err) {
@@ -344,7 +449,9 @@ export const api = {
   // Admin Metrics
   getAdminMetrics: async () => {
     try {
-      const res = await fetch(`${API_BASE}/admin/metrics`);
+      const res = await fetch(`${API_BASE}/admin/metrics`, {
+        headers: getHeaders()
+      });
       if (!res.ok) throw new Error('Failed to fetch metrics');
       return await res.json();
     } catch (err) {

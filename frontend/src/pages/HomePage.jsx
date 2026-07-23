@@ -40,9 +40,7 @@ export const HomePage = () => {
   // Dynamic Categories from Admin & AppContext
   const categories = React.useMemo(() => {
     const baseIconMap = { tech: Cpu, apparel: Shirt, home: HomeIcon, accessories: Briefcase };
-    const catNamesFromList = (categoriesList || []).map(c => c.name);
-    const catNamesFromProducts = (products || []).map(p => p.category).filter(Boolean);
-    const allCatNames = Array.from(new Set([...catNamesFromList, ...catNamesFromProducts]));
+    const allCatNames = (categoriesList || []).map(c => c.name);
 
     const list = [{ name: 'All', icon: Sparkles, color: '#BA0C2F' }];
     allCatNames.forEach(name => {
@@ -56,7 +54,7 @@ export const HomePage = () => {
       list.push({ name, icon, color });
     });
     return list;
-  }, [categoriesList, products]);
+  }, [categoriesList]);
 
   const testimonials = [
     {
@@ -107,7 +105,7 @@ export const HomePage = () => {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2.2rem', paddingTop: '0.85rem', width: '100%', overflowX: 'hidden' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', paddingTop: '2.5rem', width: '100%', overflowX: 'hidden' }}>
       
       {/* 1. Hero Banner Showcase with 3D E-Commerce Image */}
       <section className="card" style={{
@@ -197,160 +195,6 @@ export const HomePage = () => {
             </div>
           </div>
         </div>
-      </section>
-
-      {/* 2. Category Quick Selector */}
-      <section style={{ width: '100%' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem' }}>
-          <h2 style={{ fontSize: 'clamp(1.15rem, 3.5vw, 1.4rem)', fontWeight: 800 }}>Explore Categories</h2>
-          <button 
-            onClick={() => {
-              setSelectedCategory('All');
-              if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
-              setIsFilterDrawerOpen(false);
-              setCurrentPage('catalog');
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }} 
-            className="btn btn-secondary" 
-            style={{ fontSize: '0.78rem', padding: '0.3rem 0.65rem', minHeight: '34px' }}
-          >
-            View All
-          </button>
-        </div>
-
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '0.65rem',
-          width: '100%'
-        }}>
-          {categories.map((cat) => {
-            const Icon = cat.icon;
-            const isSelected = selectedCategory === cat.name;
-            return (
-              <button
-                key={cat.name}
-                onClick={() => {
-                  setSelectedCategory(cat.name);
-                  if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
-                  setIsFilterDrawerOpen(false);
-                  setCurrentPage('catalog');
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                className="card"
-                style={{
-                  flex: '1 1 90px',
-                  minWidth: '85px',
-                  padding: '0.65rem 0.85rem',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '0.5rem',
-                  cursor: 'pointer',
-                  border: isSelected ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
-                  background: isSelected ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-card)',
-                  color: isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
-                  fontWeight: 700,
-                  fontSize: '0.85rem',
-                  minHeight: '42px',
-                  borderRadius: 'var(--radius-md)'
-                }}
-              >
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: cat.color
-                }}>
-                  <Icon size={18} />
-                </div>
-                <span>{cat.name}</span>
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Dynamic Sub-Categories bar for selected category on Home page */}
-        {(() => {
-          let subList = [];
-          if (selectedCategory !== 'All') {
-            const catObj = (categoriesList || []).find(c => (c.name || '').trim().toLowerCase() === (selectedCategory || '').trim().toLowerCase());
-            subList = catObj?.subCategories || [];
-          } else {
-            // Gather all sub-categories across all categories
-            (categoriesList || []).forEach(cat => {
-              if (cat.subCategories && Array.isArray(cat.subCategories)) {
-                cat.subCategories.forEach(sub => {
-                  if (sub && !subList.includes(sub)) subList.push(sub);
-                });
-              }
-            });
-          }
-
-          if (subList.length === 0) return null;
-
-          return (
-            <div className="animate-fade-in" style={{ marginTop: '0.85rem', padding: '0.75rem 1rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.45rem', flexWrap: 'wrap', gap: '0.4rem' }}>
-                <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>
-                  Sub-Categories {selectedCategory !== 'All' ? `for ${selectedCategory}` : '(All Categories)'}:
-                </span>
-                <button
-                  onClick={() => {
-                    setIsFilterDrawerOpen(false);
-                    setCurrentPage('catalog');
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
-                  style={{ fontSize: '0.72rem', color: 'hsl(var(--hue-primary), 85%, 50%)', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }}
-                >
-                  Open in Catalog &rarr;
-                </button>
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
-                <button
-                  onClick={() => {
-                    if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory('All');
-                  }}
-                  className="btn"
-                  style={{
-                    padding: '0.3rem 0.75rem',
-                    fontSize: '0.78rem',
-                    fontWeight: selectedSubCategory === 'All' ? 800 : 600,
-                    background: selectedSubCategory === 'All' ? 'rgba(186, 12, 47, 0.15)' : 'var(--bg-card)',
-                    color: selectedSubCategory === 'All' ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
-                    border: selectedSubCategory === 'All' ? '1px solid var(--border-active)' : '1px solid var(--border-light)',
-                    borderRadius: 'var(--radius-sm)'
-                  }}
-                >
-                  All {selectedCategory !== 'All' ? selectedCategory : ''}
-                </button>
-                {subList.map(sub => {
-                  const isSubSelected = (selectedSubCategory || '').trim().toLowerCase() === sub.trim().toLowerCase();
-                  return (
-                    <button
-                      key={sub}
-                      onClick={() => {
-                        if (typeof setSelectedSubCategory === 'function') setSelectedSubCategory(sub);
-                      }}
-                      className="btn"
-                      style={{
-                        padding: '0.3rem 0.75rem',
-                        fontSize: '0.78rem',
-                        fontWeight: isSubSelected ? 800 : 600,
-                        background: isSubSelected ? 'rgba(186, 12, 47, 0.15)' : 'var(--bg-card)',
-                        color: isSubSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
-                        border: isSubSelected ? '1px solid var(--border-active)' : '1px solid var(--border-light)',
-                        borderRadius: 'var(--radius-sm)'
-                      }}
-                    >
-                      {sub}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-          );
-        })()}
       </section>
 
       {/* 3. Featured SWITCHES Products Grid */}

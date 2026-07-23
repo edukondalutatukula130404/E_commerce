@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
-import { Star, Heart, ShoppingBag, ArrowLeft, Check, Sparkles, Upload, Image as ImageIcon, MessageSquare, CheckCircle2, X } from 'lucide-react';
+import { Star, Heart, ShoppingBag, ArrowLeft, Check, Sparkles, Upload, Image as ImageIcon, MessageSquare, CheckCircle2, X, Zap } from 'lucide-react';
 
 export const ProductDetailPage = () => {
   const { products, selectedProductId, setCurrentPage, navigateToProduct, addToCart, toggleWishlist, wishlist, showToast } = useApp();
@@ -273,20 +273,49 @@ export const ProductDetailPage = () => {
             </div>
           )}
 
-          {/* Desktop Add to Cart */}
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }} className="hide-mobile">
-            <div className="card" style={{ display: 'flex', alignItems: 'center', padding: '0.2rem 0.4rem' }}>
-              <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', minHeight: '36px' }}>-</button>
-              <span style={{ padding: '0 0.75rem', fontWeight: 700 }}>{quantity}</span>
-              <button onClick={() => setQuantity(quantity + 1)} className="btn btn-secondary" style={{ padding: '0.3rem 0.6rem', minHeight: '36px' }}>+</button>
+          {/* Quantity, Add to Cart & Buy Now Action Controls */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', width: '100%', marginTop: '0.5rem' }}>
+            <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div className="card" style={{ display: 'flex', alignItems: 'center', padding: '0.2rem 0.4rem' }}>
+                <button onClick={() => setQuantity(Math.max(1, quantity - 1))} className="btn btn-secondary" style={{ padding: '0.3rem 0.65rem', minHeight: '36px', fontSize: '1rem', fontWeight: 800 }}>-</button>
+                <span style={{ padding: '0 0.85rem', fontWeight: 800, fontSize: '0.95rem' }}>{quantity}</span>
+                <button onClick={() => setQuantity(quantity + 1)} className="btn btn-secondary" style={{ padding: '0.3rem 0.65rem', minHeight: '36px', fontSize: '1rem', fontWeight: 800 }}>+</button>
+              </div>
+
+              <button
+                onClick={() => addToCart(product, selectedColor, selectedSize, quantity)}
+                className="btn btn-primary"
+                style={{ flex: 1, padding: '0.75rem 1rem', fontSize: '0.875rem', minHeight: '44px', minWidth: '150px' }}
+              >
+                <ShoppingBag size={18} /> Add to Cart (${(product.price * quantity).toFixed(2)})
+              </button>
             </div>
 
             <button
-              onClick={() => addToCart(product, selectedColor, selectedSize, quantity)}
-              className="btn btn-primary"
-              style={{ flex: 1, padding: '0.8rem', fontSize: '0.9rem' }}
+              onClick={() => {
+                addToCart(product, selectedColor, selectedSize, quantity);
+                setCurrentPage('cart');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="btn"
+              style={{
+                width: '100%',
+                padding: '0.75rem 1rem',
+                fontSize: '0.9rem',
+                fontWeight: 800,
+                background: 'linear-gradient(135deg, #10B981, #059669)',
+                color: '#ffffff',
+                borderRadius: 'var(--radius-md)',
+                minHeight: '44px',
+                boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem'
+              }}
             >
-              <ShoppingBag size={18} /> Add to Cart (${(product.price * quantity).toFixed(2)})
+              <Zap size={18} /> Buy Now (Instant Checkout)
             </button>
           </div>
 
@@ -550,22 +579,48 @@ export const ProductDetailPage = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: '0.75rem'
+        gap: '0.5rem'
       }} className="mobile-only-actionbar">
-        <div>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block' }}>Total Price</span>
-          <span style={{ fontSize: '1.25rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Price</span>
+          <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
             ${(product.price * quantity).toFixed(2)}
           </span>
         </div>
 
-        <button
-          onClick={() => addToCart(product, selectedColor, selectedSize, quantity)}
-          className="btn btn-primary"
-          style={{ flex: 1, padding: '0.65rem 1rem', fontSize: '0.875rem' }}
-        >
-          <ShoppingBag size={16} /> Add to Cart
-        </button>
+        <div style={{ display: 'flex', gap: '0.4rem', flex: 1, justifyContent: 'flex-end' }}>
+          <button
+            onClick={() => addToCart(product, selectedColor, selectedSize, quantity)}
+            className="btn btn-primary"
+            style={{ padding: '0.5rem 0.65rem', fontSize: '0.78rem', minHeight: '38px' }}
+          >
+            <ShoppingBag size={14} /> Add Cart
+          </button>
+
+          <button
+            onClick={() => {
+              addToCart(product, selectedColor, selectedSize, quantity);
+              setCurrentPage('cart');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+            className="btn"
+            style={{
+              padding: '0.5rem 0.65rem',
+              fontSize: '0.78rem',
+              fontWeight: 800,
+              background: 'linear-gradient(135deg, #10B981, #059669)',
+              color: '#ffffff',
+              borderRadius: 'var(--radius-md)',
+              minHeight: '38px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.3rem'
+            }}
+          >
+            <Zap size={14} /> Buy Now
+          </button>
+        </div>
       </div>
 
       <style>{`
@@ -576,4 +631,3 @@ export const ProductDetailPage = () => {
     </div>
   );
 };
-

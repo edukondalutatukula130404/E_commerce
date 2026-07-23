@@ -37,7 +37,7 @@ export const TermsPage = () => {
             <FileText size={20} color="hsl(var(--hue-primary), 90%, 65%)" /> 1. Overview & Agreement
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            Welcome to AURA E-Commerce Platform ("AURA", "we", "us", or "our"). By accessing or making a purchase on our website or mobile web application, you agree to be bound by these Terms & Conditions. Please read them carefully before placing an order.
+            Welcome to SWITCHES E-Commerce Platform ("SWITCHES", "we", "us", or "our"). By accessing or making a purchase on our website or mobile web application, you agree to be bound by these Terms & Conditions. Please read them carefully before placing an order.
           </p>
         </div>
 
@@ -47,12 +47,12 @@ export const TermsPage = () => {
             <CheckCircle2 size={20} color="hsl(var(--hue-primary), 90%, 65%)" /> 2. Ordering, Pricing & Stock Availability
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '0.75rem' }}>
-            All prices displayed on AURA are listed in US Dollars ($ USD) unless configured otherwise. We reserve the right to modify prices, discount promos, or availability without prior notice.
+            All prices displayed on SWITCHES are listed in US Dollars ($ USD) unless configured otherwise. We reserve the right to modify prices, discount promos, or availability without prior notice.
           </p>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem', paddingLeft: '1rem' }}>
             <li>• Orders are subject to stock availability and validation of payment credentials.</li>
             <li>• We reserve the right to decline or cancel any order flagged for potential fraud.</li>
-            <li>• Promotional coupon codes (e.g. AURA10, AURA20) are single-use per customer session.</li>
+            <li>• Promotional coupon codes (e.g. SWITCHES10, SWITCHES20) are single-use per customer session.</li>
           </ul>
         </div>
 
@@ -72,7 +72,7 @@ export const TermsPage = () => {
             <Shield size={20} color="hsl(var(--hue-primary), 90%, 65%)" /> 4. Warranty & Limitation of Liability
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem' }}>
-            All hardware devices sold on AURA include our 2-Year Hardware Warranty against defects. AURA's total liability for any claim shall not exceed the price paid for the specific item purchased.
+            All hardware devices sold on SWITCHES include our 2-Year Hardware Warranty against defects. SWITCHES's total liability for any claim shall not exceed the price paid for the specific item purchased.
           </p>
         </div>
 
@@ -80,7 +80,7 @@ export const TermsPage = () => {
         <div style={{ padding: '1.25rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', border: '1px solid var(--border-light)' }}>
           <h4 style={{ fontSize: '0.95rem', fontWeight: 700, marginBottom: '0.25rem' }}>Have Legal or Compliance Questions?</h4>
           <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Contact our legal compliance team at <strong style={{ color: 'var(--text-main)' }}>legal@aura.io</strong>
+            Contact our legal compliance team at <strong style={{ color: 'var(--text-main)' }}>legal@switches.io</strong>
           </p>
         </div>
 

@@ -1,7 +1,7 @@
 {
-  "name": "aura-backend",
+  "name": "switches-backend",
   "version": "1.0.0",
-  "description": "AURA E-Commerce REST API Backend",
+  "description": "SWITCHES E-Commerce REST API Backend",
   "type": "module",
   "main": "server.js",
   "scripts": {
@@ -9,8 +9,14 @@
     "dev": "node --watch server.js"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express": "^4.19.2"
+    "express": "^4.19.2",
+    "express-rate-limit": "^8.6.0",
+    "jsonwebtoken": "^9.0.3",
+    "mongoose": "^9.8.0",
+    "nodemailer": "^9.0.3",
+    "socket.io": "^4.8.3"
   }
 }

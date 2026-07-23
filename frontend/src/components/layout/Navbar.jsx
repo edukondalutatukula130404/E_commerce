@@ -14,6 +14,7 @@ export const Navbar = () => {
 
   const navLinks = [
     { id: 'home', label: 'Home' },
+    { id: 'categories', label: 'Categories' },
     { id: 'catalog', label: 'Catalog' },
     { id: 'about', label: 'About Us' },
     { id: 'blogs', label: 'Blogs' },
@@ -92,7 +93,7 @@ export const Navbar = () => {
         </a>
 
         {/* FAR RIGHT / LAST: Cart & Admin/Login Actions */}
-        <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        <div className="hide-mobile" style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <button
             onClick={() => setCurrentPage('cart')}
             className="btn btn-secondary"
@@ -154,25 +155,6 @@ export const Navbar = () => {
               </button>
             );
           })}
-
-          {user?.role === 'admin' && (
-            <button
-              onClick={() => setCurrentPage('admin')}
-              className="btn btn-primary"
-              style={{
-                padding: '0.35rem 0.95rem',
-                fontSize: '0.82rem',
-                fontWeight: 800,
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '0.35rem',
-                minHeight: '34px',
-                marginLeft: '0.5rem'
-              }}
-            >
-              <Shield size={14} /> Admin Command
-            </button>
-          )}
         </nav>
       </div>
 

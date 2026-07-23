@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { subscribeToEvent } from '../services/socket';
 
 const AppContext = createContext();
 
@@ -342,7 +343,16 @@ const initialProducts = [
 
 export const AppProvider = ({ children }) => {
   // Navigation State
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState(() => {
+    try {
+      const savedUser = localStorage.getItem('switches_user');
+      if (savedUser) {
+        const u = JSON.parse(savedUser);
+        if (u && u.role === 'admin') return 'admin';
+      }
+    } catch {}
+    return 'home';
+  });
   const [selectedProductId, setSelectedProductId] = useState('p1');
 
   // Search & Filter State
@@ -566,8 +576,44 @@ export const AppProvider = ({ children }) => {
     };
     window.addEventListener('focus', handleFocus);
 
+    // Socket.io Real-Time Event Subscriptions for zero-refresh updates across all pages
+    const unsubProducts = subscribeToEvent('products:changed', (data) => {
+      if (data && Array.isArray(data)) setProducts(data);
+    });
+
+    const unsubOrders = subscribeToEvent('orders:changed', (data) => {
+      if (data && Array.isArray(data)) setOrders(data);
+    });
+
+    const unsubCategories = subscribeToEvent('categories:changed', (data) => {
+      if (data && Array.isArray(data)) setCategoriesList(data);
+    });
+
+    const unsubBanners = subscribeToEvent('banners:changed', (data) => {
+      if (data && Array.isArray(data)) setBanners(data);
+    });
+
+    const unsubVendors = subscribeToEvent('vendors:changed', (data) => {
+      if (data && Array.isArray(data)) setVendors(data);
+    });
+
+    const unsubPayments = subscribeToEvent('payments:changed', (data) => {
+      if (data && Array.isArray(data)) setPayments(data);
+    });
+
+    const unsubUsers = subscribeToEvent('users:changed', (data) => {
+      if (data && Array.isArray(data)) setUsersList(data);
+    });
+
     return () => {
       window.removeEventListener('focus', handleFocus);
+      unsubProducts();
+      unsubOrders();
+      unsubCategories();
+      unsubBanners();
+      unsubVendors();
+      unsubPayments();
+      unsubUsers();
     };
   }, []);
 

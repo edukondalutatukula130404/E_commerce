@@ -50,14 +50,9 @@ export const MobileNav = () => {
 
   const navItems = [
     { 
-      id: 'catalog', 
+      id: 'categories', 
       label: 'Categories', 
-      icon: Grid,
-      onClick: () => {
-        if (typeof setSelectedCategory === 'function') setSelectedCategory('All');
-        if (typeof setIsFilterDrawerOpen === 'function') setIsFilterDrawerOpen(false);
-        setCurrentPage('catalog');
-      }
+      icon: Grid
     },
     { 
       id: 'wishlist', 
