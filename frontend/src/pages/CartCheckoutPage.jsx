@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
-import { Trash2, ShoppingBag, ArrowRight, CheckCircle2, Tag, CreditCard, Smartphone, DollarSign, Printer, ArrowLeft } from 'lucide-react';
+import { Trash2, ShoppingBag, ArrowRight, CheckCircle2, Tag, CreditCard, Smartphone, DollarSign, Printer, ArrowLeft, Plus, MapPin, Check } from 'lucide-react';
 
 export const CartCheckoutPage = () => {
   const { 
@@ -14,6 +14,7 @@ export const CartCheckoutPage = () => {
     setCurrentPage,
     user,
     userAddresses,
+    addUserAddress,
     setRedirectAfterAuth,
     pendingCheckoutStep,
     setPendingCheckoutStep,
@@ -24,13 +25,17 @@ export const CartCheckoutPage = () => {
   const [couponInput, setCouponInput] = useState('');
   const [confirmedOrder, setConfirmedOrder] = useState(null);
 
+  // Selected Address State
+  const defaultAddr = (userAddresses || []).find(a => a.isDefault) || userAddresses?.[0];
+  const [selectedAddrId, setSelectedAddrId] = useState(defaultAddr?.id || null);
+
   // Form State
   const [shippingInfo, setShippingInfo] = useState({
-    fullName: user?.name || '',
+    fullName: user?.name || defaultAddr?.fullName || '',
     email: user?.email || '',
-    street: '742 Evergreen Terrace',
-    city: 'San Francisco',
-    zip: '94107'
+    street: defaultAddr?.street || '742 Evergreen Terrace',
+    city: defaultAddr?.city || 'San Francisco',
+    zip: defaultAddr?.zip || '94107'
   });
 
   useEffect(() => {
@@ -42,6 +47,20 @@ export const CartCheckoutPage = () => {
       }));
     }
   }, [user]);
+
+  // Modal State for Add New Address
+  const [isAddAddrModalOpen, setIsAddAddrModalOpen] = useState(false);
+  const [newAddrForm, setNewAddrForm] = useState({
+    fullName: user?.name || '',
+    phone: '',
+    street: '',
+    city: '',
+    state: '',
+    zip: '',
+    country: 'USA',
+    type: 'Home',
+    isDefault: false
+  });
 
   const [paymentMethod, setPaymentMethod] = useState('card');
 
@@ -110,6 +129,26 @@ export const CartCheckoutPage = () => {
     }
     const newOrder = await placeOrder(shippingInfo, paymentMethod);
     setConfirmedOrder(newOrder);
+  };
+
+  const handleSaveNewAddressSubmit = (e) => {
+    e.preventDefault();
+    if (!newAddrForm.street || !newAddrForm.city || !newAddrForm.zip) {
+      showToast('Please enter street, city, and zip code');
+      return;
+    }
+
+    const created = addUserAddress(newAddrForm);
+    setShippingInfo({
+      fullName: created.fullName || user?.name || '',
+      email: user?.email || '',
+      street: created.street,
+      city: created.city,
+      zip: created.zip
+    });
+    setSelectedAddrId(created.id);
+    setIsAddAddrModalOpen(false);
+    showToast(`✓ Added & selected ${created.type || 'New'} Address!`);
   };
 
   return (
@@ -246,50 +285,92 @@ export const CartCheckoutPage = () => {
             {/* Step 2: Shipping Form View */}
             {checkoutStep === 'shipping' && (
               <div className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-                  <h3 style={{ fontSize: '1rem', fontWeight: 700, margin: 0 }}>Shipping Address</h3>
-                  {userAddresses && userAddresses.length > 0 && (
-                    <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                      ⚡ Click a saved address to autofill
-                    </span>
-                  )}
+                
+                {/* Saved Address Section Title & Action */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>
+                  <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Shipping Address</h3>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddAddrModalOpen(true)}
+                    className="btn btn-primary"
+                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem' }}
+                  >
+                    <Plus size={14} /> Add New Address
+                  </button>
                 </div>
 
-                {/* Quick Select Saved Address Pills */}
+                {/* Quick Select Saved Address Options */}
                 {userAddresses && userAddresses.length > 0 && (
-                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.25rem' }}>
-                    {userAddresses.map((addr) => (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--text-muted)' }}>
+                      Saved Address Options:
+                    </label>
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {userAddresses.map((addr) => {
+                        const isSelected = selectedAddrId === addr.id;
+                        return (
+                          <button
+                            key={addr.id}
+                            type="button"
+                            onClick={() => {
+                              setSelectedAddrId(addr.id);
+                              setShippingInfo({
+                                fullName: addr.fullName || user?.name || '',
+                                email: user?.email || '',
+                                street: addr.street || '',
+                                city: addr.city || '',
+                                zip: addr.zip || ''
+                              });
+                              showToast(`Selected ${addr.type || 'Saved'} Address!`);
+                            }}
+                            className="btn"
+                            style={{
+                              padding: '0.4rem 0.85rem',
+                              fontSize: '0.78rem',
+                              fontWeight: isSelected ? 800 : 600,
+                              borderRadius: 'var(--radius-full)',
+                              border: isSelected ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
+                              background: isSelected ? 'rgba(186, 12, 47, 0.12)' : 'var(--bg-secondary)',
+                              color: isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.35rem'
+                            }}
+                          >
+                            <MapPin size={13} color={isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-muted)'} />
+                            <span>{addr.type || 'Address'} ({addr.city})</span>
+                            {addr.isDefault && <span style={{ opacity: 0.8, fontSize: '0.68rem' }}>• Default</span>}
+                            {isSelected && <Check size={13} color="hsl(var(--hue-primary), 85%, 50%)" />}
+                          </button>
+                        );
+                      })}
+
+                      {/* Inline Add New Address Button Pill */}
                       <button
-                        key={addr.id}
                         type="button"
-                        onClick={() => {
-                          setShippingInfo({
-                            fullName: addr.fullName || user?.name || '',
-                            email: user?.email || '',
-                            street: addr.street || '',
-                            city: addr.city || '',
-                            zip: addr.zip || ''
-                          });
-                          showToast(`Selected ${addr.type || 'Saved'} Address!`);
-                        }}
+                        onClick={() => setIsAddAddrModalOpen(true)}
                         className="btn btn-secondary"
                         style={{
-                          padding: '0.35rem 0.75rem',
+                          padding: '0.4rem 0.85rem',
                           fontSize: '0.78rem',
                           fontWeight: 700,
                           borderRadius: 'var(--radius-full)',
-                          border: '1px solid var(--border-active)',
-                          background: 'rgba(186, 12, 47, 0.08)'
+                          border: '1px dashed var(--border-active)',
+                          color: 'hsl(var(--hue-primary), 85%, 50%)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.35rem'
                         }}
                       >
-                        📍 {addr.type || 'Address'} ({addr.city}) {addr.isDefault ? '• Default' : ''}
+                        <Plus size={13} /> Add New Address
                       </button>
-                    ))}
+                    </div>
                   </div>
                 )}
                 
+                {/* Form Input Fields with Clean Bold Labels */}
                 <div>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Full Name</label>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>Full Name</label>
                   <input
                     type="text"
                     value={shippingInfo.fullName}
@@ -299,7 +380,7 @@ export const CartCheckoutPage = () => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Email Address</label>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>Email Address</label>
                   <input
                     type="email"
                     value={shippingInfo.email}
@@ -309,7 +390,7 @@ export const CartCheckoutPage = () => {
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Street Address</label>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>Street Address</label>
                   <input
                     type="text"
                     value={shippingInfo.street}
@@ -320,7 +401,7 @@ export const CartCheckoutPage = () => {
 
                 <div style={{ display: 'flex', gap: '0.75rem' }}>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>City</label>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>City</label>
                     <input
                       type="text"
                       value={shippingInfo.city}
@@ -329,7 +410,7 @@ export const CartCheckoutPage = () => {
                     />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Zip Code</label>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.25rem' }}>Zip Code</label>
                     <input
                       type="text"
                       value={shippingInfo.zip}
@@ -456,6 +537,126 @@ export const CartCheckoutPage = () => {
 
           </aside>
 
+        </div>
+      )}
+
+      {/* Checkout Add New Address Modal */}
+      {isAddAddrModalOpen && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 3000,
+          background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+        }}>
+          <div className="card animate-fade-in" style={{ maxWidth: '480px', width: '100%', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 800 }}>Add New Shipping Address</h3>
+
+            <form onSubmit={handleSaveNewAddressSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>Full Name</label>
+                <input
+                  type="text"
+                  value={newAddrForm.fullName}
+                  onChange={(e) => setNewAddrForm({ ...newAddrForm, fullName: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>Phone Number</label>
+                <input
+                  type="text"
+                  placeholder="+1 (555) 000-0000"
+                  value={newAddrForm.phone}
+                  onChange={(e) => setNewAddrForm({ ...newAddrForm, phone: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>Street Address</label>
+                <input
+                  type="text"
+                  placeholder="Street address, Apt, Suite"
+                  value={newAddrForm.street}
+                  onChange={(e) => setNewAddrForm({ ...newAddrForm, street: e.target.value })}
+                  style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>City</label>
+                  <input
+                    type="text"
+                    value={newAddrForm.city}
+                    onChange={(e) => setNewAddrForm({ ...newAddrForm, city: e.target.value })}
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ width: '90px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>State</label>
+                  <input
+                    type="text"
+                    value={newAddrForm.state}
+                    onChange={(e) => setNewAddrForm({ ...newAddrForm, state: e.target.value })}
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                  />
+                </div>
+                <div style={{ width: '100px' }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>Zip Code</label>
+                  <input
+                    type="text"
+                    value={newAddrForm.zip}
+                    onChange={(e) => setNewAddrForm({ ...newAddrForm, zip: e.target.value })}
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>Address Tag</label>
+                  <select
+                    value={newAddrForm.type}
+                    onChange={(e) => setNewAddrForm({ ...newAddrForm, type: e.target.value })}
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                  >
+                    <option value="Home">Home</option>
+                    <option value="Work">Work</option>
+                    <option value="Apartment">Apartment</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '0.78rem', fontWeight: 800, display: 'block', marginBottom: '0.2rem' }}>Country</label>
+                  <input
+                    type="text"
+                    value={newAddrForm.country}
+                    onChange={(e) => setNewAddrForm({ ...newAddrForm, country: e.target.value })}
+                    style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }}
+                  />
+                </div>
+              </div>
+
+              <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.82rem', fontWeight: 700, cursor: 'pointer', marginTop: '0.25rem' }}>
+                <input
+                  type="checkbox"
+                  checked={newAddrForm.isDefault}
+                  onChange={(e) => setNewAddrForm({ ...newAddrForm, isDefault: e.target.checked })}
+                />
+                Set as default delivery address
+              </label>
+
+              <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                <button type="button" onClick={() => setIsAddAddrModalOpen(false)} className="btn btn-secondary" style={{ flex: 1 }}>
+                  Cancel
+                </button>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
+                  Save & Use Address
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
