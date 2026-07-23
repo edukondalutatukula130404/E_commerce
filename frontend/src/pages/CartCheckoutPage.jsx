@@ -286,17 +286,9 @@ export const CartCheckoutPage = () => {
             {checkoutStep === 'shipping' && (
               <div className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 
-                {/* Saved Address Section Title & Action */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>
+                {/* Saved Address Section Title */}
+                <div style={{ borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>
                   <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0 }}>Shipping Address</h3>
-                  <button
-                    type="button"
-                    onClick={() => setIsAddAddrModalOpen(true)}
-                    className="btn btn-primary"
-                    style={{ padding: '0.35rem 0.75rem', fontSize: '0.78rem', gap: '0.35rem' }}
-                  >
-                    <Plus size={14} /> Add New Address
-                  </button>
                 </div>
 
                 {/* Quick Select Saved Address Options */}
