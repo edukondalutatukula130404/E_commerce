@@ -434,7 +434,10 @@ export const AppProvider = ({ children }) => {
   const [userAddresses, setUserAddresses] = useState(() => {
     try {
       const saved = localStorage.getItem('switches_user_addresses');
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 3) return parsed;
+      }
     } catch (e) {}
     return [
       {
@@ -459,6 +462,42 @@ export const AppProvider = ({ children }) => {
         zip: '94105',
         country: 'USA',
         type: 'Work',
+        isDefault: false
+      },
+      {
+        id: 'addr-3',
+        fullName: 'Alex Mercer',
+        phone: '+1 (555) 333-4444',
+        street: '500 Tech Plaza, Floor 12',
+        city: 'San Francisco',
+        state: 'CA',
+        zip: '94103',
+        country: 'USA',
+        type: 'Office',
+        isDefault: false
+      },
+      {
+        id: 'addr-4',
+        fullName: 'Alex Mercer',
+        phone: '+1 (555) 777-8888',
+        street: '88 Industrial Parkway',
+        city: 'Oakland',
+        state: 'CA',
+        zip: '94601',
+        country: 'USA',
+        type: 'Warehouse / HQ',
+        isDefault: false
+      },
+      {
+        id: 'addr-5',
+        fullName: 'Alex Mercer',
+        phone: '+1 (555) 111-2222',
+        street: '25 Sunset Blvd, Apt 4B',
+        city: 'San Francisco',
+        state: 'CA',
+        zip: '94122',
+        country: 'USA',
+        type: 'Apartment',
         isDefault: false
       }
     ];

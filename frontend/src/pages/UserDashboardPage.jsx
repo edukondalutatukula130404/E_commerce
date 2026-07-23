@@ -472,7 +472,10 @@ export const UserDashboardPage = () => {
                   >
                     <option value="Home">Home</option>
                     <option value="Work">Work</option>
+                    <option value="Office">Office</option>
+                    <option value="Warehouse / HQ">Warehouse / HQ</option>
                     <option value="Apartment">Apartment</option>
+                    <option value="Studio">Studio</option>
                     <option value="Other">Other</option>
                   </select>
                 </div>
