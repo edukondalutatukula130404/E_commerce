@@ -164,6 +164,66 @@ router.put('/banners/:id', (req, res) => {
   res.json({ success: true, data: banner });
 });
 
+import crypto from 'crypto';
+
+// IMAGE UPLOAD TO CLOUDINARY
+router.post('/upload', async (req, res) => {
+  try {
+    const { image } = req.body;
+    if (!image) {
+      return res.status(400).json({ success: false, message: 'No image data provided' });
+    }
+
+    console.log('[UPLOAD] Received image upload request, data length:', image.length);
+
+    const cloudName = 'dypbj1iiy';  // Fixed typo: was 'ypbj1iiy'
+    const apiKey = '228485191495714';
+    const apiSecret = 'gQm7RgW11x_hLyu_LkZIkJ1xlvU';
+    const timestamp = Math.round(Date.now() / 1000);
+    
+    // Generate signature: SHA1 of "timestamp=<value><apiSecret>"
+    const signature = crypto
+      .createHash('sha1')
+      .update(`timestamp=${timestamp}${apiSecret}`)
+      .digest('hex');
+
+    console.log('[UPLOAD] Signature generated, timestamp:', timestamp);
+
+    // Upload to Cloudinary
+    const formData = new URLSearchParams();
+    formData.append('file', image);
+    formData.append('api_key', apiKey);
+    formData.append('timestamp', timestamp.toString());
+    formData.append('signature', signature);
+
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
+    console.log('[UPLOAD] Posting to:', cloudinaryUrl);
+
+    const response = await fetch(cloudinaryUrl, {
+      method: 'POST',
+      body: formData
+    });
+
+    const result = await response.json();
+    console.log('[UPLOAD] Cloudinary response:', result);
+
+    if (result.secure_url) {
+      console.log('[UPLOAD] Success! URL:', result.secure_url);
+      res.json({ success: true, url: result.secure_url });
+    } else {
+      console.error('[UPLOAD] Cloudinary error:', result.error);
+      res.status(500).json({ 
+        success: false, 
+        message: result.error?.message || 'Cloudinary upload failed',
+        error: result.error
+      });
+    }
+  } catch (err) {
+    console.error('[UPLOAD] Exception:', err);
+    res.status(500).json({ success: false, message: err.message || 'Upload failed' });
+  }
+});
+
 router.delete('/banners/:id', (req, res) => {
   const index = (db.banners || []).findIndex(b => b.id === req.params.id);
   if (index === -1) return res.status(404).json({ success: false, message: 'Banner not found' });
