@@ -108,11 +108,14 @@ export const UserDashboardPage = () => {
     { id: 'wishlist', label: '3. My Wishlist', icon: Heart, count: wishlist.length },
     { id: 'addresses', label: '4. Saved Address', icon: MapPin, count: userAddresses.length },
     { id: 'payments', label: '5. Payment History', icon: CreditCard },
-    { id: 'wallet', label: '6. My Wallet', icon: Wallet, badge: `$${walletBalance.toFixed(2)}` }
+    { id: 'wallet', label: '6. My Wallet', icon: Wallet, badge: `$${walletBalance.toFixed(2)}` },
+    { id: 'logout', label: '7. Log Out', icon: LogOut, isDanger: true }
   ];
 
   const handleTabSelect = (tabId) => {
-    if (tabId === 'orders') {
+    if (tabId === 'logout') {
+      handleLogout();
+    } else if (tabId === 'orders') {
       setCurrentPage('orders');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tabId === 'wishlist') {
@@ -160,10 +163,6 @@ export const UserDashboardPage = () => {
           </div>
           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', margin: 0 }}>{user?.email || "alex@switches.io"}</p>
         </div>
-
-        <button onClick={handleLogout} className="btn btn-secondary" style={{ color: '#ff4757', padding: '0.45rem 0.75rem', fontSize: '0.8rem' }}>
-          <LogOut size={14} /> Log Out
-        </button>
       </div>
 
       {/* 1. MAIN ACCOUNT MENU VIEW */}
@@ -176,6 +175,7 @@ export const UserDashboardPage = () => {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {dashboardNavTabs.map((tab) => {
               const Icon = tab.icon;
+              const isDanger = tab.isDanger;
               return (
                 <button
                   key={tab.id}
@@ -186,19 +186,19 @@ export const UserDashboardPage = () => {
                     padding: '0.75rem 1rem',
                     fontSize: '0.9rem',
                     fontWeight: 700,
-                    background: 'var(--bg-secondary)',
-                    color: 'var(--text-main)',
+                    background: isDanger ? 'rgba(255, 71, 87, 0.06)' : 'var(--bg-secondary)',
+                    color: isDanger ? '#ff4757' : 'var(--text-main)',
                     borderRadius: 'var(--radius-md)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    border: '1px solid var(--border-light)',
+                    border: isDanger ? '1px solid rgba(255, 71, 87, 0.25)' : '1px solid var(--border-light)',
                     textAlign: 'left',
                     transition: 'all 0.15s ease'
                   }}
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
-                    <Icon size={18} color="hsl(var(--hue-primary), 85%, 50%)" />
+                    <Icon size={18} color={isDanger ? '#ff4757' : 'hsl(var(--hue-primary), 85%, 50%)'} />
                     <span>{tab.label}</span>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
