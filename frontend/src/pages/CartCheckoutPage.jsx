@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { Trash2, ShoppingBag, ArrowRight, CheckCircle2, Tag, CreditCard, Smartphone, DollarSign, Printer, ArrowLeft } from 'lucide-react';
 
@@ -11,26 +11,41 @@ export const CartCheckoutPage = () => {
     appliedCoupon, 
     applyCouponCode, 
     placeOrder, 
-    setCurrentPage 
+    setCurrentPage,
+    user,
+    setRedirectAfterAuth,
+    pendingCheckoutStep,
+    setPendingCheckoutStep,
+    showToast
   } = useApp();
 
-  const [checkoutStep, setCheckoutStep] = useState('cart'); // 'cart' | 'shipping' | 'payment'
+  const [checkoutStep, setCheckoutStep] = useState(pendingCheckoutStep || 'cart'); // 'cart' | 'shipping' | 'payment'
   const [couponInput, setCouponInput] = useState('');
   const [confirmedOrder, setConfirmedOrder] = useState(null);
 
   // Form State
   const [shippingInfo, setShippingInfo] = useState({
-    fullName: 'Alex Mercer',
-    email: 'alex@switches.io',
+    fullName: user?.name || '',
+    email: user?.email || '',
     street: '742 Evergreen Terrace',
     city: 'San Francisco',
     zip: '94107'
   });
 
+  useEffect(() => {
+    if (user) {
+      setShippingInfo(prev => ({
+        ...prev,
+        fullName: user.name || prev.fullName || '',
+        email: user.email || prev.email || ''
+      }));
+    }
+  }, [user]);
+
   const [paymentMethod, setPaymentMethod] = useState('card');
 
   const cartItemsDetailed = cart.map(item => {
-    const p = products.find(prod => prod.id === item.productId);
+    const p = products.find(prod => prod.id === item.productId || prod._id === item.productId);
     return {
       ...item,
       product: p || { name: 'Product', price: 0, images: [''] }
@@ -49,8 +64,50 @@ export const CartCheckoutPage = () => {
     if (couponInput) applyCouponCode(couponInput);
   };
 
-  const handleFinalOrderSubmit = () => {
-    const newOrder = placeOrder(shippingInfo, paymentMethod);
+  const handleProceedToShipping = () => {
+    if (!user) {
+      setRedirectAfterAuth('checkout');
+      setPendingCheckoutStep('shipping');
+      setCurrentPage('auth');
+      showToast('Please log in or create an account to proceed to shipping');
+      return;
+    }
+    setCheckoutStep('shipping');
+  };
+
+  const handleProceedToPayment = () => {
+    if (!user) {
+      setRedirectAfterAuth('checkout');
+      setPendingCheckoutStep('payment');
+      setCurrentPage('auth');
+      showToast('Please log in or create an account to proceed to payment');
+      return;
+    }
+    setCheckoutStep('payment');
+  };
+
+  const handleStepTabClick = (step) => {
+    if (step === 'shipping' || step === 'payment') {
+      if (!user) {
+        setRedirectAfterAuth('checkout');
+        setPendingCheckoutStep(step);
+        setCurrentPage('auth');
+        showToast('Please log in or create an account to proceed');
+        return;
+      }
+    }
+    setCheckoutStep(step);
+  };
+
+  const handleFinalOrderSubmit = async () => {
+    if (!user) {
+      setRedirectAfterAuth('checkout');
+      setPendingCheckoutStep('payment');
+      setCurrentPage('auth');
+      showToast('Please log in to complete your order');
+      return;
+    }
+    const newOrder = await placeOrder(shippingInfo, paymentMethod);
     setConfirmedOrder(newOrder);
   };
 
@@ -82,7 +139,7 @@ export const CartCheckoutPage = () => {
             <div
               key={step}
               onClick={() => {
-                if (cart.length > 0) setCheckoutStep(step);
+                if (cart.length > 0) handleStepTabClick(step);
               }}
               style={{
                 flex: 1,
@@ -339,13 +396,13 @@ export const CartCheckoutPage = () => {
 
             {/* Next Step Action Button */}
             {checkoutStep === 'cart' && (
-              <button onClick={() => setCheckoutStep('shipping')} className="btn btn-primary" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+              <button onClick={handleProceedToShipping} className="btn btn-primary" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
                 Proceed to Shipping <ArrowRight size={16} />
               </button>
             )}
 
             {checkoutStep === 'shipping' && (
-              <button onClick={() => setCheckoutStep('payment')} className="btn btn-primary" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
+              <button onClick={handleProceedToPayment} className="btn btn-primary" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
                 Proceed to Payment <ArrowRight size={16} />
               </button>
             )}
@@ -378,58 +435,72 @@ export const CartCheckoutPage = () => {
           padding: '1rem'
         }}>
           <div className="card animate-fade-in" style={{
+            maxWidth: '520px',
             width: '100%',
-            maxWidth: '480px',
-            padding: '1.5rem',
-            background: 'var(--bg-card)',
+            padding: '2rem',
+            textAlign: 'center',
             display: 'flex',
             flexDirection: 'column',
             gap: '1rem'
           }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{
-                width: '3rem',
-                height: '3rem',
-                borderRadius: 'var(--radius-full)',
-                background: 'rgba(46, 213, 115, 0.15)',
-                color: 'hsl(var(--hue-success), 80%, 45%)',
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginBottom: '0.5rem'
-              }}>
-                <CheckCircle2 size={28} />
+            <div style={{
+              width: '64px',
+              height: '64px',
+              borderRadius: '50%',
+              background: 'rgba(186, 12, 47, 0.12)',
+              color: 'hsl(var(--hue-primary), 85%, 50%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto'
+            }}>
+              <CheckCircle2 size={36} />
+            </div>
+
+            <h2 style={{ fontSize: '1.4rem', fontWeight: 800 }}>Order Confirmed & Saved to Database!</h2>
+            <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+              Thank you for shopping with SWITCHES! Your order ID is <strong style={{ color: 'var(--text-main)' }}>#{confirmedOrder.id || confirmedOrder.orderId}</strong>.
+            </p>
+
+            <div style={{
+              background: 'var(--bg-secondary)',
+              padding: '0.85rem 1rem',
+              borderRadius: 'var(--radius-md)',
+              fontSize: '0.8rem',
+              textAlign: 'left',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '0.35rem'
+            }}>
+              <div><strong>Customer:</strong> {confirmedOrder.customerName || user?.name || 'Customer'} ({confirmedOrder.customerEmail || user?.email || ''})</div>
+              <div><strong>Total Amount:</strong> ${confirmedOrder.totalAmount?.toFixed(2)}</div>
+              <div><strong>Payment Method:</strong> {confirmedOrder.paymentMethod?.toUpperCase()}</div>
+              <div><strong>Shipping To:</strong> {confirmedOrder.shippingAddress?.street}, {confirmedOrder.shippingAddress?.city} {confirmedOrder.shippingAddress?.zip}</div>
+              <div style={{ color: 'hsl(var(--hue-success), 80%, 45%)', fontWeight: 700, marginTop: '0.25rem' }}>
+                ⚡ Saved to MongoDB Atlas Cloud Database
               </div>
-              <h2 style={{ fontSize: '1.35rem', fontWeight: 800 }}>SWITCHES Order Confirmed!</h2>
-              <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Order ID: <strong style={{ color: 'var(--text-main)' }}>{confirmedOrder.id}</strong>
-              </p>
             </div>
 
-            <div style={{ padding: '0.85rem', borderRadius: 'var(--radius-md)', background: 'var(--bg-secondary)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
-              <div style={{ fontWeight: 700 }}>Shipping Address:</div>
-              <div>{confirmedOrder.shippingAddress.fullName}</div>
-              <div>{confirmedOrder.shippingAddress.street}, {confirmedOrder.shippingAddress.city}</div>
-            </div>
-
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 800, fontSize: '1rem' }}>
-              <span>Total Paid:</span>
-              <span>${confirmedOrder.totalAmount}</span>
-            </div>
-
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <button onClick={() => window.print()} className="btn btn-secondary" style={{ flex: 1, fontSize: '0.85rem' }}>
-                <Printer size={15} /> Print Receipt
-              </button>
-              <button 
+            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+              <button
                 onClick={() => {
                   setConfirmedOrder(null);
                   setCurrentPage('orders');
-                }} 
-                className="btn btn-primary" 
-                style={{ flex: 1, fontSize: '0.85rem' }}
+                }}
+                className="btn btn-primary"
+                style={{ flex: 1 }}
               >
                 Track Order
+              </button>
+              <button
+                onClick={() => {
+                  setConfirmedOrder(null);
+                  setCurrentPage('catalog');
+                }}
+                className="btn btn-secondary"
+                style={{ flex: 1 }}
+              >
+                Continue Shopping
               </button>
             </div>
           </div>

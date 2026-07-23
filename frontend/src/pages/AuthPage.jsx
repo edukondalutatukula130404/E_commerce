@@ -3,7 +3,7 @@ import { useApp } from '../context/AppContext';
 import { Shield, ArrowLeft, Eye, EyeOff } from 'lucide-react';
 
 export const AuthPage = () => {
-  const { user, setUser, loginWithCredentials, setCurrentPage, showToast } = useApp();
+  const { user, setUser, loginWithCredentials, registerUser, setCurrentPage, showToast } = useApp();
   const [isRegister, setIsRegister] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -22,7 +22,11 @@ export const AuthPage = () => {
       showToast('Please enter an email address');
       return;
     }
-    await loginWithCredentials(email, password);
+    if (isRegister) {
+      await registerUser(name, email, password);
+    } else {
+      await loginWithCredentials(email, password);
+    }
   };
 
   const autofillSeed = (type) => {

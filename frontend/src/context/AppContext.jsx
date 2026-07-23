@@ -426,17 +426,14 @@ export const AppProvider = ({ children }) => {
     }
   });
 
-  // Auth User State
+  // Auth User State & Redirect State
+  const [redirectAfterAuth, setRedirectAfterAuth] = useState(null);
+  const [pendingCheckoutStep, setPendingCheckoutStep] = useState('cart');
+
   const [user, setUser] = useState(() => {
     try {
       const saved = localStorage.getItem('switches_user');
-      return saved ? JSON.parse(saved) : {
-        id: 'u1',
-        name: 'Alex Mercer',
-        email: 'alex@switches.io',
-        role: 'customer',
-        avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'
-      };
+      return saved ? JSON.parse(saved) : null;
     } catch {
       return null;
     }
@@ -622,6 +619,32 @@ export const AppProvider = ({ children }) => {
     setTimeout(() => setToast(null), 3000);
   };
 
+  // Register User Method
+  const registerUser = async (name, email, password) => {
+    const cleanName = (name || '').trim();
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    const res = await api.register(cleanName, cleanEmail, cleanPass);
+    if (res && res.success && res.user) {
+      setUser(res.user);
+      showToast(`Account created! Welcome ${res.user.name || cleanName}`);
+      if (redirectAfterAuth === 'checkout') {
+        setRedirectAfterAuth(null);
+        setPendingCheckoutStep('shipping');
+        setCurrentPage('cart');
+        showToast('Authenticated! Continuing with your Shipping Details.');
+      } else {
+        setCurrentPage('user-dashboard');
+      }
+      return { success: true, user: res.user };
+    } else {
+      const msg = res?.message || 'Failed to register account';
+      showToast(msg);
+      return { success: false, message: msg };
+    }
+  };
+
   // Credential Login Method
   const loginWithCredentials = async (email, password) => {
     const cleanEmail = (email || '').trim().toLowerCase();
@@ -631,8 +654,13 @@ export const AppProvider = ({ children }) => {
     const res = await api.login(cleanEmail, cleanPass);
     if (res && res.success && res.user) {
       setUser(res.user);
-      showToast(`Welcome back, ${res.user.name}!`);
-      if (res.user.role === 'admin') {
+      showToast(`Welcome back, ${res.user.name || res.user.email}!`);
+      if (redirectAfterAuth === 'checkout') {
+        setRedirectAfterAuth(null);
+        setPendingCheckoutStep('shipping');
+        setCurrentPage('cart');
+        showToast('Authenticated! Continuing with your Shipping Details.');
+      } else if (res.user.role === 'admin') {
         setCurrentPage('admin');
       } else {
         setCurrentPage('user-dashboard');
@@ -655,7 +683,14 @@ export const AppProvider = ({ children }) => {
       };
       setUser(adminObj);
       showToast('Logged in as Store Administrator');
-      setCurrentPage('admin');
+      if (redirectAfterAuth === 'checkout') {
+        setRedirectAfterAuth(null);
+        setPendingCheckoutStep('shipping');
+        setCurrentPage('cart');
+        showToast('Authenticated! Continuing with your Shipping Details.');
+      } else {
+        setCurrentPage('admin');
+      }
       return { success: true, user: adminObj };
     } else if (cleanEmail === 'alex@aura.io' || cleanEmail === 'alex@switches.io' || cleanEmail.includes('alex')) {
       if (cleanPass && cleanPass !== 'user123' && cleanPass !== 'user') {
@@ -671,7 +706,14 @@ export const AppProvider = ({ children }) => {
       };
       setUser(userObj);
       showToast('Logged in as Alex Mercer');
-      setCurrentPage('user-dashboard');
+      if (redirectAfterAuth === 'checkout') {
+        setRedirectAfterAuth(null);
+        setPendingCheckoutStep('shipping');
+        setCurrentPage('cart');
+        showToast('Authenticated! Continuing with your Shipping Details.');
+      } else {
+        setCurrentPage('user-dashboard');
+      }
       return { success: true, user: userObj };
     } else {
       // Dynamic user fallback
@@ -684,7 +726,14 @@ export const AppProvider = ({ children }) => {
       };
       setUser(newUser);
       showToast('Logged in successfully');
-      setCurrentPage('user-dashboard');
+      if (redirectAfterAuth === 'checkout') {
+        setRedirectAfterAuth(null);
+        setPendingCheckoutStep('shipping');
+        setCurrentPage('cart');
+        showToast('Authenticated! Continuing with your Shipping Details.');
+      } else {
+        setCurrentPage('user-dashboard');
+      }
       return { success: true, user: newUser };
     }
   };
@@ -893,40 +942,67 @@ export const AppProvider = ({ children }) => {
     }
   };
 
-  const placeOrder = (shippingInfo, paymentMethod) => {
+  const placeOrder = async (shippingInfo, paymentMethod) => {
     const cartDetails = cart.map(item => {
-      const p = products.find(prod => prod.id === item.productId);
+      const p = products.find(prod => prod.id === item.productId || prod._id === item.productId);
       return {
         productId: item.productId,
         name: p ? p.name : 'Product',
         price: p ? p.price : 0,
         quantity: item.quantity,
         selectedColor: item.selectedColor,
-        selectedSize: item.selectedSize
+        selectedSize: item.selectedSize,
+        image: p && p.images && p.images[0] ? p.images[0] : ''
       };
     });
 
     const subtotal = cartDetails.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const discount = appliedCoupon ? (subtotal * appliedCoupon.discountPercent) / 100 : 0;
-    const finalTotal = Math.max(0, subtotal - discount);
+    const shippingCost = subtotal >= 150 || subtotal === 0 ? 0 : 15;
+    const finalTotal = Math.max(0, subtotal - discount + shippingCost);
 
-    const newOrder = {
-      id: `SW-${Math.floor(10000 + Math.random() * 90000)}`,
-      createdAt: new Date().toISOString(),
+    const payload = {
+      user: user ? (user._id || user.id) : null,
+      customerName: shippingInfo.fullName || (user ? user.name : 'Customer'),
+      customerEmail: shippingInfo.email || (user ? user.email : 'customer@switches.com'),
       items: cartDetails,
       totalAmount: parseFloat(finalTotal.toFixed(2)),
       discount: parseFloat(discount.toFixed(2)),
-      shippingAddress: shippingInfo,
+      shippingAddress: {
+        address: shippingInfo.street || '',
+        city: shippingInfo.city || '',
+        zip: shippingInfo.zip || '',
+        country: shippingInfo.country || 'USA'
+      },
       paymentMethod,
+      paymentStatus: 'paid',
       status: 'processing'
     };
 
-    setOrders([newOrder, ...orders]);
+    let createdOrder;
+    try {
+      const apiRes = await api.createOrder(payload);
+      if (apiRes && apiRes.data) {
+        createdOrder = apiRes.data;
+        if (!createdOrder.id) createdOrder.id = createdOrder.orderId || `SW-${Math.floor(10000 + Math.random() * 90000)}`;
+      }
+    } catch (e) {
+      console.warn('API createOrder error:', e);
+    }
+
+    if (!createdOrder) {
+      createdOrder = {
+        id: `SW-${Math.floor(10000 + Math.random() * 90000)}`,
+        createdAt: new Date().toISOString(),
+        ...payload
+      };
+    }
+
+    setOrders(prev => [createdOrder, ...prev]);
     setCart([]);
     setAppliedCoupon(null);
-    showToast('SWITCHES Order Placed Successfully!');
-    api.createOrder(newOrder);
-    return newOrder;
+    showToast('SWITCHES Order Placed & Saved to Database!');
+    return createdOrder;
   };
 
   // Categories State
@@ -1229,6 +1305,11 @@ export const AppProvider = ({ children }) => {
         user,
         setUser,
         loginWithCredentials,
+        registerUser,
+        redirectAfterAuth,
+        setRedirectAfterAuth,
+        pendingCheckoutStep,
+        setPendingCheckoutStep,
         orders,
         setOrders,
         updateOrderStatus,
