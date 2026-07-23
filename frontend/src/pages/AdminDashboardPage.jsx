@@ -44,9 +44,9 @@ export const AdminDashboardPage = () => {
   const deleteVendor = context.deleteVendor;
 
   const user = context.user;
-  const setUser = context.setUser;
-  const setCurrentPage = context.setCurrentPage;
-  const showToast = context.showToast || (() => {});
+  const setUser = typeof context.setUser === 'function' ? context.setUser : (() => {});
+  const setCurrentPage = typeof context.setCurrentPage === 'function' ? context.setCurrentPage : (() => {});
+  const showToast = typeof context.showToast === 'function' ? context.showToast : (() => {});
 
   // Active Tab: 8 sidebar items
   // 'overview' | 'categories' | 'products' | 'inventory' | 'orders' | 'payments' | 'customers' | 'banners'
@@ -173,7 +173,13 @@ export const AdminDashboardPage = () => {
 
   // Handle Logout
   const handleLogout = () => {
-    setUser(null);
+    try {
+      localStorage.removeItem('token');
+      localStorage.removeItem('switches_user');
+    } catch (e) {}
+    if (typeof setUser === 'function') {
+      setUser(null);
+    }
     showToast('Logged out of Admin Command');
     setCurrentPage('home');
   };
