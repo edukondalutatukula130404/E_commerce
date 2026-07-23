@@ -49,60 +49,30 @@ export const AdminDashboardPage = () => {
     isBestSeller: false, isNew: true
   });
   const [editingProduct, setEditingProduct] = useState(null);
+  const [imageUploading, setImageUploading] = useState(false);
 
-  // Compress and upload to Cloudinary
-  const compressAndUploadImage = async (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = async () => {
-          // Create canvas for compression
-          const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 1200;
-          const MAX_HEIGHT = 1200;
-          let width = img.width;
-          let height = img.height;
+  // Upload directly to Cloudinary from browser (no backend needed)
+  const uploadToCloudinary = async (file) => {
+    const CLOUD_NAME = 'ypbj1iiy';
+    const UPLOAD_PRESET = 'switches_unsigned'; // unsigned preset
 
-          // Calculate new dimensions
-          if (width > height) {
-            if (width > MAX_WIDTH) {
-              height = Math.round((height * MAX_WIDTH) / width);
-              width = MAX_WIDTH;
-            }
-          } else {
-            if (height > MAX_HEIGHT) {
-              width = Math.round((width * MAX_HEIGHT) / height);
-              height = MAX_HEIGHT;
-            }
-          }
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', UPLOAD_PRESET);
+    formData.append('folder', 'switches_products');
 
-          canvas.width = width;
-          canvas.height = height;
-          const ctx = canvas.getContext('2d');
-          ctx.drawImage(img, 0, 0, width, height);
+    const response = await fetch(
+      `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`,
+      { method: 'POST', body: formData }
+    );
 
-          // Compress to JPEG
-          const compressedBase64 = canvas.toDataURL('image/jpeg', 0.85);
+    const data = await response.json();
 
-          // Upload to Cloudinary via backend
-          try {
-            const response = await api.uploadImage(compressedBase64);
-            if (response.success && response.url) {
-              resolve(response.url);
-            } else {
-              reject(new Error(response.message || 'Upload failed'));
-            }
-          } catch (err) {
-            reject(err);
-          }
-        };
-        img.onerror = () => reject(new Error('Failed to load image'));
-        img.src = event.target.result;
-      };
-      reader.onerror = () => reject(new Error('Failed to read file'));
-      reader.readAsDataURL(file);
-    });
+    if (data.secure_url) {
+      return data.secure_url;
+    } else {
+      throw new Error(data.error?.message || 'Cloudinary upload failed');
+    }
   };
 
   // Image upload handler
@@ -115,19 +85,22 @@ export const AdminDashboardPage = () => {
       return;
     }
 
-    showToast('Uploading to Cloudinary...');
+    setImageUploading(true);
+    showToast('Uploading image...');
 
     try {
-      const cloudinaryUrl = await compressAndUploadImage(file);
+      const url = await uploadToCloudinary(file);
       if (isEditing) {
-        setEditingProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
+        setEditingProduct(prev => ({ ...prev, images: [url] }));
       } else {
-        setNewProduct(prev => ({ ...prev, images: [cloudinaryUrl] }));
+        setNewProduct(prev => ({ ...prev, images: [url] }));
       }
-      showToast('✓ Image uploaded to Cloudinary!');
+      showToast('Image uploaded to Cloudinary!');
     } catch (err) {
-      console.error('Cloudinary upload error:', err);
+      console.error('Upload error:', err);
       showToast('Upload failed: ' + err.message);
+    } finally {
+      setImageUploading(false);
     }
   };
 
