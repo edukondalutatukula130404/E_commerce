@@ -418,20 +418,6 @@ export const HomePage = () => {
             </p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <button
-              onClick={() => scrollCarousel('left')}
-              className="btn btn-secondary"
-              style={{ padding: '0.35rem 0.55rem', minHeight: '36px', minWidth: '36px' }}
-            >
-              <ChevronLeft size={18} />
-            </button>
-            <button
-              onClick={() => scrollCarousel('right')}
-              className="btn btn-secondary"
-              style={{ padding: '0.35rem 0.55rem', minHeight: '36px', minWidth: '36px' }}
-            >
-              <ChevronRight size={18} />
-            </button>
             <button 
               onClick={() => setCurrentPage('catalog')}
               className="btn btn-secondary"
