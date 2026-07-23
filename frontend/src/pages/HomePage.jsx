@@ -24,6 +24,7 @@ export const HomePage = () => {
   const { products, categoriesList, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, setSelectedSubCategory, selectedSubCategory, setIsFilterDrawerOpen, toggleWishlist, wishlist } = useApp();
 
   const [openFaqId, setOpenFaqId] = useState(null);
+  const [showPopup, setShowPopup] = useState(true);
   const bestSellersRef = useRef(null);
 
   const scrollCarousel = (direction) => {
@@ -116,6 +117,44 @@ export const HomePage = () => {
 
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', paddingTop: '2.5rem', width: '100%', overflowX: 'hidden' }}>
+
+      {/* Top Promotional Popup Banner */}
+      {showPopup && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 9999,
+          background: 'var(--grad-primary)',
+          color: '#fff',
+          padding: '0.55rem 1rem',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '1rem',
+          fontSize: '0.82rem',
+          fontWeight: 700,
+          boxShadow: '0 2px 12px rgba(186,12,47,0.35)'
+        }}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
+            🔥 <strong>LIMITED TIME:</strong> Use code <span style={{ background: 'rgba(255,255,255,0.25)', padding: '0.1rem 0.5rem', borderRadius: '4px', letterSpacing: '0.5px' }}>SWITCHES20</span> for 20% OFF your order!
+            <button
+              onClick={() => { setCurrentPage('catalog'); setShowPopup(false); }}
+              style={{ background: '#fff', color: '#ba0c2f', border: 'none', borderRadius: '4px', padding: '0.2rem 0.65rem', fontSize: '0.78rem', fontWeight: 800, cursor: 'pointer' }}
+            >
+              Shop Now
+            </button>
+          </span>
+          <button
+            onClick={() => setShowPopup(false)}
+            style={{ position: 'absolute', right: '1rem', background: 'transparent', border: 'none', color: '#fff', cursor: 'pointer', fontSize: '1.1rem', lineHeight: 1, padding: '0.2rem' }}
+            aria-label="Close"
+          >
+            ✕
+          </button>
+        </div>
+      )}
       
       {/* 1. Hero Banner Showcase with 3D E-Commerce Image */}
       <section className="card" style={{
