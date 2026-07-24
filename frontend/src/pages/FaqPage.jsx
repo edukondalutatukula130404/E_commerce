@@ -10,7 +10,7 @@ export const FaqPage = () => {
       category: "Shipping & Delivery",
       icon: Truck,
       question: "How fast is SWITCHES express shipping?",
-      answer: "We offer sub-second order processing and same-day dispatch for orders placed before 2 PM. Express delivery typically arrives within 1 to 3 business days nationwide. All orders over $150 qualify for free express shipping."
+      answer: "We offer sub-second order processing and same-day dispatch for orders placed before 2 PM. Express delivery typically arrives within 1 to 3 business days nationwide. All orders over ₹1,500 qualify for free express shipping."
     },
     {
       category: "Shipping & Delivery",

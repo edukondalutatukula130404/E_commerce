@@ -197,11 +197,11 @@ export const ProductDetailPage = () => {
           {/* Pricing */}
           <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.6rem' }}>
             <span style={{ fontSize: 'clamp(1.5rem, 5vw, 2.1rem)', fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
-              ${product.price}
+              ₹{product.price}
             </span>
             {product.originalPrice && (
               <span style={{ fontSize: '0.95rem', color: 'var(--text-muted)', textDecoration: 'line-through' }}>
-                ${product.originalPrice}
+                ₹{product.originalPrice}
               </span>
             )}
           </div>
@@ -287,7 +287,7 @@ export const ProductDetailPage = () => {
                 className="btn btn-primary"
                 style={{ flex: 1, padding: '0.75rem 1rem', fontSize: '0.875rem', minHeight: '44px', minWidth: '150px' }}
               >
-                <ShoppingBag size={18} /> Add to Cart (${(product.price * quantity).toFixed(2)})
+                <ShoppingBag size={18} /> Add to Cart (₹{(product.price * quantity).toFixed(2)})
               </button>
             </div>
 
@@ -462,7 +462,7 @@ export const ProductDetailPage = () => {
                 <span className="badge badge-primary" style={{ alignSelf: 'flex-start', fontSize: '0.65rem' }}>{rec.category}</span>
                 <h4 style={{ fontSize: '0.85rem', fontWeight: 700, lineHeight: 1.25, height: '2.2rem', overflow: 'hidden' }}>{rec.name}</h4>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto' }}>
-                  <span style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${rec.price}</span>
+                  <span style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>₹{rec.price}</span>
                   <button 
                     onClick={() => navigateToProduct(rec.id)}
                     className="btn btn-secondary"
@@ -584,7 +584,7 @@ export const ProductDetailPage = () => {
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           <span style={{ fontSize: '0.65rem', color: 'var(--text-muted)' }}>Price</span>
           <span style={{ fontSize: '1.1rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
-            ${(product.price * quantity).toFixed(2)}
+            ₹{(product.price * quantity).toFixed(2)}
           </span>
         </div>
 

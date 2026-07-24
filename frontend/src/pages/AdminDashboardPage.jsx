@@ -48,9 +48,9 @@ export const AdminDashboardPage = () => {
   const setCurrentPage = typeof context.setCurrentPage === 'function' ? context.setCurrentPage : (() => {});
   const showToast = typeof context.showToast === 'function' ? context.showToast : (() => {});
 
-  // Active Tab: 8 sidebar items
-  // 'overview' | 'categories' | 'products' | 'inventory' | 'orders' | 'payments' | 'customers' | 'banners'
-  const [activeTab, setActiveTab] = useState('overview');
+  const [localActiveTab, setLocalActiveTab] = useState('overview');
+  const activeTab = context.adminActiveTab || localActiveTab;
+  const setActiveTab = context.setAdminActiveTab || setLocalActiveTab;
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // Search & Filter States
@@ -449,7 +449,7 @@ export const AdminDashboardPage = () => {
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
             <div style={{ fontSize: '0.78rem', background: 'var(--bg-card)', padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)' }}>
               <span style={{ color: 'var(--text-muted)' }}>Gross Revenue: </span>
-              <strong style={{ color: 'hsl(var(--hue-primary), 85%, 50%)', fontWeight: 900 }}>${totalRevenue.toLocaleString()}</strong>
+              <strong style={{ color: 'hsl(var(--hue-primary), 85%, 50%)', fontWeight: 900 }}>₹{totalRevenue.toLocaleString()}</strong>
             </div>
 
             {lowStockProducts.length > 0 && (
@@ -467,7 +467,7 @@ export const AdminDashboardPage = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem' }}>
               <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Total Store Revenue</span>
-                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${totalRevenue.toLocaleString()}</span>
+                <span style={{ fontSize: '1.6rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>₹{totalRevenue.toLocaleString()}</span>
                 <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>+24.5% SLA Performance</span>
               </div>
               <div className="card" style={{ padding: '1.1rem', display: 'flex', flexDirection: 'column', gap: '0.3rem' }}>
@@ -492,10 +492,10 @@ export const AdminDashboardPage = () => {
               <h3 style={{ fontSize: '1rem', fontWeight: 800, marginBottom: '1rem' }}>Revenue Growth Trend (2026 Q2)</h3>
               <div style={{ display: 'flex', alignItems: 'flex-end', gap: '1rem', height: '160px', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.5rem' }}>
                 {[
-                  { month: 'Apr', val: 42, label: '$4.2k' },
-                  { month: 'May', val: 68, label: '$6.8k' },
-                  { month: 'Jun', val: 95, label: '$9.5k' },
-                  { month: 'Jul', val: 142, label: '$14.2k' }
+                  { month: 'Apr', val: 42, label: '₹4.2k' },
+                  { month: 'May', val: 68, label: '₹6.8k' },
+                  { month: 'Jun', val: 95, label: '₹9.5k' },
+                  { month: 'Jul', val: 142, label: '₹14.2k' }
                 ].map(item => (
                   <div key={item.month} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', height: '100%', justifyContent: 'flex-end' }}>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, marginBottom: '0.3rem' }}>{item.label}</span>
@@ -743,7 +743,7 @@ export const AdminDashboardPage = () => {
                   <input type="text" placeholder="e.g. SWITCHES Pro Wireless" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
                 </div>
                 <div>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Price ($) *</label>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Price (₹) *</label>
                   <input type="number" step="0.01" placeholder="149.99" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} style={{ width: '100%', padding: '0.55rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.82rem' }} />
                 </div>
                 <div>
@@ -912,7 +912,7 @@ export const AdminDashboardPage = () => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <span style={{ fontSize: '0.95rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${p.price}</span>
+                      <span style={{ fontSize: '0.95rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>₹{p.price}</span>
                       <div style={{ display: 'flex', gap: '0.35rem' }}>
                         <button onClick={() => setEditingProduct(p)} className="btn btn-secondary" style={{ padding: '0.3rem 0.55rem', fontSize: '0.75rem' }}><Edit3 size={13} /> Edit</button>
                         <button onClick={() => deleteProduct(p.id)} className="btn btn-secondary" style={{ padding: '0.3rem 0.55rem', fontSize: '0.75rem', color: '#ff4757' }}><Trash2 size={13} /> Delete</button>
@@ -996,7 +996,7 @@ export const AdminDashboardPage = () => {
 
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.4rem', borderTop: '1px solid var(--border-light)', paddingTop: '0.5rem' }}>
                     <div><strong>Customer:</strong> {o.shippingAddress?.fullName || 'Alex Mercer'}</div>
-                    <div><strong>Total Amount:</strong> <span style={{ color: 'var(--text-main)', fontWeight: 800 }}>${o.totalAmount}</span></div>
+                    <div><strong>Total Amount:</strong> <span style={{ color: 'var(--text-main)', fontWeight: 800 }}>₹{o.totalAmount}</span></div>
                     <div><strong>Payment Method:</strong> {(o.paymentMethod || 'card').toUpperCase()}</div>
                   </div>
                 </div>
@@ -1027,7 +1027,7 @@ export const AdminDashboardPage = () => {
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                    <span style={{ fontSize: '1rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${pay.amount}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 900, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>₹{pay.amount}</span>
                     <select value={pay.status} onChange={(e) => updatePaymentStatus(pay.id, e.target.value)} style={{ padding: '0.35rem 0.6rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-card)', color: 'var(--text-main)', fontSize: '0.78rem', fontWeight: 700 }}>
                       <option value="Paid">Paid</option>
                       <option value="Pending">Pending</option>
@@ -1307,7 +1307,7 @@ export const AdminDashboardPage = () => {
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                 <div>
-                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Price ($)</label>
+                  <label style={{ fontSize: '0.75rem', fontWeight: 700, display: 'block', marginBottom: '0.2rem' }}>Price (₹)</label>
                   <input type="number" step="0.01" value={editingProduct.price} onChange={(e) => setEditingProduct({ ...editingProduct, price: e.target.value })} style={{ width: '100%', padding: '0.5rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-light)', background: 'var(--bg-secondary)', color: 'var(--text-main)', fontSize: '0.85rem' }} />
                 </div>
                 <div>

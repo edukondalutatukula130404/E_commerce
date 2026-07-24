@@ -231,7 +231,7 @@ export const CartCheckoutPage = () => {
                     <span>
                       {subtotal >= freeShippingThreshold 
                         ? '🎉 You unlocked FREE Express Shipping!' 
-                        : `Add $${(freeShippingThreshold - subtotal).toFixed(2)} more for Free Shipping`}
+                        : `Add ₹${(freeShippingThreshold - subtotal).toFixed(2)} more for Free Shipping`}
                     </span>
                     <span>{Math.round(progressToFreeShipping)}%</span>
                   </div>
@@ -260,7 +260,7 @@ export const CartCheckoutPage = () => {
                           Color: {item.selectedColor} | Size: {item.selectedSize}
                         </div>
                         <span style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>
-                          ${item.product.price}
+                          ₹{item.product.price}
                         </span>
                       </div>
 
@@ -502,21 +502,21 @@ export const CartCheckoutPage = () => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', paddingTop: '0.4rem', borderTop: '1px solid var(--border-light)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Subtotal</span>
-                <span style={{ fontWeight: 700 }}>${subtotal.toFixed(2)}</span>
+                <span style={{ fontWeight: 700 }}>₹{subtotal.toFixed(2)}</span>
               </div>
               {appliedCoupon && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', color: 'hsl(var(--hue-success), 80%, 45%)' }}>
                   <span>Discount</span>
-                  <span>-${discountAmount.toFixed(2)}</span>
+                  <span>-₹{discountAmount.toFixed(2)}</span>
                 </div>
               )}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--text-muted)' }}>Shipping</span>
-                <span style={{ fontWeight: 700 }}>{shippingCost === 0 ? 'FREE' : `$${shippingCost}`}</span>
+                <span style={{ fontWeight: 700 }}>{shippingCost === 0 ? 'FREE' : `₹${shippingCost}`}</span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.15rem', fontWeight: 900, paddingTop: '0.6rem', borderTop: '1px solid var(--border-light)', color: 'var(--text-main)' }}>
                 <span>Total</span>
-                <span>${finalTotal.toFixed(2)}</span>
+                <span>₹{finalTotal.toFixed(2)}</span>
               </div>
             </div>
 
@@ -535,7 +535,7 @@ export const CartCheckoutPage = () => {
 
             {checkoutStep === 'payment' && (
               <button onClick={handleFinalOrderSubmit} className="btn btn-primary" style={{ padding: '0.75rem', fontSize: '0.9rem' }}>
-                <CheckCircle2 size={18} /> Place Order Now (${finalTotal.toFixed(2)})
+                <CheckCircle2 size={18} /> Place Order Now (₹{finalTotal.toFixed(2)})
               </button>
             )}
 
@@ -722,7 +722,7 @@ export const CartCheckoutPage = () => {
               gap: '0.35rem'
             }}>
               <div><strong>Customer:</strong> {confirmedOrder.customerName || user?.name || 'Customer'} ({confirmedOrder.customerEmail || user?.email || ''})</div>
-              <div><strong>Total Amount:</strong> ${confirmedOrder.totalAmount?.toFixed(2)}</div>
+              <div><strong>Total Amount:</strong> ₹{confirmedOrder.totalAmount?.toFixed(2)}</div>
               <div><strong>Payment Method:</strong> {confirmedOrder.paymentMethod?.toUpperCase()}</div>
               <div><strong>Shipping To:</strong> {confirmedOrder.shippingAddress?.street}, {confirmedOrder.shippingAddress?.city} {confirmedOrder.shippingAddress?.zip}</div>
               <div style={{ color: 'hsl(var(--hue-success), 80%, 45%)', fontWeight: 700, marginTop: '0.25rem' }}>

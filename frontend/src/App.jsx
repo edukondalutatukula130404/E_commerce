@@ -98,121 +98,55 @@ class ErrorBoundary extends React.Component {
 
 const MainContent = () => {
   const { currentPage, toast } = useApp();
-  const [showTopBanner, setShowTopBanner] = React.useState(true);
 
   const isAdminView = currentPage === 'admin';
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: isAdminView ? 0 : 'calc(var(--mobile-nav-height) + 1rem)' }}>
-
-      {/* Top Promotional Banner — fully responsive */}
-      {showTopBanner && !isAdminView && (
-        <>
-          <div id="top-promo-banner" style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 99999,
-            background: 'linear-gradient(90deg, #ba0c2f 0%, #8a0820 100%)',
-            color: '#fff',
-            padding: '0.55rem 2.5rem 0.55rem 1rem',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexWrap: 'wrap',
-            gap: '0.4rem',
-            fontSize: 'clamp(0.7rem, 2.5vw, 0.82rem)',
-            fontWeight: 600,
-            textAlign: 'center',
-            boxShadow: '0 2px 12px rgba(186,12,47,0.4)',
-            lineHeight: 1.4
-          }}>
-            🔥 <strong>LIMITED TIME</strong> — Use code&nbsp;
-            <span style={{
-              background: 'rgba(255,255,255,0.25)',
-              border: '1px solid rgba(255,255,255,0.4)',
-              padding: '0.05rem 0.5rem',
-              borderRadius: '4px',
-              fontFamily: 'monospace',
-              fontWeight: 800,
-              letterSpacing: '0.5px',
-              fontSize: 'clamp(0.72rem, 2.5vw, 0.85rem)'
-            }}>
-              SWITCHES20
-            </span>
-            &nbsp;for <strong>20% OFF</strong> your order!
-            <button
-              onClick={() => setShowTopBanner(false)}
-              style={{
-                position: 'absolute',
-                right: '0.6rem',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                background: 'transparent',
-                border: 'none',
-                color: 'rgba(255,255,255,0.85)',
-                cursor: 'pointer',
-                fontSize: '1.1rem',
-                lineHeight: 1,
-                padding: '0.3rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}
-              aria-label="Close"
-            >
-              ✕
-            </button>
-          </div>
-          {/* Spacer so page content doesn't go under the fixed banner */}
-          <div id="top-promo-spacer" style={{ height: '36px', flexShrink: 0 }} />
-        </>
-      )}
       
-      {/* Top Notification Pop Up */}
+      {/* Top Floating Notification Pop-Up Toast Alert */}
       {toast && (
         <div 
-          className="animate-toast-top"
+          className="animate-slide-down"
           style={{
             position: 'fixed',
-            top: showTopBanner && !isAdminView ? '3.25rem' : '1.25rem',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            zIndex: 100050,
-            background: 'var(--bg-glass-heavy)',
-            border: '1px solid var(--border-active)',
+            top: '75px',
+            right: '1rem',
+            zIndex: 999999,
+            background: 'linear-gradient(135deg, rgba(20, 20, 26, 0.96) 0%, rgba(186, 12, 47, 0.95) 100%)',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
             padding: '0.65rem 1.35rem',
             borderRadius: '9999px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.22), 0 0 15px rgba(186,12,47,0.15)',
-            fontWeight: 700,
-            fontSize: '0.875rem',
-            color: 'var(--text-main)',
-            backdropFilter: 'blur(16px)',
-            WebkitBackdropFilter: 'blur(16px)',
+            boxShadow: '0 12px 36px rgba(0, 0, 0, 0.45), 0 0 20px rgba(186, 12, 47, 0.4)',
+            fontWeight: 800,
+            fontSize: '0.85rem',
+            color: '#ffffff',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.6rem',
+            gap: '0.65rem',
             maxWidth: 'calc(100vw - 2rem)',
-            transition: 'top 0.3s ease'
+            width: 'max-content',
+            pointerEvents: 'none'
           }}
         >
           <span style={{
             display: 'inline-flex',
             alignItems: 'center',
             justifyContent: 'center',
-            width: '22px',
-            height: '22px',
+            width: '24px',
+            height: '24px',
             borderRadius: '50%',
-            background: 'var(--color-primary, #ba0c2f)',
-            color: '#fff',
-            fontSize: '0.72rem',
-            fontWeight: 800,
+            background: 'rgba(255, 255, 255, 0.25)',
+            color: '#ffffff',
+            fontSize: '0.75rem',
+            fontWeight: 900,
             flexShrink: 0
           }}>
-            🔔
+            ✓
           </span>
-          <span>{toast.text}</span>
+          <span style={{ letterSpacing: '0.2px' }}>{toast.text}</span>
         </div>
       )}
 

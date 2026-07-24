@@ -250,29 +250,6 @@ export const CatalogPage = () => {
           >
             <SlidersHorizontal size={15} /> Filter
           </button>
-
-          {/* Sort Dropdown */}
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value)}
-            className="card"
-            style={{
-              padding: '0.55rem 0.65rem',
-              fontSize: '0.8rem',
-              fontWeight: 600,
-              color: 'var(--text-main)',
-              background: 'var(--bg-card)',
-              outline: 'none',
-              cursor: 'pointer',
-              minHeight: '38px',
-              border: '1px solid var(--border-light)'
-            }}
-          >
-            <option value="featured">Sort: Featured</option>
-            <option value="price-low">Price: Low-High</option>
-            <option value="price-high">Price: High-Low</option>
-            <option value="rating">Highest Rated</option>
-          </select>
         </div>
 
 
@@ -304,6 +281,46 @@ export const CatalogPage = () => {
             >
               Reset
             </button>
+          </div>
+
+          {/* Sort By Filter */}
+          <div>
+            <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.4rem' }}>Sort Products By</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+              {[
+                { id: 'featured', label: '🔥 Featured / Recommended' },
+                { id: 'price-low', label: '🏷️ Price: Low to High' },
+                { id: 'price-high', label: '🏷️ Price: High to Low' },
+                { id: 'rating', label: '⭐ Highest Rated' },
+                { id: 'newest', label: '✨ Newest Arrivals' }
+              ].map((opt) => {
+                const isSelected = sortOption === opt.id;
+                return (
+                  <button
+                    key={opt.id}
+                    onClick={() => setSortOption(opt.id)}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '0.45rem 0.65rem',
+                      borderRadius: 'var(--radius-md)',
+                      border: isSelected ? '1.5px solid var(--border-active)' : '1px solid var(--border-light)',
+                      background: isSelected ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-secondary)',
+                      color: isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                      fontSize: '0.78rem',
+                      fontWeight: isSelected ? 800 : 500,
+                      cursor: 'pointer',
+                      transition: 'all 0.15s ease',
+                      textAlign: 'left'
+                    }}
+                  >
+                    <span>{opt.label}</span>
+                    {isSelected && <span style={{ fontSize: '0.75rem', fontWeight: 900 }}>✓</span>}
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
           {/* Category & Nested Sub-Category Filter */}
@@ -408,7 +425,7 @@ export const CatalogPage = () => {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', fontWeight: 700, marginBottom: '0.25rem' }}>
               <span>Max Price</span>
-              <span>${maxPrice}</span>
+              <span>₹{maxPrice}</span>
             </div>
             <input
               type="range"
@@ -511,7 +528,7 @@ export const CatalogPage = () => {
                       </div>
 
                       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px solid var(--border-light)' }}>
-                        <span style={{ fontSize: '0.95rem', fontWeight: 800 }}>${product.price}</span>
+                        <span style={{ fontSize: '0.95rem', fontWeight: 800 }}>₹{product.price}</span>
                         <div style={{ display: 'flex', gap: '0.3rem' }}>
                           <button 
                             onClick={(e) => {
@@ -544,7 +561,7 @@ export const CatalogPage = () => {
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: 2000,
+          zIndex: 3500,
           background: 'rgba(0, 0, 0, 0.65)',
           backdropFilter: 'blur(6px)',
           display: 'flex',
@@ -552,14 +569,18 @@ export const CatalogPage = () => {
         }}>
           <div className="animate-slide-up" style={{
             width: '100%',
-            maxWidth: '320px',
-            height: '100%',
+            maxWidth: '360px',
+            height: '100vh',
+            maxHeight: '100vh',
             background: 'var(--bg-card)',
-            padding: '1.25rem',
+            padding: '1.25rem 1.25rem calc(var(--mobile-nav-height) + 10rem) 1.25rem',
             display: 'flex',
             flexDirection: 'column',
             gap: '1.25rem',
-            overflowY: 'auto'
+            overflowY: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            touchAction: 'pan-y',
+            overscrollBehaviorY: 'contain'
           }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <h3 style={{ fontSize: '1rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
@@ -568,6 +589,45 @@ export const CatalogPage = () => {
               <button onClick={() => setIsFilterDrawerOpen(false)} className="btn btn-icon">
                 <X size={16} />
               </button>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.4rem' }}>Sort Products By</label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+                {[
+                  { id: 'featured', label: '🔥 Featured / Recommended' },
+                  { id: 'price-low', label: '🏷️ Price: Low to High' },
+                  { id: 'price-high', label: '🏷️ Price: High to Low' },
+                  { id: 'rating', label: '⭐ Highest Rated' },
+                  { id: 'newest', label: '✨ Newest Arrivals' }
+                ].map((opt) => {
+                  const isSelected = sortOption === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      onClick={() => setSortOption(opt.id)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justify: 'space-between',
+                        padding: '0.55rem 0.75rem',
+                        borderRadius: 'var(--radius-md)',
+                        border: isSelected ? '2px solid var(--border-active)' : '1px solid var(--border-light)',
+                        background: isSelected ? 'rgba(186, 12, 47, 0.1)' : 'var(--bg-secondary)',
+                        color: isSelected ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                        fontSize: '0.82rem',
+                        fontWeight: isSelected ? 800 : 500,
+                        cursor: 'pointer',
+                        transition: 'all 0.15s ease',
+                        textAlign: 'left'
+                      }}
+                    >
+                      <span>{opt.label}</span>
+                      {isSelected && <span style={{ fontSize: '0.75rem', fontWeight: 900 }}>✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
 
             <div>
@@ -693,7 +753,7 @@ export const CatalogPage = () => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Max Price: ${maxPrice}</label>
+              <label style={{ fontSize: '0.78rem', fontWeight: 700, display: 'block', marginBottom: '0.35rem' }}>Max Price: ₹{maxPrice}</label>
               <input
                 type="range"
                 min="20"

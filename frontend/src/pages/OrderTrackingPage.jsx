@@ -108,7 +108,7 @@ export const OrderTrackingPage = () => {
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <span style={{ fontSize: '1.2rem', fontWeight: 800, color: 'hsl(var(--hue-primary), 90%, 65%)' }}>
-                      ${order.totalAmount}
+                      ₹{order.totalAmount}
                     </span>
                     <span className="badge badge-accent" style={{ display: 'block', marginTop: '0.2rem', fontSize: '0.7rem' }}>
                       {order.paymentMethod.toUpperCase()}
@@ -121,7 +121,7 @@ export const OrderTrackingPage = () => {
                   {order.items.map((item, idx) => (
                     <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
                       <span>{item.quantity}x <strong>{item.name}</strong> ({item.selectedColor || 'Default'})</span>
-                      <span style={{ fontWeight: 700 }}>${(item.price * item.quantity).toFixed(2)}</span>
+                      <span style={{ fontWeight: 700 }}>₹{(item.price * item.quantity).toFixed(2)}</span>
                     </div>
                   ))}
                 </div>

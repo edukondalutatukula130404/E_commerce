@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { ShoppingBag, Shield, User, Package, Heart, CreditCard, Wallet, LogOut, ChevronDown, MapPin } from 'lucide-react';
+import { ShoppingBag, Shield, User, Package, Heart, CreditCard, Wallet, LogOut, ChevronDown, MapPin, Bell, Check, Trash2, X, BarChart3, Users, Layers, Tag, Ticket, Settings } from 'lucide-react';
 
 export const Navbar = () => {
   const { 
@@ -10,13 +10,22 @@ export const Navbar = () => {
     user,
     setUser,
     setUserDashboardTab,
-    showToast
+    setAdminActiveTab,
+    showToast,
+    notifications = [],
+    removeNotification,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    clearAllNotifications
   } = useApp();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
   const dropdownRef = useRef(null);
+  const notifRef = useRef(null);
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   const navLinks = [
     { id: 'home', label: 'Home', page: 'home' },
@@ -28,11 +37,14 @@ export const Navbar = () => {
     { id: 'terms', label: 'Terms', page: 'terms' }
   ];
 
-  // Close dropdown on click outside
+  // Close dropdowns on click outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+      }
+      if (notifRef.current && !notifRef.current.contains(event.target)) {
+        setIsNotifOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -64,42 +76,93 @@ export const Navbar = () => {
         flexDirection: 'column'
       }}
     >
-      {/* 1. Main Top Header Grid (Logo Left, Brand Name Middle, Cart/Admin Right) */}
+      {/* 1. Main Top Header Bar (Logo Left, Centered Title Middle, Actions Right) */}
       <div 
         style={{ 
           maxWidth: 'var(--container-max)', 
           width: '100%',
           margin: '0 auto', 
-          padding: '0.65rem 2rem', 
+          padding: '0.55rem 1rem', 
           display: 'grid', 
           gridTemplateColumns: '1fr auto 1fr', 
-          alignItems: 'center' 
+          alignItems: 'center',
+          gap: '0.5rem',
+          position: 'relative'
         }}
       >
-        {/* FAR LEFT: Logo Image */}
-        <a
-          href="/"
-          onClick={(e) => {
-            e.preventDefault();
-            setCurrentPage('home');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          style={{ justifySelf: 'start', textDecoration: 'none', display: 'flex', alignItems: 'center' }}
-          title="SWITCHES — Go to Homepage"
-        >
-          <img
-            src="/logo.png"
-            alt="SWITCHES Logo"
-            style={{ 
-              height: '42px', 
-              width: 'auto', 
-              objectFit: 'contain', 
-              filter: 'drop-shadow(0 2px 8px rgba(186, 12, 47, 0.35))' 
+        {/* FAR LEFT (START): Logo Image & Mobile User Greeting Badge */}
+        <div style={{ justifySelf: 'start', display: 'flex', alignItems: 'center', gap: '0.65rem' }}>
+          <a
+            href="/"
+            onClick={(e) => {
+              e.preventDefault();
+              setCurrentPage('home');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
-          />
-        </a>
+            className="hide-mobile"
+            style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', flexShrink: 0 }}
+            title="SWITCHES — Go to Homepage"
+          >
+            <img
+              src="/logo.png"
+              alt="SWITCHES Logo"
+              style={{ 
+                height: '46px', 
+                width: 'auto', 
+                objectFit: 'contain', 
+                filter: 'drop-shadow(0 2px 10px rgba(186, 12, 47, 0.35))' 
+              }}
+            />
+          </a>
 
-        {/* MIDDLE / CENTER: Brand Name */}
+          {/* Logged-In User Greeting Badge (Shown on Mobile when logged in on Home Page) */}
+          {user && currentPage === 'home' && (
+            <div 
+              className="animate-fade-in hide-desktop"
+              onClick={() => {
+                if (typeof setUserDashboardTab === 'function') setUserDashboardTab('menu');
+                setCurrentPage('user-dashboard');
+              }}
+              style={{ 
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.35rem',
+                padding: '0.18rem 0.6rem 0.18rem 0.2rem',
+                borderRadius: '9999px',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--border-light)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                whiteSpace: 'nowrap',
+                maxWidth: '140px',
+                position: 'absolute',
+                left: '0.85rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                zIndex: 10
+              }}
+              title="View Account"
+            >
+              <img
+                src={user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80'}
+                alt={user?.name || 'User'}
+                style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  objectFit: 'cover',
+                  border: '1.5px solid hsl(var(--hue-primary), 85%, 50%)',
+                  flexShrink: 0
+                }}
+              />
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--text-main)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                Hi, <span style={{ color: '#ba0c2f' }}>{user?.name ? user.name.split(' ')[0] : 'User'}</span>
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* CENTER / MIDDLE: Centered Brand Title */}
         <a
           href="/"
           onClick={(e) => {
@@ -107,23 +170,66 @@ export const Navbar = () => {
             setCurrentPage('home');
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
-          style={{ justifySelf: 'center', textAlign: 'center', textDecoration: 'none', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+          style={{ 
+            justifySelf: 'center', 
+            textAlign: 'center', 
+            textDecoration: 'none', 
+            display: 'flex', 
+            flexDirection: 'column',
+            alignItems: 'center', 
+            justifyContent: 'center',
+            minWidth: 0,
+            overflow: 'hidden'
+          }}
           title="SWITCHES — Homepage"
         >
-          <span style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '0.5px', color: 'var(--text-main)', lineHeight: 1 }}>
-            SWITCHES<span style={{ color: 'hsl(var(--hue-primary), 85%, 50%)' }}>.</span>
+          <span style={{ 
+            fontSize: 'clamp(1.15rem, 3.8vw, 1.4rem)', 
+            fontWeight: 900, 
+            letterSpacing: '0.6px', 
+            color: 'var(--text-main)', 
+            lineHeight: 1, 
+            whiteSpace: 'nowrap',
+            textTransform: 'uppercase'
+          }}>
+            SWITCHES<span style={{ color: '#ba0c2f' }}>.</span>
           </span>
-          <span style={{ fontSize: '0.58rem', fontWeight: 800, letterSpacing: '1px', color: 'var(--text-muted)', marginTop: '2px' }}>
+          <span style={{ 
+            fontSize: '0.52rem', 
+            fontWeight: 800, 
+            letterSpacing: '1.5px', 
+            color: 'var(--text-muted)', 
+            marginTop: '2px', 
+            whiteSpace: 'nowrap',
+            textTransform: 'uppercase',
+            opacity: 0.8
+          }}>
             SINCE 2026
           </span>
         </a>
 
-        {/* FAR RIGHT / LAST: Cart & User Dropdown Actions */}
-        <div className="hide-mobile" style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+        {/* FAR RIGHT: Header Options (Cart, User Account / Login) */}
+        <div style={{ justifySelf: 'end', display: 'flex', alignItems: 'center', gap: '0.55rem', flexShrink: 0 }}>
+          
+          {/* Desktop Cart Button */}
           <button
             onClick={() => setCurrentPage('cart')}
-            className="btn btn-secondary"
-            style={{ padding: '0.4rem 0.85rem', position: 'relative', height: '36px', fontSize: '0.8rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}
+            className="hide-mobile"
+            style={{
+              padding: '0 0.9rem',
+              height: '36px',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              borderRadius: '9999px',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border-light)',
+              color: 'var(--text-main)',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
           >
             <ShoppingBag size={15} />
             <span>Cart</span>
@@ -134,8 +240,8 @@ export const Navbar = () => {
             )}
           </button>
 
-          {/* User Account Button & Interactive Dropdown Menu */}
-          <div style={{ position: 'relative' }} ref={dropdownRef}>
+          {/* User Account / Login Button & Interactive Dropdown Menu (Hidden on Mobile, handled by MobileNav) */}
+          <div className="hide-mobile" style={{ position: 'relative' }} ref={dropdownRef}>
             <button
               onClick={() => {
                 if (!user) {
@@ -144,17 +250,20 @@ export const Navbar = () => {
                   setIsDropdownOpen(!isDropdownOpen);
                 }
               }}
-              className="btn btn-secondary"
               style={{
-                padding: '0.4rem 0.85rem',
+                padding: '0 0.9rem',
                 height: '36px',
                 fontSize: '0.8rem',
                 fontWeight: 700,
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.4rem',
-                borderRadius: 'var(--radius-md)',
-                background: isDropdownOpen ? 'rgba(186, 12, 47, 0.15)' : undefined
+                gap: '0.45rem',
+                borderRadius: '9999px',
+                background: isDropdownOpen ? 'rgba(186, 12, 47, 0.12)' : 'var(--bg-secondary)',
+                border: isDropdownOpen ? '1px solid var(--border-active)' : '1px solid var(--border-light)',
+                color: 'var(--text-main)',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
               }}
             >
               {user?.role === 'admin' ? <Shield size={15} color="#ba0c2f" /> : <User size={15} />}
@@ -210,159 +319,190 @@ export const Navbar = () => {
                   </div>
                 </div>
 
-                {/* Admin Command Panel Link if Admin Role */}
-                {user.role === 'admin' && (
-                  <button
-                    onClick={() => {
-                      setCurrentPage('admin');
-                      setIsDropdownOpen(false);
-                    }}
-                    className="btn"
-                    style={{
-                      padding: '0.5rem 0.75rem',
-                      fontSize: '0.8rem',
-                      fontWeight: 700,
-                      justifyContent: 'flex-start',
-                      gap: '0.6rem',
-                      color: '#ba0c2f',
-                      background: 'rgba(186, 12, 47, 0.08)',
-                      borderRadius: 'var(--radius-md)'
-                    }}
-                  >
-                    <Shield size={15} color="#ba0c2f" /> Admin Command Panel
-                  </button>
+                {/* Admin Dropdown Options */}
+                {user.role === 'admin' ? (
+                  <>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('overview');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 700, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <BarChart3 size={15} color="#ba0c2f" /> Dashboard
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('products');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Package size={15} color="#ba0c2f" /> Products
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('orders');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <ShoppingBag size={15} color="#ba0c2f" /> Orders
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('customers');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Users size={15} color="#ba0c2f" /> Customers
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('categories');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Layers size={15} color="#ba0c2f" /> Categories
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('inventory');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Tag size={15} color="#ba0c2f" /> Inventory
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('banners');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Ticket size={15} color="#ba0c2f" /> Coupons
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('payments');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <CreditCard size={15} color="#ba0c2f" /> Reports
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('overview');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Settings size={15} color="#ba0c2f" /> Settings
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (typeof setAdminActiveTab === 'function') setAdminActiveTab('customers');
+                        setCurrentPage('admin');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.45rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.65rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Shield size={15} color="#ba0c2f" /> Admin Users
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    {/* Standard User Menu Options */}
+                    <button
+                      onClick={() => {
+                        setCurrentPage('user-dashboard');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.6rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <User size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Profile
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentPage('orders');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.6rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Package size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Orders
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentPage('wishlist');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.6rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Heart size={15} color="#ff4757" /> My Wishlist
+                    </button>
+                    <button
+                      onClick={() => {
+                        setUserDashboardTab('addresses');
+                        setCurrentPage('user-dashboard');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.6rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <MapPin size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Saved Address
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentPage('user-dashboard');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.6rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <CreditCard size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Payment History
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentPage('user-dashboard');
+                        setIsDropdownOpen(false);
+                      }}
+                      className="btn"
+                      style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, justifyContent: 'flex-start', gap: '0.6rem', color: 'var(--text-main)', background: 'transparent' }}
+                    >
+                      <Wallet size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Wallet
+                    </button>
+                  </>
                 )}
-
-                {/* 1. My Profile */}
-                <button
-                  onClick={() => {
-                    setCurrentPage('user-dashboard');
-                    setIsDropdownOpen(false);
-                  }}
-                  className="btn"
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    justifyContent: 'flex-start',
-                    gap: '0.6rem',
-                    color: 'var(--text-main)',
-                    background: 'transparent',
-                    borderRadius: 'var(--radius-md)'
-                  }}
-                >
-                  <User size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Profile
-                </button>
-
-                {/* 2. My Orders */}
-                <button
-                  onClick={() => {
-                    setCurrentPage('orders');
-                    setIsDropdownOpen(false);
-                  }}
-                  className="btn"
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    justifyContent: 'flex-start',
-                    gap: '0.6rem',
-                    color: 'var(--text-main)',
-                    background: 'transparent',
-                    borderRadius: 'var(--radius-md)'
-                  }}
-                >
-                  <Package size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Orders
-                </button>
-
-                {/* 3. My Wishlist */}
-                <button
-                  onClick={() => {
-                    setCurrentPage('wishlist');
-                    setIsDropdownOpen(false);
-                  }}
-                  className="btn"
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    justifyContent: 'flex-start',
-                    gap: '0.6rem',
-                    color: 'var(--text-main)',
-                    background: 'transparent',
-                    borderRadius: 'var(--radius-md)'
-                  }}
-                >
-                  <Heart size={15} color="#ff4757" /> My Wishlist
-                </button>
-
-                {/* 4. Saved Addresses */}
-                <button
-                  onClick={() => {
-                    setUserDashboardTab('addresses');
-                    setCurrentPage('user-dashboard');
-                    setIsDropdownOpen(false);
-                  }}
-                  className="btn"
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    justifyContent: 'flex-start',
-                    gap: '0.6rem',
-                    color: 'var(--text-main)',
-                    background: 'transparent',
-                    borderRadius: 'var(--radius-md)'
-                  }}
-                >
-                  <MapPin size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Saved Address
-                </button>
-
-                {/* 4. Payment History */}
-                <button
-                  onClick={() => {
-                    setCurrentPage('user-dashboard');
-                    setIsDropdownOpen(false);
-                  }}
-                  className="btn"
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    justifyContent: 'flex-start',
-                    gap: '0.6rem',
-                    color: 'var(--text-main)',
-                    background: 'transparent',
-                    borderRadius: 'var(--radius-md)'
-                  }}
-                >
-                  <CreditCard size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> Payment History
-                </button>
-
-                {/* 5. My Wallet */}
-                <button
-                  onClick={() => {
-                    setCurrentPage('user-dashboard');
-                    setIsDropdownOpen(false);
-                  }}
-                  className="btn"
-                  style={{
-                    padding: '0.5rem 0.75rem',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    justifyContent: 'flex-start',
-                    gap: '0.6rem',
-                    color: 'var(--text-main)',
-                    background: 'transparent',
-                    borderRadius: 'var(--radius-md)'
-                  }}
-                >
-                  <Wallet size={15} color="hsl(var(--hue-primary), 85%, 50%)" /> My Wallet
-                </button>
 
                 <div style={{ height: '1px', background: 'var(--border-light)', margin: '0.15rem 0' }} />
 
-                {/* 6. Logout (Last Option) */}
+                {/* Logout (Last Option) */}
                 <button
                   onClick={handleLogout}
                   className="btn"
@@ -422,6 +562,156 @@ export const Navbar = () => {
               </button>
             );
           })}
+
+          {/* Nav Bar Notifications Pop Up Option */}
+          <div style={{ position: 'relative' }} ref={notifRef}>
+            <button
+              onClick={() => setIsNotifOpen(!isNotifOpen)}
+              className="btn"
+              style={{
+                padding: '0.35rem 0.95rem',
+                fontSize: '0.85rem',
+                fontWeight: isNotifOpen ? 800 : 600,
+                background: isNotifOpen ? 'rgba(186, 12, 47, 0.12)' : 'transparent',
+                color: isNotifOpen ? 'hsl(var(--hue-primary), 85%, 50%)' : 'var(--text-main)',
+                borderRadius: 'var(--radius-md)',
+                border: 'none',
+                minHeight: '34px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.4rem',
+                cursor: 'pointer'
+              }}
+            >
+              <Bell size={15} color={unreadCount > 0 ? '#ba0c2f' : 'currentColor'} />
+              <span>Notifications</span>
+              {unreadCount > 0 && (
+                <span
+                  style={{
+                    background: '#ba0c2f',
+                    color: '#fff',
+                    fontSize: '0.62rem',
+                    fontWeight: 900,
+                    padding: '0.1rem 0.4rem',
+                    borderRadius: '9999px'
+                  }}
+                >
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+
+            {/* Desktop Nav Bar Notifications Dropdown */}
+            {isNotifOpen && (
+              <div
+                className="animate-fade-in"
+                style={{
+                  position: 'absolute',
+                  top: 'calc(100% + 0.5rem)',
+                  right: 0,
+                  width: '360px',
+                  maxWidth: '92vw',
+                  background: 'var(--bg-glass-heavy)',
+                  backdropFilter: 'blur(20px)',
+                  WebkitBackdropFilter: 'blur(20px)',
+                  border: '1px solid var(--border-active)',
+                  borderRadius: 'var(--radius-lg)',
+                  boxShadow: '0 15px 40px rgba(0,0,0,0.25)',
+                  padding: '0.85rem',
+                  zIndex: 3500,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '0.65rem'
+                }}
+              >
+                {/* Header */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.6rem', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', minWidth: 0 }}>
+                    <Bell size={16} color="#ba0c2f" style={{ flexShrink: 0 }} />
+                    <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)', whiteSpace: 'nowrap', flexShrink: 0 }}>Notifications Pop Up</span>
+                    {unreadCount > 0 && (
+                      <span style={{ background: 'rgba(186, 12, 47, 0.15)', color: '#ba0c2f', fontSize: '0.65rem', fontWeight: 800, padding: '0.1rem 0.4rem', borderRadius: '9999px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        {unreadCount} new
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.2rem', flexShrink: 0 }}>
+                    {unreadCount > 0 && (
+                      <button
+                        onClick={markAllNotificationsAsRead}
+                        style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: '0.2rem 0.35rem', whiteSpace: 'nowrap' }}
+                      >
+                        Read all
+                      </button>
+                    )}
+                    {notifications.length > 0 && (
+                      <button
+                        onClick={clearAllNotifications}
+                        style={{ background: 'none', border: 'none', color: '#ba0c2f', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer', padding: '0.2rem 0.35rem', whiteSpace: 'nowrap' }}
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Notifications List */}
+                <div style={{ maxHeight: '280px', overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '0.45rem' }}>
+                  {notifications.length === 0 ? (
+                    <div style={{ padding: '1.5rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                      🎉 No notifications at this time!
+                    </div>
+                  ) : (
+                    notifications.map((notif) => (
+                      <div
+                        key={notif.id}
+                        onClick={() => markNotificationAsRead(notif.id)}
+                        style={{
+                          padding: '0.6rem 0.75rem',
+                          borderRadius: 'var(--radius-md)',
+                          background: notif.unread ? 'rgba(186, 12, 47, 0.08)' : 'var(--bg-secondary)',
+                          border: notif.unread ? '1px solid rgba(186, 12, 47, 0.25)' : '1px solid var(--border-light)',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '0.2rem',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.4rem' }}>
+                          <span style={{ fontSize: '0.8rem', fontWeight: 800, color: 'var(--text-main)' }}>{notif.title}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                            <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)' }}>{notif.time}</span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeNotification(notif.id);
+                              }}
+                              style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--text-muted)',
+                                cursor: 'pointer',
+                                fontSize: '0.75rem',
+                                padding: '0.1rem 0.25rem',
+                                lineHeight: 1,
+                                borderRadius: '3px'
+                              }}
+                              title="Remove notification"
+                              aria-label="Remove notification"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </div>
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.35 }}>{notif.message}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </nav>
       </div>
 

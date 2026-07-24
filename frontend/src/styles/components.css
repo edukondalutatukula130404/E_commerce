@@ -311,3 +311,9 @@ main.main-content {
     display: none !important;
   }
 }
+
+@media (min-width: 768px) {
+  .hide-desktop {
+    display: none !important;
+  }
+}

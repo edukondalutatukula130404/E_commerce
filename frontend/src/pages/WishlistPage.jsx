@@ -69,7 +69,7 @@ export const WishlistPage = () => {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.55rem', borderTop: '1px solid var(--border-light)' }}>
-                  <span style={{ fontSize: '1.05rem', fontWeight: 800 }}>${product.price}</span>
+                  <span style={{ fontSize: '1.05rem', fontWeight: 800 }}>₹{product.price}</span>
                   <button onClick={() => addToCart(product)} className="btn btn-primary" style={{ padding: '0.35rem 0.65rem', fontSize: '0.75rem', minHeight: '32px' }}>
                     <ShoppingBag size={13} /> Add
                   </button>

@@ -62,7 +62,7 @@ export const UserDashboardPage = () => {
     }
     setWalletBalance(prev => prev + val);
     setAddWalletAmount('');
-    showToast(`$${val.toFixed(2)} added to your SWITCHES Wallet!`);
+    showToast(`₹${val.toFixed(2)} added to your SWITCHES Wallet!`);
   };
 
   const handleOpenAddModal = () => {
@@ -103,18 +103,22 @@ export const UserDashboardPage = () => {
   };
 
   const dashboardNavTabs = [
+    ...(user?.role === 'admin' ? [{ id: 'admin-panel', label: '🛡️ Open Admin Workspace', icon: ShieldCheck }] : []),
     { id: 'profile', label: '1. My Profile', icon: User },
     { id: 'orders', label: '2. My Orders', icon: Package, count: userOrders.length },
     { id: 'wishlist', label: '3. My Wishlist', icon: Heart, count: wishlist.length },
     { id: 'addresses', label: '4. Saved Address', icon: MapPin, count: userAddresses.length },
     { id: 'payments', label: '5. Payment History', icon: CreditCard },
-    { id: 'wallet', label: '6. My Wallet', icon: Wallet, badge: `$${walletBalance.toFixed(2)}` },
+    { id: 'wallet', label: '6. My Wallet', icon: Wallet, badge: `₹${walletBalance.toFixed(2)}` },
     { id: 'logout', label: '7. Log Out', icon: LogOut, isDanger: true }
   ];
 
   const handleTabSelect = (tabId) => {
     if (tabId === 'logout') {
       handleLogout();
+    } else if (tabId === 'admin-panel') {
+      setCurrentPage('admin');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     } else if (tabId === 'orders') {
       setCurrentPage('orders');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -335,7 +339,7 @@ export const UserDashboardPage = () => {
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{tx.date} via {tx.method}</div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>${tx.amount.toFixed(2)}</div>
+                  <div style={{ fontWeight: 800, color: 'hsl(var(--hue-primary), 85%, 50%)' }}>₹{tx.amount.toFixed(2)}</div>
                   <span style={{ fontSize: '0.72rem', color: '#10b981', fontWeight: 700 }}>✓ {tx.status}</span>
                 </div>
               </div>
@@ -350,7 +354,7 @@ export const UserDashboardPage = () => {
           <div className="card" style={{ padding: '1.75rem', background: 'var(--grad-primary)', color: '#fff', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <span style={{ fontSize: '0.85rem', opacity: 0.9, fontWeight: 700 }}>👛 SWITCHES Store Credit Wallet</span>
-              <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginTop: '0.2rem' }}>${walletBalance.toFixed(2)}</h2>
+              <h2 style={{ fontSize: '2.2rem', fontWeight: 900, marginTop: '0.2rem' }}>₹{walletBalance.toFixed(2)}</h2>
             </div>
             <div style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.2)', padding: '0.4rem 0.85rem', borderRadius: 'var(--radius-full)', fontWeight: 800 }}>
               ⚡ 1-Click Instant Checkout Ready

@@ -1,6 +1,89 @@
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
-import { Grid, Heart, Home, Search, User, Shield, ShoppingBag, X, ChevronRight, Layers, Tag, Package } from 'lucide-react';
+import { Grid, Heart, Home, Search, User, Shield, ShoppingBag, X, ChevronRight, Layers, Tag, Package, Bell, Check, Trash2 } from 'lucide-react';
+
+// Individual Swipeable Notification Item Component
+const SwipeableNotifItem = ({ notif, onRemove, onRead }) => {
+  const [offsetX, setOffsetX] = useState(0);
+  const [startX, setStartX] = useState(null);
+
+  const handleTouchStart = (e) => {
+    setStartX(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchMove = (e) => {
+    if (startX !== null) {
+      const currentX = e.targetTouches[0].clientX;
+      const diff = currentX - startX;
+      setOffsetX(diff);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (Math.abs(offsetX) > 40) {
+      onRemove(notif.id);
+    } else {
+      setOffsetX(0);
+    }
+    setStartX(null);
+  };
+
+  return (
+    <div
+      onTouchStart={handleTouchStart}
+      onTouchMove={handleTouchMove}
+      onTouchEnd={handleTouchEnd}
+      onClick={() => onRead(notif.id)}
+      style={{
+        padding: '0.85rem 1rem',
+        borderRadius: 'var(--radius-md)',
+        background: notif.unread ? 'rgba(186, 12, 47, 0.08)' : 'var(--bg-secondary)',
+        border: notif.unread ? '1.5px solid rgba(186, 12, 47, 0.3)' : '1px solid var(--border-light)',
+        cursor: 'pointer',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '0.3rem',
+        transform: `translateX(${offsetX}px)`,
+        opacity: Math.max(0.1, 1 - Math.abs(offsetX) / 120),
+        transition: startX === null ? 'all 0.25s ease' : 'none',
+        position: 'relative',
+        touchAction: 'pan-y'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+        <span style={{ fontSize: '0.88rem', fontWeight: 800, color: 'var(--text-main)' }}>{notif.title}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexShrink: 0 }}>
+          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>{notif.time}</span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(notif.id);
+            }}
+            style={{
+              background: 'rgba(0, 0, 0, 0.06)',
+              border: 'none',
+              color: 'var(--text-muted)',
+              cursor: 'pointer',
+              fontSize: '0.75rem',
+              width: '20px',
+              height: '20px',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              lineHeight: 1
+            }}
+            title="Remove notification"
+            aria-label="Remove notification"
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+      <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', margin: 0, lineHeight: 1.4 }}>{notif.message}</p>
+    </div>
+  );
+};
 
 export const MobileNav = () => {
   const {
@@ -9,6 +92,7 @@ export const MobileNav = () => {
     wishlist,
     cart,
     user,
+    setUserDashboardTab,
     searchQuery,
     setSearchQuery,
     categoriesList,
@@ -16,17 +100,24 @@ export const MobileNav = () => {
     setSelectedCategory,
     setIsFilterDrawerOpen,
     openCatalogFilter,
-    products
+    products,
+    notifications = [],
+    removeNotification,
+    markNotificationAsRead,
+    markAllNotificationsAsRead,
+    clearAllNotifications
   } = useApp();
 
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isCategoryDrawerOpen, setIsCategoryDrawerOpen] = useState(false);
+  const [isNotifDrawerOpen, setIsNotifDrawerOpen] = useState(false);
 
   // Scroll direction detection state
   const [isHidden, setIsHidden] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+  const unreadCount = notifications.filter(n => n.unread).length;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -59,10 +150,13 @@ export const MobileNav = () => {
       }
     },
     { 
-      id: 'wishlist', 
-      label: 'Wishlist', 
-      icon: Heart, 
-      badge: wishlist.length 
+      id: 'notifications-drawer', 
+      label: 'Alerts', 
+      icon: Bell, 
+      badge: unreadCount,
+      onClick: () => {
+        setIsNotifDrawerOpen(!isNotifDrawerOpen);
+      }
     },
     { 
       id: 'home', 
@@ -70,18 +164,26 @@ export const MobileNav = () => {
       icon: Home 
     },
     { 
-      id: 'orders', 
-      label: 'My Orders', 
-      icon: Package,
-      onClick: () => {
-        setCurrentPage('orders');
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+      id: 'wishlist', 
+      label: 'Wishlist', 
+      icon: Heart, 
+      badge: wishlist.length 
     },
     { 
-      id: user ? (user.role === 'admin' ? 'admin' : 'user-dashboard') : 'auth', 
+      id: 'user-dashboard', 
       label: 'Profile', 
-      icon: user?.role === 'admin' ? Shield : User 
+      icon: User,
+      onClick: () => {
+        if (!user) {
+          setCurrentPage('auth');
+        } else {
+          if (typeof setUserDashboardTab === 'function') {
+            setUserDashboardTab('menu');
+          }
+          setCurrentPage('user-dashboard');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
   ];
 
@@ -232,6 +334,105 @@ export const MobileNav = () => {
           }
         `}</style>
       </nav>
+
+      {/* Dynamic Slide-Down Notifications Pop Up Modal (Top Pinned) */}
+      {isNotifDrawerOpen && (
+        <div 
+          onClick={() => setIsNotifDrawerOpen(false)}
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 2600,
+            background: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(8px)',
+            display: 'flex',
+            alignItems: 'flex-start',
+            justifyContent: 'center'
+          }}
+          className="animate-fade-in"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="card animate-modal-down"
+            style={{
+              width: '100%',
+              maxWidth: '500px',
+              borderTopLeftRadius: 0,
+              borderTopRightRadius: 0,
+              borderBottomLeftRadius: 'var(--radius-lg)',
+              borderBottomRightRadius: 'var(--radius-lg)',
+              padding: '1.25rem',
+              maxHeight: '80vh',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              boxShadow: '0 15px 40px rgba(0,0,0,0.35)',
+              background: 'var(--bg-card)'
+            }}
+          >
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border-light)', paddingBottom: '0.75rem', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', minWidth: 0 }}>
+                <Bell size={18} color="hsl(var(--hue-primary), 85%, 50%)" style={{ flexShrink: 0 }} />
+                <h3 style={{ fontSize: '1rem', fontWeight: 800, margin: 0, whiteSpace: 'nowrap' }}>Notifications</h3>
+                {unreadCount > 0 && (
+                  <span style={{ background: 'rgba(186, 12, 47, 0.15)', color: '#ba0c2f', fontSize: '0.7rem', fontWeight: 800, padding: '0.15rem 0.45rem', borderRadius: '9999px', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    {unreadCount} new
+                  </span>
+                )}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', flexShrink: 0 }}>
+                {unreadCount > 0 && (
+                  <button
+                    onClick={markAllNotificationsAsRead}
+                    style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '0.2rem 0.35rem', whiteSpace: 'nowrap' }}
+                  >
+                    Read all
+                  </button>
+                )}
+                {notifications.length > 0 && (
+                  <button
+                    onClick={clearAllNotifications}
+                    style={{ background: 'none', border: 'none', color: '#ba0c2f', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '0.2rem 0.35rem', whiteSpace: 'nowrap' }}
+                  >
+                    Clear
+                  </button>
+                )}
+                <button 
+                  onClick={() => setIsNotifDrawerOpen(false)} 
+                  className="btn btn-icon"
+                  style={{ width: '28px', height: '28px', padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                  aria-label="Close notifications"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+
+            {/* Notifications List */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              {notifications.length === 0 ? (
+                <div style={{ padding: '2rem 1rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  🎉 No notifications at this time!
+                </div>
+              ) : (
+                notifications.map((notif) => (
+                  <SwipeableNotifItem
+                    key={notif.id}
+                    notif={notif}
+                    onRemove={removeNotification}
+                    onRead={markNotificationAsRead}
+                  />
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Dynamic Slide-Up Categories Modal */}
       {isCategoryDrawerOpen && (

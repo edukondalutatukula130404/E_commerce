@@ -430,6 +430,7 @@ export const AppProvider = ({ children }) => {
   const [redirectAfterAuth, setRedirectAfterAuth] = useState(null);
   const [pendingCheckoutStep, setPendingCheckoutStep] = useState('cart');
   const [userDashboardTab, setUserDashboardTab] = useState('profile');
+  const [adminActiveTab, setAdminActiveTab] = useState('overview');
 
   const [userAddresses, setUserAddresses] = useState(() => {
     try {
@@ -628,6 +629,51 @@ export const AppProvider = ({ children }) => {
   // Toast State
   const [toast, setToast] = useState(null);
 
+  // Notifications Pop Up State
+  const [notifications, setNotifications] = useState([
+    {
+      id: 'notif-1',
+      title: '🔥 20% OFF Limited Discount',
+      message: 'Use promo code SWITCHES20 at checkout to save 20% on all tech & apparel items.',
+      time: '5m ago',
+      unread: true,
+      type: 'promo'
+    },
+    {
+      id: 'notif-2',
+      title: '📦 Order #SW-92810 Update',
+      message: 'Your order has been packaged and is currently in transit to your address.',
+      time: '1h ago',
+      unread: true,
+      type: 'order'
+    },
+    {
+      id: 'notif-3',
+      title: '✨ Welcome to SWITCHES Store',
+      message: 'Explore our catalog of premium audio, mechanical keyboards, hoodies, and accessories.',
+      time: '2h ago',
+      unread: false,
+      type: 'system'
+    }
+  ]);
+
+  const removeNotification = (id) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  };
+
+  const markNotificationAsRead = (id) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
+
+  const clearAllNotifications = () => {
+    setNotifications([]);
+  };
+
+
   // Enforce default light theme
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', 'light');
@@ -746,7 +792,18 @@ export const AppProvider = ({ children }) => {
 
   const showToast = (text) => {
     setToast({ text, id: Date.now() });
-    setTimeout(() => setToast(null), 3000);
+    setNotifications(prev => [
+      {
+        id: `notif-${Date.now()}`,
+        title: '🔔 Alert',
+        message: text,
+        time: 'Just now',
+        unread: true,
+        type: 'alert'
+      },
+      ...prev
+    ]);
+    setTimeout(() => setToast(null), 3500);
   };
 
   // Register User Method
@@ -1434,6 +1491,8 @@ export const AppProvider = ({ children }) => {
         toggleWishlist,
         userDashboardTab,
         setUserDashboardTab,
+        adminActiveTab,
+        setAdminActiveTab,
         userAddresses,
         addUserAddress,
         updateUserAddress,
@@ -1467,7 +1526,12 @@ export const AppProvider = ({ children }) => {
         toggleBannerActive,
         deleteBanner,
         toast,
-        showToast
+        showToast,
+        notifications,
+        removeNotification,
+        markNotificationAsRead,
+        markAllNotificationsAsRead,
+        clearAllNotifications
       }}
     >
       {children}

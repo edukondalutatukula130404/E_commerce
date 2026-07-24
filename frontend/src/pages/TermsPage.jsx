@@ -47,7 +47,7 @@ export const TermsPage = () => {
             <CheckCircle2 size={20} color="hsl(var(--hue-primary), 90%, 65%)" /> 2. Ordering, Pricing & Stock Availability
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.95rem', marginBottom: '0.75rem' }}>
-            All prices displayed on SWITCHES are listed in US Dollars ($ USD) unless configured otherwise. We reserve the right to modify prices, discount promos, or availability without prior notice.
+            All prices displayed on SWITCHES are listed in Indian Rupees (₹ INR). We reserve the right to modify prices, discount promos, or availability without prior notice.
           </p>
           <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '0.5rem', color: 'var(--text-muted)', fontSize: '0.9rem', paddingLeft: '1rem' }}>
             <li>• Orders are subject to stock availability and validation of payment credentials.</li>

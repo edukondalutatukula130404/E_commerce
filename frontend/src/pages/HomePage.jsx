@@ -21,10 +21,38 @@ import {
 } from 'lucide-react';
 
 export const HomePage = () => {
-  const { products, categoriesList, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, setSelectedSubCategory, selectedSubCategory, setIsFilterDrawerOpen, toggleWishlist, wishlist } = useApp();
+  const { user, products, categoriesList, navigateToProduct, setCurrentPage, setSelectedCategory, selectedCategory, setSelectedSubCategory, selectedSubCategory, setIsFilterDrawerOpen, toggleWishlist, wishlist, showToast } = useApp();
 
   const [openFaqId, setOpenFaqId] = useState(null);
+  const [showMobilePopup, setShowMobilePopup] = useState(true);
+  const [copied, setCopied] = useState(false);
   const bestSellersRef = useRef(null);
+
+  // Dynamic greeting logic based on time of day
+  const getGreetingData = () => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) {
+      return { greeting: 'Good Morning! ☀️', sub: 'Explore the latest tech & precision gear for your day.' };
+    } else if (hour >= 12 && hour < 17) {
+      return { greeting: 'Good Afternoon! 🌤️', sub: 'Handpicked electronics & premium accessories ready for you.' };
+    } else if (hour >= 17 && hour < 22) {
+      return { greeting: 'Good Evening! 🌙', sub: 'Discover tonight\'s exclusive hardware deals & new arrivals.' };
+    } else {
+      return { greeting: 'Good Night! 🌌', sub: 'Night owl deals & sub-second express shipping available 24/7.' };
+    }
+  };
+
+  const timeGreeting = getGreetingData();
+  const userName = user ? (user.name ? user.name.split(' ')[0] : 'User') : 'Guest';
+
+  const handleCopy = () => {
+    setCopied(true);
+    if (typeof showToast === 'function') showToast('✓ Promo Code SWITCHES20 copied!');
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText('SWITCHES20');
+    }
+    setTimeout(() => setCopied(false), 3000);
+  };
 
   const scrollCarousel = (direction) => {
     if (bestSellersRef.current) {
@@ -115,7 +143,7 @@ export const HomePage = () => {
   ];
 
   return (
-    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '2.5rem', paddingTop: '2.5rem', width: '100%', overflowX: 'hidden' }}>
+    <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', paddingTop: '0.75rem', width: '100%', overflowX: 'hidden' }}>
       
       {/* 1. Hero Banner Showcase with 3D E-Commerce Image */}
       <section className="card" style={{
@@ -207,6 +235,73 @@ export const HomePage = () => {
         </div>
       </section>
 
+      {/* 2. Promotional Offer Banner Card */}
+      <section 
+        className="card animate-fade-in" 
+        style={{ 
+          background: 'linear-gradient(135deg, #121319 0%, #2a0812 50%, #ba0c2f 100%)', 
+          color: '#ffffff', 
+          padding: '1.1rem 1.35rem', 
+          borderRadius: 'var(--radius-lg)', 
+          boxShadow: '0 12px 32px rgba(186, 12, 47, 0.28)', 
+          border: '1px solid rgba(186, 12, 47, 0.4)',
+          display: 'flex', 
+          alignItems: 'center', 
+          justify: 'space-between', 
+          flexWrap: 'wrap', 
+          gap: '1rem',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flex: 1, minWidth: '220px' }}>
+          <img
+            src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80"
+            alt="SWITCHES VIP Deal"
+            style={{
+              width: '68px',
+              height: '68px',
+              borderRadius: 'var(--radius-md)',
+              objectFit: 'cover',
+              border: '2px solid rgba(255, 255, 255, 0.35)',
+              boxShadow: '0 6px 16px rgba(0, 0, 0, 0.4)',
+              flexShrink: 0
+            }}
+          />
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.45rem', marginBottom: '0.25rem' }}>
+              <span style={{ background: 'hsl(var(--hue-primary), 85%, 50%)', color: '#fff', fontSize: '0.65rem', fontWeight: 900, padding: '0.15rem 0.55rem', borderRadius: '9999px', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                ⚡ LIMITED TIME
+              </span>
+              <span style={{ fontSize: '0.78rem', color: '#fbbf24', fontWeight: 800 }}>GET 20% OFF TODAY</span>
+            </div>
+            <h3 style={{ fontSize: 'clamp(0.95rem, 3.2vw, 1.15rem)', fontWeight: 800, margin: 0, color: '#ffffff', lineHeight: 1.3 }}>
+              Claim Your Exclusive Hardware Discount with <span style={{ color: '#fbbf24', fontFamily: 'monospace', textDecoration: 'underline' }}>SWITCHES20</span>
+            </h3>
+          </div>
+        </div>
+
+        <button
+          onClick={handleCopy}
+          className="btn"
+          style={{
+            background: copied ? '#10b981' : 'linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%)',
+            color: copied ? '#ffffff' : '#ba0c2f',
+            border: 'none',
+            padding: '0.6rem 1.1rem',
+            fontSize: '0.82rem',
+            fontWeight: 900,
+            borderRadius: 'var(--radius-md)',
+            boxShadow: '0 4px 14px rgba(0,0,0,0.3)',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            whiteSpace: 'nowrap'
+          }}
+        >
+          {copied ? '✓ Code Copied!' : 'Copy Code SWITCHES20'}
+        </button>
+      </section>
+
       {/* 3. Featured SWITCHES Products Carousel */}
       <section style={{ width: '100%' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
@@ -285,7 +380,7 @@ export const HomePage = () => {
                     </p>
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.45rem', borderTop: '1px solid var(--border-light)' }}>
-                    <span style={{ fontSize: '1rem', fontWeight: 800 }}>${product.price}</span>
+                    <span style={{ fontSize: '1rem', fontWeight: 800 }}>₹{product.price}</span>
                     <button
                       onClick={(e) => { e.stopPropagation(); navigateToProduct(product.id); }}
                       className="btn btn-secondary"
@@ -466,7 +561,7 @@ export const HomePage = () => {
                 </div>
 
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
-                  <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
+                  <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>₹{product.price}</span>
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
@@ -612,7 +707,7 @@ export const HomePage = () => {
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingTop: '0.5rem', borderTop: '1px solid var(--border-light)' }}>
-                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>${product.price}</span>
+                <span style={{ fontSize: '1rem', fontWeight: 800, color: 'var(--text-main)' }}>₹{product.price}</span>
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
