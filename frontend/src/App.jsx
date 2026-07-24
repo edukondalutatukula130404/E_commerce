@@ -105,70 +105,113 @@ const MainContent = () => {
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: isAdminView ? 0 : 'calc(var(--mobile-nav-height) + 1rem)' }}>
 
-      {/* Top Promotional Popup Banner — above everything */}
+      {/* Top Promotional Banner — fully responsive */}
       {showTopBanner && !isAdminView && (
-        <div id="top-promo-banner" style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 99999,
-          background: 'linear-gradient(90deg, #ba0c2f 0%, #7a071c 100%)',
-          color: '#fff',
-          padding: '0.5rem 1rem',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          gap: '0.75rem',
-          fontSize: '0.8rem',
-          fontWeight: 700,
-          textAlign: 'center',
-          boxShadow: '0 2px 12px rgba(186,12,47,0.4)',
-          height: '38px'
-        }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', justifyContent: 'center' }}>
-            🔥 <strong>LIMITED TIME:</strong> Use code
-            <span style={{ background: 'rgba(255,255,255,0.22)', padding: '0.1rem 0.55rem', borderRadius: '4px', letterSpacing: '0.5px', fontFamily: 'monospace', fontSize: '0.85rem' }}>
+        <>
+          <div id="top-promo-banner" style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 99999,
+            background: 'linear-gradient(90deg, #ba0c2f 0%, #8a0820 100%)',
+            color: '#fff',
+            padding: '0.55rem 2.5rem 0.55rem 1rem',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexWrap: 'wrap',
+            gap: '0.4rem',
+            fontSize: 'clamp(0.7rem, 2.5vw, 0.82rem)',
+            fontWeight: 600,
+            textAlign: 'center',
+            boxShadow: '0 2px 12px rgba(186,12,47,0.4)',
+            lineHeight: 1.4
+          }}>
+            🔥 <strong>LIMITED TIME</strong> — Use code&nbsp;
+            <span style={{
+              background: 'rgba(255,255,255,0.25)',
+              border: '1px solid rgba(255,255,255,0.4)',
+              padding: '0.05rem 0.5rem',
+              borderRadius: '4px',
+              fontFamily: 'monospace',
+              fontWeight: 800,
+              letterSpacing: '0.5px',
+              fontSize: 'clamp(0.72rem, 2.5vw, 0.85rem)'
+            }}>
               SWITCHES20
             </span>
-            for <strong>20% OFF</strong> your entire order!
-          </span>
-          <button
-            onClick={() => setShowTopBanner(false)}
-            style={{ position: 'absolute', right: '0.85rem', top: '50%', transform: 'translateY(-50%)', background: 'transparent', border: 'none', color: 'rgba(255,255,255,0.8)', cursor: 'pointer', fontSize: '1rem', lineHeight: 1, padding: '0.25rem' }}
-            aria-label="Close banner"
-          >
-            ✕
-          </button>
-        </div>
+            &nbsp;for <strong>20% OFF</strong> your order!
+            <button
+              onClick={() => setShowTopBanner(false)}
+              style={{
+                position: 'absolute',
+                right: '0.6rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                background: 'transparent',
+                border: 'none',
+                color: 'rgba(255,255,255,0.85)',
+                cursor: 'pointer',
+                fontSize: '1.1rem',
+                lineHeight: 1,
+                padding: '0.3rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+          </div>
+          {/* Spacer so page content doesn't go under the fixed banner */}
+          <div id="top-promo-spacer" style={{ height: '36px', flexShrink: 0 }} />
+        </>
       )}
-
-      {/* Push content below the banner */}
-      {showTopBanner && !isAdminView && <div style={{ height: '38px', flexShrink: 0 }} />}
       
-      {/* Toast Alert Banner */}
+      {/* Top Notification Pop Up */}
       {toast && (
         <div 
-          className="animate-fade-in"
+          className="animate-toast-top"
           style={{
             position: 'fixed',
-            bottom: '5rem',
-            right: '1.5rem',
-            zIndex: 3000,
+            top: showTopBanner && !isAdminView ? '3.25rem' : '1.25rem',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 100050,
             background: 'var(--bg-glass-heavy)',
             border: '1px solid var(--border-active)',
-            padding: '0.75rem 1.25rem',
-            borderRadius: 'var(--radius-md)',
-            boxShadow: 'var(--shadow-lg)',
+            padding: '0.65rem 1.35rem',
+            borderRadius: '9999px',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.22), 0 0 15px rgba(186,12,47,0.15)',
             fontWeight: 700,
             fontSize: '0.875rem',
             color: 'var(--text-main)',
-            backdropFilter: 'blur(12px)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.5rem'
+            gap: '0.6rem',
+            maxWidth: 'calc(100vw - 2rem)',
+            transition: 'top 0.3s ease'
           }}
         >
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: '22px',
+            height: '22px',
+            borderRadius: '50%',
+            background: 'var(--color-primary, #ba0c2f)',
+            color: '#fff',
+            fontSize: '0.72rem',
+            fontWeight: 800,
+            flexShrink: 0
+          }}>
+            🔔
+          </span>
           <span>{toast.text}</span>
         </div>
       )}
