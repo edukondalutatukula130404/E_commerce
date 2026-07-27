@@ -2,36 +2,33 @@ pipeline {
 
     agent any
 
+    tools {
+        nodejs 'NodeJS-22'
+    }
+
     stages {
 
         stage('Checkout') {
-
             steps {
-
-                echo "Checking out source code..."
-
                 checkout scm
-
             }
-
         }
 
-        stage('Workspace') {
-
+        stage('Install Backend Dependencies') {
             steps {
-
-                echo "Current Workspace"
-
-                sh 'pwd'
-
-                echo "Project Files"
-
-                sh 'ls -la'
-
+                dir('backend') {
+                    sh 'npm install'
+                }
             }
+        }
 
+        stage('Install Frontend Dependencies') {
+            steps {
+                dir('frontend') {
+                    sh 'npm install'
+                }
+            }
         }
 
     }
-
 }
