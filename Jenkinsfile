@@ -128,7 +128,7 @@ pipeline {
 
                 ssh ${SERVER} '
 
-                sudo systemctl reload nginx
+                sudo /usr/bin/systemctl reload nginx
 
                 '
 
