@@ -6,25 +6,20 @@ pipeline {
         nodejs 'NodeJS-22'
     }
 
-    environment {
-
-        SERVER = "ubuntu@192.168.88.33"
-
-        APP_PATH = "/home/ubuntu/E_commerce"
-
-        FRONTEND_PATH = "/var/www/ecommerce"
-
-        PM2_APP = "ecommerce-backend"
-
+    triggers {
+        githubPush()
     }
 
-    options {
-        timestamps()
+    environment {
+        SERVER = "ubuntu@192.168.88.33"
+        APP_PATH = "/home/ubuntu/E_commerce"
+        FRONTEND_PATH = "/var/www/ecommerce"
+        PM2_APP = "ecommerce-backend"
     }
 
     stages {
 
-        stage('Checkout Source') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -33,9 +28,7 @@ pipeline {
         stage('Backend Dependencies') {
             steps {
                 dir('backend') {
-                    sh '''
-                        npm install
-                    '''
+                    sh 'npm install'
                 }
             }
         }
@@ -43,9 +36,7 @@ pipeline {
         stage('Frontend Dependencies') {
             steps {
                 dir('frontend') {
-                    sh '''
-                        npm install
-                    '''
+                    sh 'npm install'
                 }
             }
         }
@@ -53,133 +44,62 @@ pipeline {
         stage('Build Frontend') {
             steps {
                 dir('frontend') {
-                    sh '''
-                        npm run build
-                    '''
+                    sh 'npm run build'
                 }
             }
         }
 
         stage('Deploy Backend') {
             steps {
-
                 sh """
-
-                ssh ${SERVER} '
-
-                cd ${APP_PATH}
-
-                git fetch origin
-
-                git reset --hard origin/master
-
-                cd backend
-
-                npm install
-
-                '
-
+                rsync -avz --delete backend/ ${SERVER}:${APP_PATH}/backend/
                 """
 
+                sh """
+                ssh ${SERVER} '
+                cd ${APP_PATH}/backend
+                npm install
+                '
+                """
             }
         }
 
         stage('Deploy Frontend') {
-
             steps {
-
                 sh """
-
-                rsync -avz --delete \
-                frontend/dist/ \
-                ${SERVER}:${FRONTEND_PATH}/
-
+                rsync -avz --delete frontend/dist/ ${SERVER}:${FRONTEND_PATH}/
                 """
-
             }
-
         }
 
-        stage('Restart PM2') {
-
+        stage('Restart Backend') {
             steps {
-
                 sh """
-
                 ssh ${SERVER} '
-
                 pm2 restart ${PM2_APP}
-
                 pm2 save
-
-                '
-
-                """
-
-            }
-
-        }
-
-        stage('Reload Nginx') {
-
-            steps {
-
-                sh """
-
-                ssh ${SERVER} '
-
                 sudo /usr/bin/systemctl reload nginx
-
                 '
-
                 """
-
             }
-
         }
 
         stage('Health Check') {
-
             steps {
-
-                sh '''
-
+                sh """
                 curl -I https://ecom.speshway.site
-
-                '''
-
+                """
             }
-
         }
-
     }
 
     post {
-
         success {
-
-            echo "======================================"
-
-            echo "Deployment Successful"
-
-            echo "https://ecom.speshway.site"
-
-            echo "======================================"
-
+            echo 'Deployment Successful'
         }
 
         failure {
-
-            echo "======================================"
-
-            echo "Deployment Failed"
-
-            echo "Check Console Output"
-
-            echo "======================================"
-
+            echo 'Deployment Failed'
         }
-
     }
-
 }
