@@ -62,7 +62,7 @@ export const HomePage = () => {
   };
 
   const featured = React.useMemo(() => {
-    return products.filter(p => {
+    const filteredList = products.filter(p => {
       const matchesCategory = selectedCategory === 'All' || (p.category || '').trim().toLowerCase() === selectedCategory.trim().toLowerCase();
       const matchesSubCategory = !selectedSubCategory || selectedSubCategory === 'All' || 
         (p.subCategory || '').trim().toLowerCase() === selectedSubCategory.trim().toLowerCase() ||
@@ -70,6 +70,9 @@ export const HomePage = () => {
         (p.description || '').toLowerCase().includes(selectedSubCategory.toLowerCase());
       return matchesCategory && matchesSubCategory;
     });
+
+    const isFeaturedOnly = filteredList.filter(p => p.isFeatured || p.category?.toLowerCase() === 'switches');
+    return isFeaturedOnly.length > 0 ? isFeaturedOnly : filteredList;
   }, [products, selectedCategory, selectedSubCategory]);
 
   const bestSellers = products.filter(p => p.isBestSeller || p.isFeatured).length > 0 ? products.filter(p => p.isBestSeller || p.isFeatured) : products;

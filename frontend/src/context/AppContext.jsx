@@ -338,6 +338,138 @@ const initialProducts = [
     stock: 20,
     isNew: true,
     isFeatured: true
+  },
+  {
+    id: "p14",
+    name: "SWITCHES Crimson V2 Linear Switch Pack (110 Pcs)",
+    slug: "switches-crimson-v2-linear-switch-pack",
+    tagline: "Pre-lubed Ultra-smooth Linear Mechanical Keyboard Switches",
+    price: 49.99,
+    originalPrice: 64.99,
+    category: "Switches",
+    subCategory: "Mechanical Switches",
+    rating: 5.0,
+    reviewCount: 174,
+    images: [
+      "https://images.unsplash.com/photo-1618384887929-16ec33fab9ef?auto=format&fit=crop&w=800&q=80"
+    ],
+    colors: [{ name: "Crimson Red", hex: "#BA0C2F" }],
+    sizes: ["110 Switches"],
+    description: "Factory pre-lubricated Krytox 205g0 linear switches with polycarbonate top housing and POM stem for deep thock acoustic profile.",
+    features: ["45g Operating Force", "5-pin PCB Mount", "Factory Pre-lubed", "50M Keystrokes Lifespan"],
+    stock: 55,
+    isNew: true,
+    isFeatured: true
+  },
+  {
+    id: "p15",
+    name: "SWITCHES Sapphire Tactile Switch Pack (110 Pcs)",
+    slug: "switches-sapphire-tactile-switch-pack",
+    tagline: "Crisp Tactile Bump with PC Housing & POM Stem",
+    price: 54.99,
+    originalPrice: 69.99,
+    category: "Switches",
+    subCategory: "Mechanical Switches",
+    rating: 4.9,
+    reviewCount: 148,
+    images: [
+      "https://images.unsplash.com/photo-1595225476474-87563907a212?auto=format&fit=crop&w=800&q=80"
+    ],
+    colors: [{ name: "Sapphire Blue", hex: "#0984e3" }],
+    sizes: ["110 Switches"],
+    description: "Satisfying tactile bump at top of keystroke with zero wobble, high precision leaf, and factory lubed gold-plated dual-stage springs.",
+    features: ["67g Bottom-out Force", "Crisp Tactile Feedback", "Dual-stage Long Spring", "Gold Plated Contacts"],
+    stock: 40,
+    isNew: true,
+    isFeatured: true
+  },
+  {
+    id: "p16",
+    name: "SWITCHES Phantom Silent Linear Switch Pack (110 Pcs)",
+    slug: "switches-phantom-silent-linear-switch-pack",
+    tagline: "Whisper-Quiet Mechanical Switches for Office & Night Gaming",
+    price: 52.99,
+    originalPrice: 64.99,
+    category: "Switches",
+    subCategory: "Mechanical Switches",
+    rating: 4.9,
+    reviewCount: 112,
+    images: [
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+    ],
+    colors: [{ name: "Stealth Gray", hex: "#636e72" }],
+    sizes: ["110 Switches"],
+    description: "Silicone dampener inserts provide whisper-quiet keystrokes without mushy actuation, ideal for office work and midnight gaming sessions.",
+    features: ["42g Actuation Force", "Built-in Silent Dampeners", "Dustproof Box Stem", "Krytox Pre-lubed"],
+    stock: 30,
+    isNew: true,
+    isFeatured: true
+  },
+  {
+    id: "p17",
+    name: "SWITCHES Apex Magnetic Hall Effect Switches (110 Pcs)",
+    slug: "switches-apex-magnetic-hall-effect-switches",
+    tagline: "Rapid Trigger & Dynamic Actuation 0.1mm - 4.0mm",
+    price: 69.99,
+    originalPrice: 84.99,
+    category: "Switches",
+    subCategory: "Magnetic Switches",
+    rating: 5.0,
+    reviewCount: 215,
+    images: [
+      "https://images.unsplash.com/photo-1511467687858-23d96c32e4ae?auto=format&fit=crop&w=800&q=80"
+    ],
+    colors: [{ name: "Crystal Amber", hex: "#e17055" }],
+    sizes: ["110 Switches"],
+    description: "Next-gen Hall Effect magnetic switches enabling instantaneous rapid trigger reset and custom actuation points down to 0.1mm.",
+    features: ["Hall Effect Magnetic Sensor", "0.1mm Rapid Trigger", "Custom Actuation Point", "100 Million Keystroke Lifespan"],
+    stock: 45,
+    isNew: true,
+    isFeatured: true
+  },
+  {
+    id: "p18",
+    name: "SWITCHES Pro Lube Station & Switch Opener Kit",
+    slug: "switches-pro-lube-station-kit",
+    tagline: "CNC Aluminum Opener, Krytox 205g0 Lube & Acrylic Deck",
+    price: 34.99,
+    originalPrice: 44.99,
+    category: "Switches",
+    subCategory: "Switch Accessories",
+    rating: 4.8,
+    reviewCount: 96,
+    images: [
+      "https://images.unsplash.com/photo-1544652478-6653e09f18a2?auto=format&fit=crop&w=800&q=80"
+    ],
+    colors: [{ name: "Anodized Red", hex: "#BA0C2F" }],
+    sizes: ["Full Kit"],
+    description: "Complete modding station for custom keyboard enthusiasts. Includes CNC 2-in-1 switch opener, Krytox 205g0 lube, stem holder, and brushes.",
+    features: ["CNC Anodized 2-in-1 Opener", "Krytox 205g0 Lube (5g)", "36-Switch Acrylic Lube Deck", "Precision Stem Holder & Brushes"],
+    stock: 60,
+    isNew: true,
+    isFeatured: true
+  },
+  {
+    id: "p19",
+    name: "SWITCHES CyberDeck Pro Split Hot-Swap Keyboard",
+    slug: "switches-cyberdeck-pro-split-keyboard",
+    tagline: "Split Ergonomic Keyboard with Dual OLED Screens & Gasket Mount",
+    price: 219.99,
+    originalPrice: 259.99,
+    category: "Switches",
+    subCategory: "Keyboards",
+    rating: 5.0,
+    reviewCount: 88,
+    images: [
+      "https://images.unsplash.com/photo-1587829741301-dc798b83add3?auto=format&fit=crop&w=800&q=80"
+    ],
+    colors: [{ name: "Obsidian Black", hex: "#121212" }],
+    sizes: ["Split Ergonomic"],
+    description: "Ergonomic split design with hot-swappable socket support, dual high-contrast OLED status displays, per-key RGB, and aluminum body.",
+    features: ["Split Ergonomic Layout", "Dual OLED Displays", "Hot-swappable 5-Pin Sockets", "QMK/VIA Programmable"],
+    stock: 15,
+    isNew: true,
+    isFeatured: true
   }
 ];
 
@@ -373,7 +505,10 @@ export const AppProvider = ({ children }) => {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(p => {
+          const existingIds = new Set(parsed.map(p => p.id));
+          const missing = initialProducts.filter(init => !existingIds.has(init.id));
+          const combined = missing.length > 0 ? [...parsed, ...missing] : parsed;
+          return combined.map(p => {
             if (!p.subCategory) {
               const match = initialProducts.find(init => init.id === p.id);
               if (match && match.subCategory) p.subCategory = match.subCategory;
@@ -709,7 +844,10 @@ export const AppProvider = ({ children }) => {
   const fetchProductsAndSync = () => {
     api.getProducts().then(res => {
       if (res && res.data && Array.isArray(res.data)) {
-        const mapped = res.data.map(p => {
+        const existingIds = new Set(res.data.map(p => p.id));
+        const missing = initialProducts.filter(init => !existingIds.has(init.id));
+        const combined = missing.length > 0 ? [...res.data, ...missing] : res.data;
+        const mapped = combined.map(p => {
           if (!p.subCategory) {
             const match = initialProducts.find(init => init.id === p.id);
             if (match && match.subCategory) p.subCategory = match.subCategory;
