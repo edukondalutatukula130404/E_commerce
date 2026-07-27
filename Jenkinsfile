@@ -30,5 +30,19 @@ pipeline {
             }
         }
 
+        stage('Build Frontend') {
+            steps {
+                dir('frontend') {
+                    sh 'npm run build'
+                }
+            }
+        }
+
+        stage('Verify Build') {
+            steps {
+                sh 'ls -la frontend/dist'
+            }
+        }
+
     }
 }
