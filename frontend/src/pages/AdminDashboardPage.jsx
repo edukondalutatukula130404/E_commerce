@@ -315,9 +315,9 @@ export const AdminDashboardPage = () => {
   const sidebarNavItems = [
     { id: 'overview', label: '1. Overview', icon: BarChart3 },
     { id: 'categories', label: '2. Category Management', icon: Layers, count: (categoriesList || []).length },
-    { id: 'products', label: '3. Products Management', icon: Package, count: (products || []).length },
+    { id: 'products', label: '3. Product Management', icon: Package, count: (products || []).length },
     { id: 'inventory', label: '4. Inventory Management', icon: AlertTriangle, count: lowStockProducts.length },
-    { id: 'orders', label: '5. Order', icon: ShoppingBag, count: (orders || []).length },
+    { id: 'orders', label: '5. Orders', icon: ShoppingBag, count: (orders || []).length },
     { id: 'payments', label: '6. Payment History', icon: CreditCard, count: (payments || []).length },
     { id: 'customers', label: '7. Customers', icon: Users, count: (usersList || []).length },
     { id: 'banners', label: '8. Banners', icon: Image, count: (banners || []).length }
@@ -433,9 +433,9 @@ export const AdminDashboardPage = () => {
               <h1 style={{ fontSize: 'clamp(1.2rem, 3vw, 1.5rem)', fontWeight: 900, margin: 0 }}>
                 {activeTab === 'overview' && '📊 Dashboard Overview'}
                 {activeTab === 'categories' && '🏷️ Category Management'}
-                {activeTab === 'products' && '📦 Products Management'}
+                {activeTab === 'products' && '📦 Product Management'}
                 {activeTab === 'inventory' && '📋 Inventory & Stock Control'}
-                {activeTab === 'orders' && '🛍️ Order Fulfillment'}
+                {activeTab === 'orders' && '🛍️ Orders Fulfillment'}
                 {activeTab === 'payments' && '💳 Payment Transactions'}
                 {activeTab === 'customers' && '👥 Customer Database & Roles'}
                 {activeTab === 'banners' && '🖼️ Hero Banners & Marketing'}
