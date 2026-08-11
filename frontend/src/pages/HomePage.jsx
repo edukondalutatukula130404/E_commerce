@@ -182,23 +182,13 @@ export const HomePage = () => {
             Experience the new standard in retail. Instant sub-second browsing, high-converting checkout, and 60 FPS fluid animations.
           </p>
 
-          <div style={{ display: 'flex', gap: '0.55rem', width: '100%', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
             <button 
               onClick={() => setCurrentPage('catalog')} 
               className="btn btn-primary"
-              style={{ flex: 1, padding: '0.65rem 0.65rem', fontSize: '0.8rem', whiteSpace: 'nowrap', minHeight: '38px' }}
+              style={{ padding: '0.75rem 1.75rem', fontSize: '0.95rem', fontWeight: 800, whiteSpace: 'nowrap', minHeight: '44px', borderRadius: '9999px' }}
             >
-              Explore Collection <ArrowRight size={14} />
-            </button>
-            <button 
-              onClick={() => {
-                setSelectedCategory('Tech');
-                setCurrentPage('catalog');
-              }} 
-              className="btn btn-secondary"
-              style={{ flex: 1, padding: '0.65rem 0.65rem', fontSize: '0.8rem', whiteSpace: 'nowrap', minHeight: '38px' }}
-            >
-              Shop Electronics
+              Explore Collection <ArrowRight size={16} />
             </button>
           </div>
         </div>
